@@ -269,7 +269,7 @@ export function SettingsView() {
                           {member.you ? <span className="shrink-0 whitespace-nowrap rounded-full bg-grey-grey-100 px-[8px] py-[4px] text-label-medium text-text-secondary">You</span> : null}
                         </span>
                       </td>
-                      <td className="max-w-[0px] truncate py-[12px] text-text-secondary">{member.email}</td>
+                      <td className="max-w-[0px] truncate py-[12px] text-text-secondary" title={member.email}>{member.email}</td>
                       <td className="py-[12px]">
                         <span className={`inline-flex whitespace-nowrap rounded-full px-[8px] py-[4px] text-label-medium ${roleTone(member.role)}`}>{member.role}</span>
                       </td>
