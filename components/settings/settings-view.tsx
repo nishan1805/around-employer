@@ -1,7 +1,6 @@
 "use client";
 
 import { Clock, CreditCard, Info, Lock, Megaphone, MoreVertical, Sun, UserPlus, X } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
@@ -237,7 +236,7 @@ export function SettingsView() {
               <Button onClick={() => document.getElementById("invite-name")?.focus()}>+ Invite member</Button>
             </div>
             <div className="mt-[16px] overflow-hidden rounded-lg border border-border-default">
-              <table className="w-full text-left text-body-sm-regular">
+              <table className="w-full text-left text-body-sm-regular [&_td]:px-[16px] [&_th]:px-[16px]">
                 <thead className="bg-grey-grey-50 text-label-medium text-text-secondary">
                   <tr>
                     <th className="py-[8px] font-medium">Name</th>
@@ -306,13 +305,12 @@ export function SettingsView() {
                 <p className="text-body-sm-semibold text-text-primary">Role permissions</p>
                 <p className="text-body-sm-regular text-text-secondary">Only owners can change roles and remove team members.</p>
               </div>
-              <Link href="/help" className="shrink-0 text-body-sm-medium text-brand-primary">Learn about roles</Link>
             </div>
           </section>
-          <section className="rounded-lg border border-border-default bg-white p-[20px]">
+          <section className="rounded-lg border border-border-default bg-white p-[24px]">
             <h2 className="text-subheading-semibold">Invite a new member</h2>
             <p className="mt-[4px] text-body-sm-regular text-text-secondary">They&apos;ll get an email with a link to join your team.</p>
-            <div className="mt-[16px] flex items-start gap-[16px]">
+            <div className="mt-[16px] flex min-w-[0px] items-start gap-[16px]">
               <div className="min-w-[0px] flex-1">
                 <Field label="Name" error={inviteErrors.name}>
                   <TextInput id="invite-name" placeholder="Enter full name" value={invite.name} disabled={suspended} onChange={(event) => setInvite({ ...invite, name: event.target.value })} />

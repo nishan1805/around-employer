@@ -188,7 +188,7 @@ Tabs: Account, Team members, Notifications. One column.
 | `whatsapp` / `whatsapp-failed` | Add-number OTP. The WhatsApp switch stays disabled until the number is verified. |
 | `suspended` | Account banner. Edits locked. |
 
-Daily summary time defaults to `policy.notifications.dailySummaryDefaultTime` (9:00 AM). Expiry reminders default to `policy.notifications.expiryReminderDefault` (3 days before expiry). Both show a Pending decision tag. “Learn about roles” links to Help. Access copy is shown in the cells; only the Access header carries the Pending decision tag. Branch access is omitted because team records do not have it. The hiring address is `HIRING_EMAIL` in `src/config/employer.ts`.
+Daily summary time defaults to `policy.notifications.dailySummaryDefaultTime` (9:00 AM). Expiry reminders default to `policy.notifications.expiryReminderDefault` (3 days before expiry). Both show a Pending decision tag. Access copy is shown in the cells; only the Access header carries the Pending decision tag. Branch access is omitted because team records do not have it. The hiring address is `HIRING_EMAIL` in `src/config/employer.ts`.
 
 ## Billing `/billing`
 
