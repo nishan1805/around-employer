@@ -126,14 +126,14 @@ export const NOTIFICATIONS: AppNotification[] = [
     id: "n4",
     title: "Job expiring soon",
     body: "Civil Engineer expires in 2 days",
-    time: "5 hrs ago",
+    time: "Yesterday",
     unread: false,
     tone: "expiring",
   },
   {
     id: "n5",
-    title: "New applicant",
-    body: "Amit Patel applied for Civil Engineer",
+    title: "Amit Patel applied for Civil Engineer",
+    body: "",
     time: "2 days ago",
     unread: false,
     tone: "applicant",
@@ -150,7 +150,7 @@ function job(partial: Omit<Job, "description" | "skills" | "benefits" | "educati
     education: "Any graduation",
     workArrangement: "On-site",
     openings: 1,
-    experience: "1–3 years",
+    experience: "1 – 3 years",
     salaryType: "Fixed salary",
     monthlySalary: 25000,
     ...partial,
@@ -415,15 +415,15 @@ const amitDetail: Applicant["detail"] = {
     pages: [
       {
         heading: "Amit Sharma",
-        body: "UI/UX Designer · Raipur\n+91 98765 43210 · amit.sharma@email.com\n\nSummary\nDesigner focused on clear hiring and retail interfaces. Comfortable taking a flow from research notes to a shipped React screen.",
+        body: "UI/UX Designer\n+91 98765 43210 · amitsharma@email.com · Raipur, Chhattisgarh · behance.net/amitsharma\n\nPROFILE SUMMARY\nPassionate UI/UX designer with 2+ years of experience in creating user-centered digital products. Skilled in designing responsive web and mobile interfaces, building design systems and collaborating with development teams. Eager to contribute to meaningful products and grow as a designer.\n\nSKILLS\nUI Design, UX Research, Figma, User Flows, Wireframing, Prototyping, HTML, CSS, JavaScript, React, Tailwind CSS\n\nWORK EXPERIENCE\nUI/UX Designer — Nable Invent Solutions · Internship\nApr 2023 – Aug 2023 (5 months)\nWorked on web and mobile design projects, created wireframes, high-fidelity designs and collaborated with the development team.",
       },
       {
-        heading: "Experience",
-        body: "UI/UX Designer — Nable Invent Solutions (Apr 2023 – Aug 2023)\nShipped the marketing site and a 40-component library.\n\nFrontend Developer — CredoHire (Aug 2023 – Sep 2023)\nPrototyped the candidate pipeline in React.",
+        heading: "Work experience",
+        body: "Frontend Developer — CredoHire · Internship\nAug 2023 – Sep 2023 (2 months)\nWorked on front end development using React, Tailwind and Next.js.",
       },
       {
-        heading: "Education & skills",
-        body: "BCA, Pt. Ravishankar Shukla University, 2020 – 2023\n\nFigma, user flows, wireframing, prototyping, HTML, CSS, JavaScript, React, Tailwind CSS.",
+        heading: "Education",
+        body: "Bachelor of Computer Applications (BCA)\nPt. Ravishankar Shukla University, Raipur\n2020 – 2023",
       },
     ],
   },
@@ -437,7 +437,7 @@ const named: Applicant[] = [
   applicant({
     id: "amit-sharma",
     name: "Amit Sharma",
-    initials: "AS",
+    initials: "N",
     jobId: "graphic-designer",
     jobTitle: "UI/UX Designer",
     status: "New",
@@ -587,7 +587,7 @@ const firstNames = ["Anjali", "Vikram", "Sana", "Karan", "Meera", "Arjun", "Divy
 const lastNames = ["Sahu", "Verma", "Patel", "Khan", "Yadav", "Dewangan", "Joshi", "Naidu"];
 
 const filled: Applicant[] = statusFill.map((status, i) => {
-  const name = `${firstNames[i % firstNames.length]} ${lastNames[i % lastNames.length]} ${i + 1}`;
+  const name = `${firstNames[i % firstNames.length]} ${lastNames[i % lastNames.length]}`;
   return {
     id: `app-${i + 1}`,
     name,

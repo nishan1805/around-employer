@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, CalendarCheck, RefreshCw, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Briefcase, CalendarCheck, CheckCircle2, ChevronDown, MoreVertical, RefreshCw, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -64,10 +64,10 @@ export function DashboardView() {
   return (
     <div className="space-y-[16px] ">
       <div className="flex flex-wrap items-center justify-between gap-[12px]">
-        <h1 className="text-subheading-semibold">Dashboard</h1>
+        <h1 className="text-display-small-semibold">Dashboard</h1>
         <div className="flex items-center gap-[8px]">
           <span className="inline-flex h-[40px] items-center gap-[8px] rounded-md border border-border-default bg-white px-[12px] text-body-sm-regular">
-            <CalendarCheck size={16} /> Last 7 days
+            <CalendarCheck size={16} /> Last 7 days <ChevronDown size={16} />
           </span>
           <button aria-label="Refresh" className="flex h-[40px] w-[40px] items-center justify-center rounded-md border border-border-default bg-white">
             <RefreshCw size={16} />
@@ -97,7 +97,7 @@ export function DashboardView() {
           body={
             <>
               We are checking your business details. You can save job drafts meanwhile; publishing unlocks once verified. Review time{" "}
-              <PendingDecision value={VERIFICATION_SLA_LABEL} />.
+              <PendingDecision value={VERIFICATION_SLA_LABEL} />
             </>
           }
           action={
@@ -107,10 +107,18 @@ export function DashboardView() {
           }
         />
       ) : state === "suspended" ? null : (
-        <div className="flex items-center justify-between rounded-lg bg-success-success-50 px-[20px] py-[16px]">
-          <div>
-            <p className="text-body-semibold text-success-success-700">Company verified</p>
-            <p className="text-body-sm-regular text-text-secondary">Your company shows a verified badge to job seekers on Around Jobs.</p>
+        <div className="flex items-center justify-between gap-[16px] rounded-lg bg-success-success-50 px-[20px] py-[16px]">
+          <div className="flex items-center gap-[12px]">
+            <CheckCircle2 className="text-success-success-700" size={28} />
+            <div>
+              <p className="text-body-semibold text-success-success-700">Company verified</p>
+              <p className="text-body-sm-regular text-text-secondary">Your company shows a verified badge to job seekers on Around Jobs.</p>
+            </div>
+          </div>
+          <div className="hidden items-center gap-[8px] sm:flex" aria-hidden>
+            <span className="size-[40px] rounded-full bg-success-success-100" />
+            <span className="size-[28px] rounded-md bg-white" />
+            <span className="size-[16px] rounded-full bg-success-success-700" />
           </div>
         </div>
       )}
@@ -121,7 +129,7 @@ export function DashboardView() {
           title='Job “Sales Associate” is pending review'
           body={
             <>
-              We&apos;ll notify you when it goes live. Review time <PendingDecision value={JOB_REVIEW_SLA_LABEL} />.
+              We&apos;ll notify you when it goes live. Review time <PendingDecision value={JOB_REVIEW_SLA_LABEL} />
             </>
           }
         />
@@ -153,7 +161,7 @@ export function DashboardView() {
           title="You have reached the job-post limit on your plan."
           body={
             <>
-              Included live posts <PendingDecision value={PLAN_JOB_POST_LIMIT} />. Upgrade to post more jobs.
+              Included live posts <PendingDecision value={PLAN_JOB_POST_LIMIT} /> Upgrade to post more jobs.
             </>
           }
           action={<Button variant="outline" size="sm" href="/billing">Upgrade plan</Button>}
@@ -173,7 +181,7 @@ export function DashboardView() {
       {pending ? (
         <section className="rounded-lg border border-border-default bg-white p-[20px]">
           <div className="mb-[12px] flex items-center justify-between">
-            <h2 className="text-body-semibold">Your drafts</h2>
+            <h2 className="text-subheading-semibold">Your drafts</h2>
             <Button href="/post-job" size="sm" variant="outline">New draft</Button>
           </div>
           {jobs.map((item) => (
@@ -191,22 +199,23 @@ export function DashboardView() {
         <div className="grid grid-cols-1 gap-[16px] xl:grid-cols-2">
           <section className="rounded-lg border border-border-default bg-white p-[16px]">
             <div className="mb-[12px] flex items-center justify-between">
-              <h2 className="text-body-semibold">
+              <h2 className="text-subheading-semibold">
                 Recent applicants{" "}
                 {state === "new-applicants" ? <span className="ml-[4px] rounded-full bg-primary-primary-50 px-[8px] py-[4px] text-label-medium text-brand-primary">2 new</span> : null}
               </h2>
-              <Link href={href("/applicants")} className="text-body-sm-semibold text-brand-primary">View all →</Link>
+              <Link href={href("/applicants")} className="inline-flex items-center gap-[4px] text-body-sm-semibold text-brand-primary">View all <ArrowRight size={16} /></Link>
             </div>
             {zeroMetrics ? (
               <EmptyState title="No applicants yet" body="Applicants will appear here once you post your first job." />
             ) : (
               <table className="w-full text-left text-body-sm-regular">
-                <thead className="text-label-medium text-text-secondary">
+                <thead className="bg-grey-grey-50 text-label-medium text-text-secondary">
                   <tr>
-                    <th className="py-[8px] font-medium">Candidate</th>
+                    <th className="px-[8px] py-[8px] font-medium">Candidate</th>
                     <th className="font-medium">Applied for</th>
                     <th className="font-medium">Applied on</th>
                     <th className="font-medium">Status</th>
+                    <th className="px-[8px]" />
                   </tr>
                 </thead>
                 <tbody>
@@ -221,6 +230,7 @@ export function DashboardView() {
                       <td>{person.role}</td>
                       <td className="text-text-secondary">{formatRelative(person.when)}</td>
                       <td><ApplicantBadge status={person.status} /></td>
+                      <td className="text-right"><button aria-label={`Actions for ${person.name}`} className="inline-flex h-[32px] w-[32px] items-center justify-center rounded-sm border border-border-default"><MoreVertical size={16} /></button></td>
                     </tr>
                   ))}
                 </tbody>
@@ -229,21 +239,22 @@ export function DashboardView() {
           </section>
           <section className="rounded-lg border border-border-default bg-white p-[16px]">
             <div className="mb-[12px] flex items-center justify-between">
-              <h2 className="text-body-semibold">Active jobs</h2>
-              <Link href={href("/jobs")} className="text-body-sm-semibold text-brand-primary">Manage →</Link>
+              <h2 className="text-subheading-semibold">Active jobs</h2>
+              <Link href={href("/jobs")} className="inline-flex items-center gap-[4px] text-body-sm-semibold text-brand-primary">Manage <ArrowRight size={16} /></Link>
             </div>
             {empty ? (
               <EmptyState title="No active jobs" body="Post your first job to start receiving applications from nearby candidates." action={<Button href="/post-job">Post a job</Button>} />
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[520px] text-left text-body-sm-regular">
-                  <thead className="text-label-medium text-text-secondary">
+                  <thead className="bg-grey-grey-50 text-label-medium text-text-secondary">
                     <tr>
-                      <th className="py-[8px] font-medium">Job title</th>
+                      <th className="px-[8px] py-[8px] font-medium">Job title</th>
                       <th className="font-medium">Type & Location</th>
                       <th className="font-medium">Views</th>
                       <th className="font-medium">Applicants</th>
                       <th className="font-medium">Status</th>
+                      <th />
                     </tr>
                   </thead>
                   <tbody>
@@ -256,6 +267,7 @@ export function DashboardView() {
                         <td>{item.views}</td>
                         <td>{item.applicants}</td>
                         <td><JobBadge status={item.status} /></td>
+                        <td className="text-right"><button aria-label={`Actions for ${item.title}`} className="inline-flex h-[32px] w-[32px] items-center justify-center rounded-sm border border-border-default"><MoreVertical size={16} /></button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -272,14 +284,19 @@ export function DashboardView() {
 
 function Stat({ icon, tint, label, value, note, delta }: { icon: ReactNode; tint: string; label: string; value: string; note?: string; delta?: string }) {
   return (
-    <div className="flex gap-[12px] rounded-lg border border-border-default bg-white p-[16px]">
-      <div className={`flex h-[44px] w-[44px] items-center justify-center rounded-md ${tint}`}>{icon}</div>
-      <div>
+    <div className="flex items-center gap-[12px] rounded-lg border border-border-default bg-white p-[16px]">
+      <div className={`flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-md ${tint}`}>{icon}</div>
+      <div className="min-w-[0px] flex-1">
         <p className="text-label-medium text-text-secondary">{label}</p>
         <p className="text-display-small-semibold">{value}</p>
-        {delta ? <p className="text-label-medium text-success-success-700">{delta} <span className="font-normal text-text-tertiary">vs last week</span></p> : null}
         {note ? <p className="text-label-regular text-text-secondary">{note}</p> : null}
       </div>
+      {delta ? (
+        <p className="text-right text-label-medium text-success-success-700">
+          <span className="inline-flex items-center gap-[4px]"><ArrowUpRight size={14} /> {delta.replace(" new", "")}</span>
+          <span className="block font-normal text-text-tertiary">vs last week</span>
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -309,7 +326,7 @@ function StatusCard() {
         title="Verification pending"
         body={
           <>
-            Submitted 28 Oct 2026. Reference {SHOW_REFERENCE_ID ? VERIFICATION_REFERENCE_ID : null} <PendingDecision value={VERIFICATION_REFERENCE_ID} show={SHOW_REFERENCE_ID} />.
+            Submitted 28 Oct 2026. Reference {SHOW_REFERENCE_ID ? VERIFICATION_REFERENCE_ID : null} <PendingDecision value={VERIFICATION_REFERENCE_ID} show={SHOW_REFERENCE_ID} />
           </>
         }
       />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Calendar, ChevronDown, Clock, Download, ExternalLink, Globe } from "lucide-react";
+import { ArrowRight, Briefcase, Calendar, ChevronDown, ChevronLeft, ChevronRight, Clock, Download, Expand, Globe, Maximize2, Minus, Phone, Plus } from "lucide-react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorState, SkeletonBlock } from "@/components/ui/feedback";
 import { usePortal } from "@/components/shell/use-portal";
 import { formatDate } from "@/lib/format";
-import type { ApplicantStatus } from "@/lib/types";
+import type { Applicant, ApplicantStatus } from "@/lib/types";
 
 const STAGES: ApplicantStatus[] = ["New", "Shortlisted", "Interviewing", "Hired", "Rejected"];
 
@@ -20,6 +20,7 @@ export function CandidateView({ id }: { id: string }) {
   const person = applicants.find((item) => item.id === id) ?? applicants.find((item) => item.id === "amit-sharma");
   const [tab, setTab] = useState<"overview" | "resume">(state === "resume" || state === "no-resume" || state === "unsupported" || state === "resume-error" ? "resume" : "overview");
   const [page, setPage] = useState(0);
+  const [zoom, setZoom] = useState(100);
   const [menu, setMenu] = useState(false);
 
   if (state === "loading") {
@@ -30,6 +31,7 @@ export function CandidateView({ id }: { id: string }) {
   }
   const candidate = person;
   const detail = candidate.detail;
+  const resume = detail?.resume ?? null;
   const resumeBlocked = state === "no-resume" || state === "unsupported" || state === "resume-error" || !detail?.resume;
 
   function download() {
@@ -45,9 +47,9 @@ export function CandidateView({ id }: { id: string }) {
 
   return (
     <div>
-      <Link href="/applicants" className="text-body-sm-medium">‹ Back to Applicants</Link>
+      <Link href="/applicants" className="inline-flex items-center gap-[8px] text-body-sm-medium text-text-primary"><ChevronLeft size={16} /> Back to Applicants</Link>
       <section className="mt-[16px] flex flex-wrap items-center gap-[16px] rounded-lg border border-border-default bg-white p-[20px]">
-        <span className="flex h-[56px] w-[56px] items-center justify-center rounded-full bg-primary-primary-50 text-body-semibold text-brand-primary">{candidate.initials}</span>
+        <span className="flex h-[56px] w-[56px] items-center justify-center rounded-full bg-grey-grey-100 text-body-semibold text-text-secondary">{candidate.initials}</span>
         <div className="min-w-[0px] flex-1">
           <div className="flex flex-wrap items-center gap-[8px]">
             <h1 className="text-display-small-semibold">{candidate.name}</h1>
@@ -151,7 +153,7 @@ export function CandidateView({ id }: { id: string }) {
               <Card title="Portfolio / Links">
                 {detail.links.map((link) => (
                   <a key={link.href} href={link.href} className="mt-[8px] flex items-center gap-[8px] rounded-md border border-border-default px-[12px] py-[8px] text-body-sm-regular text-brand-primary" target="_blank" rel="noreferrer">
-                    <Globe size={16} /> <span className="flex-1">{link.label}</span> <ExternalLink size={14} />
+                    <Globe size={16} /> <span className="flex-1">{link.label}</span> <ArrowRight size={14} />
                   </a>
                 ))}
               </Card>
@@ -164,21 +166,41 @@ export function CandidateView({ id }: { id: string }) {
             <p className="text-body-sm-regular">This file type can’t be previewed. Download it or ask the candidate for a PDF.</p>
           ) : state === "resume-error" ? (
             <ErrorState title="Couldn't load the resume" body="Check your connection and try again." onRetry={() => router.push(`/applicants/${candidate.id}?state=resume`)} />
-          ) : state === "no-resume" || !detail?.resume ? (
+          ) : state === "no-resume" || !resume ? (
             <p className="text-body-sm-regular text-text-secondary">No resume was uploaded with this application.</p>
           ) : (
             <div>
-              <div className="mb-[16px] flex items-center justify-between">
-                <p className="text-body-sm-semibold">{detail.resume.fileName}</p>
-                <p className="text-label-regular text-text-secondary">Page {page + 1} of {detail.resume.pages.length}</p>
-              </div>
-              <article className="min-h-[360px] rounded-md border border-border-default bg-background-secondary p-[24px]">
-                <h2 className="text-subheading-semibold">{detail.resume.pages[page].heading}</h2>
-                <p className="mt-[12px] whitespace-pre-wrap text-body-sm-regular">{detail.resume.pages[page].body}</p>
-              </article>
-              <div className="mt-[16px] flex gap-[8px]">
-                <Button variant="outline" disabled={page === 0} onClick={() => setPage((value) => value - 1)}>Previous</Button>
-                <Button variant="outline" disabled={page === detail.resume.pages.length - 1} onClick={() => setPage((value) => value + 1)}>Next</Button>
+              <h2 className="text-subheading-semibold">Resume</h2>
+              <p className="mt-[4px] text-body-sm-regular text-text-secondary">View the candidate&apos;s submitted resume.</p>
+              <div className="mt-[16px] flex overflow-hidden rounded-lg border border-border-default">
+                <aside className="flex w-[96px] shrink-0 flex-col gap-[8px] bg-grey-grey-50 p-[12px]">
+                  {resume.pages.map((item, index) => (
+                    <button key={item.heading} type="button" aria-label={`Page ${index + 1}`} onClick={() => setPage(index)} className={`relative aspect-[3/4] overflow-hidden rounded-sm border bg-white p-[6px] text-left ${page === index ? "border-brand-primary" : "border-border-default"}`}>
+                      <span className="block truncate text-[8px] font-semibold leading-[10px]">{item.heading}</span>
+                      <span className="mt-[2px] block line-clamp-5 text-[6px] leading-[8px] text-text-secondary">{item.body}</span>
+                      <span className={`absolute bottom-[4px] left-1/2 flex h-[16px] min-w-[16px] -translate-x-1/2 items-center justify-center rounded-full px-[4px] text-[10px] ${page === index ? "bg-brand-primary text-white" : "bg-grey-grey-100 text-text-secondary"}`}>{index + 1}</span>
+                    </button>
+                  ))}
+                </aside>
+                <div className="min-w-[0px] flex-1">
+                  <div className="flex items-center justify-center gap-[12px] bg-grey-grey-900 px-[12px] py-[8px] text-white">
+                    <button type="button" aria-label="Previous page" disabled={page === 0} className="disabled:opacity-40" onClick={() => setPage((value) => Math.max(0, value - 1))}><ChevronLeft size={16} /></button>
+                    <span className="text-label-medium">{page + 1} / {resume.pages.length}</span>
+                    <button type="button" aria-label="Next page" disabled={page === resume.pages.length - 1} className="disabled:opacity-40" onClick={() => setPage((value) => Math.min(resume.pages.length - 1, value + 1))}><ChevronRight size={16} /></button>
+                    <span className="h-[16px] w-px bg-grey-grey-700" />
+                    <button type="button" aria-label="Zoom out" onClick={() => setZoom((value) => Math.max(50, value - 25))}><Minus size={16} /></button>
+                    <span className="min-w-[48px] text-center text-label-medium">{zoom}%</span>
+                    <button type="button" aria-label="Zoom in" onClick={() => setZoom((value) => Math.min(200, value + 25))}><Plus size={16} /></button>
+                    <span className="h-[16px] w-px bg-grey-grey-700" />
+                    <button type="button" aria-label="Fit" onClick={() => setZoom(100)}><Maximize2 size={16} /></button>
+                    <button type="button" aria-label="Fullscreen" onClick={() => setZoom((value) => (value === 100 ? 125 : 100))}><Expand size={16} /></button>
+                  </div>
+                  <div className="flex justify-center overflow-auto bg-grey-grey-700 p-[24px]">
+                    <article className="w-[560px] origin-top bg-white p-[32px] text-text-primary shadow-lg" style={{ transform: `scale(${zoom / 100})` }}>
+                      <ResumePage candidate={candidate} page={page} />
+                    </article>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -191,7 +213,7 @@ export function CandidateView({ id }: { id: string }) {
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="rounded-lg border border-border-default bg-white p-[20px]">
-      <h2 className="mb-[12px] text-body-semibold">{title}</h2>
+      <h2 className="mb-[16px] text-subheading-semibold">{title}</h2>
       {children}
     </section>
   );
@@ -199,9 +221,63 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-[16px] border-b border-border-default py-[8px] text-body-sm-regular last:border-0">
+    <div className="flex items-start justify-between gap-[24px] border-b border-border-default py-[12px] text-body-sm-regular last:border-0">
       <span className="text-text-secondary">{label}</span>
       <span className="font-medium">{value}</span>
+    </div>
+  );
+}
+
+function ResumePage({ candidate, page }: { candidate: Applicant; page: number }) {
+  const detail = candidate.detail;
+  if (!detail || page > 0) {
+    const sheet = detail?.resume?.pages[page];
+    return (
+      <div>
+        <h2 className="text-display-small-semibold">{sheet?.heading}</h2>
+        <p className="mt-[12px] whitespace-pre-wrap text-body-sm-regular text-text-secondary">{sheet?.body}</p>
+      </div>
+    );
+  }
+  const firstJob = detail.experienceItems[0];
+  return (
+    <div className="space-y-[16px]">
+      <div>
+        <p className="text-display-small-semibold">{candidate.name}</p>
+        <p className="text-body-sm-regular text-text-secondary">{candidate.jobTitle}</p>
+      </div>
+      <div className="flex flex-wrap gap-x-[16px] gap-y-[8px] text-label-regular text-text-secondary">
+        <span className="inline-flex items-center gap-[6px]"><Phone size={14} /> {candidate.phone}</span>
+        <span className="inline-flex items-center gap-[6px]"><Globe size={14} /> {candidate.email}</span>
+        <span>{candidate.location}</span>
+        {detail.links[0] ? <a className="inline-flex items-center gap-[6px] text-brand-primary" href={detail.links[0].href}><ArrowRight size={14} /> {detail.links[0].label}</a> : null}
+      </div>
+      <section className="border-t border-border-default pt-[14px]">
+        <p className="text-body-sm-semibold">PROFILE SUMMARY</p>
+        <p className="mt-[10px] text-body-sm-regular text-text-secondary">Passionate UI/UX designer with 2+ years of experience in creating user-centered digital products. Skilled in designing responsive web and mobile interfaces, building design systems and collaborating with development teams. Eager to contribute to meaningful products and grow as a designer.</p>
+      </section>
+      <section className="border-t border-border-default pt-[14px]">
+        <p className="text-body-sm-semibold">SKILLS</p>
+        <div className="mt-[10px] flex flex-wrap gap-[8px]">
+          {detail.skills.map((skill) => <span key={skill} className="rounded-full bg-primary-primary-50 px-[10px] py-[4px] text-label-regular">{skill}</span>)}
+        </div>
+      </section>
+      {firstJob ? (
+        <section className="border-t border-border-default pt-[14px]">
+          <p className="text-body-sm-semibold">WORK EXPERIENCE</p>
+          <div className="mt-[10px] flex gap-[12px]">
+            <span className="mt-[6px] size-[8px] shrink-0 rounded-full bg-brand-primary" />
+            <div className="min-w-[0px] flex-1">
+              <div className="flex items-start justify-between gap-[12px]">
+                <p className="text-body-sm-semibold">{firstJob.title}</p>
+                <p className="text-label-regular text-text-secondary">{firstJob.dates}</p>
+              </div>
+              <p className="text-label-regular text-text-secondary">{firstJob.org}</p>
+              <p className="mt-[4px] text-body-sm-regular text-text-secondary">{firstJob.description}</p>
+            </div>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

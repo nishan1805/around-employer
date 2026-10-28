@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal } from "lucide-react";
+import { ChevronDown, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -29,6 +29,8 @@ export function JobsView() {
   const { jobs, state, patchJob, removeJob, duplicateJob, account, verification } = usePortal();
   const [tab, setTab] = useState<"all" | JobStatus>(state === "returned" ? "returned" : "all");
   const [clearedEmpty, setClearedEmpty] = useState(false);
+  const [category, setCategory] = useState("All categories");
+  const [employment, setEmployment] = useState("All types");
   const [page, setPage] = useState(1);
   const [menuFor, setMenuFor] = useState<string | null>(state === "actions" ? "front-desk" : state === "returned" ? null : null);
   const [confirm, setConfirm] = useState<{ id: string; action: "pause" | "resume" | "close" | "delete" | "renew" } | null>(null);
@@ -41,7 +43,12 @@ export function JobsView() {
     return base;
   }, [source]);
 
-  const filtered = state === "no-results" && !clearedEmpty ? [] : source.filter((job) => tab === "all" || job.status === tab);
+  const filtered = state === "no-results" && !clearedEmpty ? [] : source.filter((job) => {
+    if (tab !== "all" && job.status !== tab) return false;
+    if (category !== "All categories" && job.category !== category) return false;
+    if (employment !== "All types" && job.employmentType !== employment) return false;
+    return true;
+  });
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
   const openMenu = state === "returned" ? rows.find((job) => job.title === "Kitchen Helper")?.id ?? menuFor : menuFor;
@@ -59,7 +66,7 @@ export function JobsView() {
     <div>
       <div className="flex flex-wrap items-start justify-between gap-[12px]">
         <div>
-          <h1 className="text-subheading-semibold">My Jobs</h1>
+          <h1 className="text-display-small-semibold">My Jobs</h1>
           <p className="text-body-sm-regular text-text-secondary">Manage all your job listings, track performance, and take actions.</p>
         </div>
         <Button href="/post-job">Post a Job</Button>
@@ -82,6 +89,11 @@ export function JobsView() {
             {item.label} <span className="text-label-regular">{counts[item.id] ?? 0}</span>
           </button>
         ))}
+      </div>
+      <div className="mt-[16px] flex flex-wrap gap-[8px]">
+        <FilterSelect label="Job category" value={category} options={["All categories", ...Array.from(new Set(source.map((job) => job.category)))]} onChange={setCategory} />
+        <FilterSelect label="Employment type" value={employment} options={["All types", "Full-time", "Part-time", "Contract", "Internship"]} onChange={setEmployment} />
+        <FilterSelect label="More filters" value="More filters" options={["More filters", "Active only"]} onChange={() => undefined} />
       </div>
       <div className="mt-[16px] overflow-hidden rounded-lg border border-border-default bg-white">
         {source.length === 0 ? (
@@ -129,8 +141,8 @@ export function JobsView() {
                     <td className="px-[16px] py-[12px] whitespace-nowrap">{job.applicants}</td>
                     <td className="px-[16px] py-[12px] whitespace-nowrap">{formatDate(job.postedOn)}</td>
                     <td className="relative px-[16px] py-[12px]">
-                      <button aria-label="Job actions" onClick={() => setMenuFor(openMenu === job.id ? null : job.id)}>
-                        <MoreHorizontal size={18} />
+                      <button aria-label="Job actions" className="inline-flex h-[32px] w-[32px] items-center justify-center rounded-sm border border-border-default" onClick={() => setMenuFor(openMenu === job.id ? null : job.id)}>
+                        <MoreVertical size={16} />
                       </button>
                       {openMenu === job.id ? <JobMenu job={job} canSubmit={canSubmitJobForReview(account, verification)} onClose={() => setMenuFor(null)} onConfirm={(action) => setConfirm({ id: job.id, action })} onDuplicate={() => { duplicateJob(job.id); setMenuFor(null); }} /> : null}
                     </td>
@@ -180,15 +192,14 @@ function JobMenu({
   onConfirm: (action: "pause" | "resume" | "close" | "delete" | "renew") => void;
   onDuplicate: () => void;
 }) {
-  const items: { label: string; href?: string; danger?: boolean; onClick?: () => void }[] = [];
-  if (job.status === "paused") items.push({ label: "Resume job", onClick: () => onConfirm("resume") });
-  if (job.status === "expired") items.push({ label: "Renew job", onClick: () => onConfirm("renew") });
-  if (job.status !== "pending_review") items.push({ label: "Edit job", href: `/jobs/${job.id}` });
-  if (job.status === "active") items.push({ label: "Close job", onClick: () => onConfirm("close") });
-  if (job.status === "active") items.push({ label: "Pause", onClick: () => onConfirm("pause") });
-  items.push({ label: "Duplicate job", onClick: onDuplicate });
-  if (job.status === "draft" && canSubmit) items.push({ label: "Submit for review", href: `/post-job?state=review&job=${job.id}` });
-  items.push({ label: "Delete job", danger: true, onClick: () => onConfirm("delete") });
+  const items: { label: string; href?: string; danger?: boolean; onClick?: () => void }[] = [
+    { label: "Resume job", onClick: () => onConfirm(job.status === "expired" ? "renew" : "resume") },
+    { label: "Edit job", href: `/jobs/${job.id}` },
+    { label: "Close job", onClick: () => onConfirm("close") },
+    { label: "Duplicate job", onClick: onDuplicate },
+    { label: "Delete job", danger: true, onClick: () => onConfirm("delete") },
+  ];
+  void canSubmit;
   return (
     <div className="absolute right-[16px] z-20 w-[176px] rounded-md border border-border-default bg-white py-[4px] text-left shadow-lg">
       {items.map((item) =>
@@ -203,6 +214,18 @@ function JobMenu({
         ),
       )}
     </div>
+  );
+}
+
+function FilterSelect({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
+  return (
+    <label className="relative inline-flex h-[40px] items-center">
+      <span className="sr-only">{label}</span>
+      <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} className="h-[40px] appearance-none rounded-md border border-border-default bg-white pr-[32px] pl-[12px] text-body-sm-regular">
+        {options.map((option) => <option key={option}>{option}</option>)}
+      </select>
+      <ChevronDown size={16} className="pointer-events-none absolute right-[8px] text-text-secondary" />
+    </label>
   );
 }
 

@@ -1,14 +1,13 @@
 /** Fixed clock so relative labels in the mock stay stable. */
 export const APP_NOW = new Date("2026-10-28T12:00:00+05:30");
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 export function formatDate(iso: string | null | undefined) {
   if (!iso) return "—";
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "Asia/Kolkata",
-  }).format(new Date(iso));
+  const [year, month, day] = iso.slice(0, 10).split("-").map(Number);
+  if (!year || !month || !day) return "—";
+  return `${day} ${MONTHS[month - 1]} ${year}`;
 }
 
 export function formatRelative(iso: string) {

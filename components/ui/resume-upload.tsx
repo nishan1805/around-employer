@@ -1,3 +1,4 @@
+import { Upload } from "lucide-react";
 import { DOCUMENT_ACCEPT_LABEL } from "@/src/config/policy";
 
 export type UploadStatus = "empty" | "uploading" | "uploaded" | "failed" | "cancelled";
@@ -45,8 +46,10 @@ export function ResumeUpload({
     return <p className="rounded-sm border border-border-default px-[12px] py-[12px] text-body-sm-regular">Upload cancelled.</p>;
   }
   return (
-    <label className="flex h-[128px] cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-border-default px-[16px] text-center text-body-sm-regular text-text-secondary">
-      Drop a {DOCUMENT_ACCEPT_LABEL} file
+    <label className="flex cursor-pointer flex-col items-center justify-center gap-[8px] py-[8px] text-center text-body-sm-regular text-text-secondary">
+      <Upload size={20} className="text-text-tertiary" aria-hidden />
+      <span>Drop a {DOCUMENT_ACCEPT_LABEL} file</span>
+      <span className="inline-flex h-[40px] items-center rounded-sm border border-border-default bg-white px-[12px] text-body-sm-semibold text-text-primary">Choose file</span>
       <input type="file" className="hidden" accept={accept} onChange={(event) => onFile(event.target.files?.[0])} />
     </label>
   );
