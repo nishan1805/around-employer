@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { PendingDecision } from "@/components/ui/pending-decision";
 import { EMPLOYER } from "@/lib/fixtures";
-import { CREDIT_PACKS, FREE_JOB_ALLOWANCE, PLAN_JOB_POST_LIMIT } from "@/src/config/policy";
+import { CREDIT_PACKS, FREE_JOB_ALLOWANCE } from "@/src/config/policy";
 
 const HISTORY = [
-  { date: "12 Oct 2026", description: "Renewed · Store Sales Associate", credits: "−1", balance: "4", positive: false },
+  { date: "12 Oct 2026", description: "Renewed · Civil Engineer", credits: "−1", balance: "4", positive: false },
   { date: "5 Oct 2026", description: "Bought 5-credit pack", credits: "+5", balance: "5", positive: true },
-  { date: "1 Oct 2026", description: "Posted · Patient Care Assistant (free allowance)", credits: "0", balance: "0", positive: false },
+  { date: "1 Oct 2026", description: "Posted · Site Supervisor (free allowance)", credits: "0", balance: "0", positive: false },
 ];
 
 export function BillingView() {
@@ -25,9 +25,6 @@ export function BillingView() {
           <p className="text-label-medium text-text-secondary">Free allowance</p>
           <p className="mt-[8px]">
             <PendingDecision value={FREE_JOB_ALLOWANCE} className="px-[12px] py-[6px] text-heading-semibold" />
-          </p>
-          <p className="mt-[8px] text-label-regular text-text-secondary">
-            Included live posts <PendingDecision value={PLAN_JOB_POST_LIMIT} />
           </p>
           <p className="mt-[8px] text-label-regular text-text-secondary">Resets on 1 Nov</p>
         </section>

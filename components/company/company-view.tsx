@@ -70,12 +70,12 @@ export function CompanyView() {
       </div>
       {message ? <div className="mt-[16px]"><Banner tone="success" title={message} /></div> : null}
       <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
-        <div className="flex flex-wrap items-center gap-[16px]">
-          <div className="min-w-[180px] flex-1">
+        <div className="flex flex-wrap items-center gap-[24px]">
+          <div className="w-[200px] shrink-0">
             <h2 className="text-subheading-semibold">Company Logo</h2>
             <p className="text-body-sm-regular text-text-secondary">Upload your company logo.</p>
           </div>
-          <div className="flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-md bg-primary-primary-50 text-body-semibold text-brand-primary">
+          <div className="flex size-[96px] shrink-0 items-center justify-center overflow-hidden rounded-md bg-primary-primary-50 text-body-semibold text-brand-primary">
             {company.logoDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={company.logoDataUrl} alt="" className="h-full w-full object-cover" />

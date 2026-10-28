@@ -51,7 +51,7 @@ export function JobsView() {
   });
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
-  const openMenu = state === "returned" ? rows.find((job) => job.title === "Kitchen Helper")?.id ?? menuFor : menuFor;
+  const openMenu = state === "returned" ? rows.find((job) => job.title === "Safety Officer")?.id ?? menuFor : menuFor
 
   function runConfirm() {
     if (!confirm) return;

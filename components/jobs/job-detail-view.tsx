@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, ChevronRight, Eye, MapPin, MoreHorizontal, Users } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Eye, MapPin, MoreHorizontal, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -60,7 +60,7 @@ export function JobDetailView({ id }: { id: string }) {
   return (
     <div className="space-y-[16px] ">
       <p className="flex items-center gap-[4px] text-body-sm-regular text-text-secondary">
-        <Link href="/jobs" className="font-medium text-text-primary">My Jobs</Link>
+        <Link href="/jobs" className="inline-flex items-center gap-[4px] font-medium text-text-primary"><ChevronLeft size={16} /> My Jobs</Link>
         <ChevronRight size={14} />
         <span className="max-w-[72ch] truncate text-text-primary">{job.title}</span>
       </p>
@@ -147,16 +147,17 @@ export function JobDetailView({ id }: { id: string }) {
         </section>
       ) : null}
 
-      <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-border-default bg-white">
-        <div className="flex items-center gap-[12px] border-r border-border-default p-[16px]">
-          <span className="flex h-[44px] w-[44px] items-center justify-center rounded-md bg-primary-primary-50 text-brand-primary"><Eye size={18} /></span>
+      <div className="flex items-center gap-[32px] rounded-lg border border-border-default bg-white px-[24px] py-[24px]">
+        <div className="flex items-center gap-[16px]">
+          <span className="flex size-[48px] items-center justify-center rounded-md bg-primary-primary-50 text-brand-primary"><Eye size={20} /></span>
           <div>
             <p className="text-label-medium text-text-secondary">Views</p>
             <p className="text-display-small-semibold">{job.views}</p>
           </div>
         </div>
-        <div className="flex items-center gap-[12px] p-[16px]">
-          <span className="flex h-[44px] w-[44px] items-center justify-center rounded-md bg-primary-primary-50 text-brand-primary"><Users size={18} /></span>
+        <span className="h-[48px] w-px bg-border-default" aria-hidden />
+        <div className="flex items-center gap-[16px]">
+          <span className="flex size-[48px] items-center justify-center rounded-md bg-primary-primary-50 text-brand-primary"><Users size={20} /></span>
           <div>
             <p className="text-label-medium text-text-secondary">Applicants</p>
             <p className="text-display-small-semibold">{job.applicants}</p>
@@ -164,12 +165,12 @@ export function JobDetailView({ id }: { id: string }) {
         </div>
       </div>
 
-      <div className="grid gap-[16px] lg:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
-        <section className="rounded-lg border border-border-default bg-white p-[20px]">
+      <div className="grid items-start gap-[16px] lg:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
+        <section className="h-fit rounded-lg border border-border-default bg-white p-[20px]">
           <h2 className="text-subheading-semibold">Job Description</h2>
           <p className="mt-[12px] max-w-[72ch] text-body-sm-regular text-text-secondary">{job.description}</p>
           <div className="my-[16px] border-t border-border-default" />
-          <h3 className="text-body-sm-semibold">Skills</h3>
+          <h3 className="text-body-semibold">Skills</h3>
           <div className="mt-[8px] flex flex-wrap gap-[8px]">
             {job.skills.map((skill) => (
               <span key={skill} className="rounded-full border border-border-default px-[12px] py-[4px] text-label-medium">{skill}</span>

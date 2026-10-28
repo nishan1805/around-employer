@@ -60,7 +60,7 @@ export function ApplicantsView({ jobId }: { jobId?: string }) {
   const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
   const visible = rows.slice((page - 1) * pageSize, page * pageSize);
 
-  if (jobId) return <SplitReview jobTitle={scoped[0]?.jobTitle ?? "Store Sales Associate"} people={scoped} onStatus={setApplicantStatus} />;
+  if (jobId) return <SplitReview jobTitle={scoped[0]?.jobTitle ?? "Civil Engineer"} people={scoped} onStatus={setApplicantStatus} />;
 
   const jobOptions = ["All jobs", ...Array.from(new Set(scoped.map((person) => person.jobTitle)))];
   const locationOptions = ["All locations", ...Array.from(new Set(scoped.map((person) => person.location)))];
