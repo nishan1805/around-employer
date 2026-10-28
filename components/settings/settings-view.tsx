@@ -236,14 +236,22 @@ export function SettingsView() {
               <Button onClick={() => document.getElementById("invite-name")?.focus()}>+ Invite member</Button>
             </div>
             <div className="mt-[16px] overflow-hidden rounded-lg border border-border-default">
-              <table className="w-full text-left text-body-sm-regular [&_td]:px-[16px] [&_th]:px-[16px]">
+              <table className="w-full table-fixed text-left text-body-sm-regular [&_td]:px-[16px] [&_th]:px-[16px]">
+                <colgroup>
+                  <col className="w-[26%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[16%]" />
+                  <col className="w-[22%]" />
+                  <col className="w-[16%]" />
+                  <col className="w-[8%]" />
+                </colgroup>
                 <thead className="bg-grey-grey-50 text-label-medium text-text-secondary">
                   <tr>
                     <th className="py-[8px] font-medium">Name</th>
                     <th className="py-[8px] font-medium">Email</th>
                     <th className="py-[8px] font-medium">Role</th>
                     <th className="py-[8px] font-medium">
-                      <span className="inline-flex items-center gap-[8px]">
+                      <span className="inline-flex items-center gap-[8px] whitespace-nowrap">
                         Access <PendingTag />
                       </span>
                     </th>
@@ -254,20 +262,20 @@ export function SettingsView() {
                 <tbody>
                   {team.map((member) => (
                     <tr key={member.id} className="border-t border-border-default">
-                      <td className="py-[12px]">
-                        <span className="flex items-center gap-[8px]">
-                          <span className="flex h-[32px] w-[32px] items-center justify-center rounded-full bg-primary-primary-50 text-label-semibold text-brand-primary">{member.initials}</span>
-                          <span className="font-medium">{member.name}</span>
-                          {member.you ? <span className="rounded-full bg-grey-grey-100 px-[8px] py-[4px] text-label-medium text-text-secondary">You</span> : null}
+                      <td className="py-[12px] whitespace-nowrap">
+                        <span className="flex items-center gap-[8px] whitespace-nowrap">
+                          <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-primary-primary-50 text-label-semibold text-brand-primary">{member.initials}</span>
+                          <span className="whitespace-nowrap font-medium">{member.name}</span>
+                          {member.you ? <span className="shrink-0 whitespace-nowrap rounded-full bg-grey-grey-100 px-[8px] py-[4px] text-label-medium text-text-secondary">You</span> : null}
                         </span>
                       </td>
-                      <td className="py-[12px] whitespace-nowrap text-text-secondary">{member.email}</td>
+                      <td className="max-w-[0px] truncate py-[12px] text-text-secondary">{member.email}</td>
                       <td className="py-[12px]">
-                        <span className={`inline-flex rounded-full px-[8px] py-[4px] text-label-medium ${roleTone(member.role)}`}>{member.role}</span>
+                        <span className={`inline-flex whitespace-nowrap rounded-full px-[8px] py-[4px] text-label-medium ${roleTone(member.role)}`}>{member.role}</span>
                       </td>
                       <td className="py-[12px] whitespace-nowrap text-text-secondary">{TEAM_ACCESS[member.role]}</td>
                       <td className="py-[12px]">
-                        <span className={`inline-flex rounded-full px-[8px] py-[4px] text-label-medium ${member.status === "Active" ? "bg-success-success-50 text-success-success-700" : "bg-warning-warning-50 text-warning-warning-700"}`}>
+                        <span className={`inline-flex whitespace-nowrap rounded-full px-[8px] py-[4px] text-label-medium ${member.status === "Active" ? "bg-success-success-50 text-success-success-700" : "bg-warning-warning-50 text-warning-warning-700"}`}>
                           {member.status === "Active" ? "Active" : "Pending invite"}
                         </span>
                       </td>
