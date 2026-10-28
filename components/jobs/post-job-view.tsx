@@ -141,19 +141,19 @@ export function PostJobView() {
   const chars = paste.length;
 
   return (
-    <div className="px-16 py-6 sm:px-32">
+    <div className="px-[16px] py-[24px] sm:px-[32px]">
       {phase === "choose" ? (
         <div className="mx-auto max-w-3xl">
           <h1 className="text-display-small-semibold">Post a job</h1>
-          <p className="mt-1 text-body-sm-regular text-text-secondary">Paste a description and we’ll fill the form, or enter the details yourself. Nothing goes live until you submit it for review.</p>
-          <div className="mt-6 grid gap-16 md:grid-cols-2">
-            <button onClick={() => setPhase("paste")} className="rounded-lg border border-border-default bg-white p-5 text-left">
+          <p className="mt-[4px] text-body-sm-regular text-text-secondary">Paste a description and we’ll fill the form, or enter the details yourself. Nothing goes live until you submit it for review.</p>
+          <div className="mt-[24px] grid gap-[16px] md:grid-cols-2">
+            <button onClick={() => setPhase("paste")} className="rounded-lg border border-border-default bg-white p-[20px] text-left">
               <p className="text-body-semibold">Paste a job description</p>
-              <p className="mt-1 text-body-sm-regular text-text-secondary">We’ll extract the title, pay, work type and requirements. You still review every field.</p>
+              <p className="mt-[4px] text-body-sm-regular text-text-secondary">We’ll extract the title, pay, work type and requirements. You still review every field.</p>
             </button>
-            <button onClick={() => setPhase("details")} className="rounded-lg border border-border-default bg-white p-5 text-left">
+            <button onClick={() => setPhase("details")} className="rounded-lg border border-border-default bg-white p-[20px] text-left">
               <p className="text-body-semibold">Enter details manually</p>
-              <p className="mt-1 text-body-sm-regular text-text-secondary">Fill the form step by step. You can save a draft at any time.</p>
+              <p className="mt-[4px] text-body-sm-regular text-text-secondary">Fill the form step by step. You can save a draft at any time.</p>
             </button>
           </div>
         </div>
@@ -163,14 +163,14 @@ export function PostJobView() {
         <div>
           <h1 className="text-display-small-semibold">Paste a job description</h1>
           <p className="text-body-sm-regular text-text-secondary">We’ll extract the details. Nothing is posted until you review it.</p>
-          <section className="mt-16 rounded-lg border border-border-default bg-white p-5">
+          <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
             <div className="flex justify-between text-body-sm-medium">
               <span>Job description *</span>
               <span className="text-label-regular text-text-tertiary">Paste or type your text</span>
             </div>
-            <TextArea className="mt-3 min-h-192" value={paste} onChange={(event) => setPaste(event.target.value)} />
-            <p className="mt-2 text-label-regular text-text-secondary">We’ll extract the job title, pay, work type and requirements. {chars} characters. Your text is saved as you go.</p>
-            <div className="mt-16 flex justify-end gap-2">
+            <TextArea className="mt-[12px] min-h-[192px]" value={paste} onChange={(event) => setPaste(event.target.value)} />
+            <p className="mt-[8px] text-label-regular text-text-secondary">We’ll extract the job title, pay, work type and requirements. {chars} characters. Your text is saved as you go.</p>
+            <div className="mt-[16px] flex justify-end gap-[8px]">
               <Button variant="outline" onClick={() => setPhase("choose")}>Back</Button>
               <Button disabled={paste.trim().length < 20} onClick={() => setPhase("processing")}>Extract details</Button>
             </div>
@@ -186,17 +186,17 @@ export function PostJobView() {
       ) : null}
 
       {stepIndex >= 0 ? (
-        <div className="grid gap-16 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <div className="grid gap-[16px] lg:grid-cols-[240px_minmax(0,1fr)]">
           <StepIndicator steps={STEPS.map((label) => ({ id: label, label }))} current={stepIndex} />
-          <section className="rounded-lg border border-border-default bg-white p-5">
+          <section className="rounded-lg border border-border-default bg-white p-[20px]">
             {phase === "details" ? (
-              <div className="space-y-16">
+              <div className="space-y-[16px]">
                 {state === "details-ai" ? <Banner tone="info" title="Filled from your description" body="Check every field before you continue. Nothing is posted yet." /> : null}
                 <div>
                   <h1 className="text-display-small-semibold">Job details</h1>
                   <p className="text-body-sm-regular text-text-secondary">Tell candidates what the role is and where they’ll work.</p>
                 </div>
-                <div className="grid gap-16 md:grid-cols-2">
+                <div className="grid gap-[16px] md:grid-cols-2">
                   <Field label="Job title" required error={errors.title}><TextInput value={draft.title} onChange={(event) => patch("title", event.target.value)} /></Field>
                   <Field label="Job category" required error={errors.category}>
                     <SelectInput value={draft.category} onChange={(event) => patch("category", event.target.value)}>
@@ -224,13 +224,13 @@ export function PostJobView() {
               </div>
             ) : null}
             {phase === "pay" ? (
-              <div className="space-y-16">
+              <div className="space-y-[16px]">
                 <h1 className="text-display-small-semibold">Pay & requirements</h1>
-                <div className="grid gap-16 md:grid-cols-2">
+                <div className="grid gap-[16px] md:grid-cols-2">
                   <Field label="Salary type">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-[8px]">
                       {(["Fixed salary", "Salary range"] as SalaryType[]).map((item) => (
-                        <button key={item} type="button" onClick={() => patch("salaryType", item)} className={`h-11 rounded-sm border text-body-sm-semibold ${draft.salaryType === item ? "border-brand-primary text-brand-primary" : "border-border-default"}`}>{item}</button>
+                        <button key={item} type="button" onClick={() => patch("salaryType", item)} className={`h-[44px] rounded-sm border text-body-sm-semibold ${draft.salaryType === item ? "border-brand-primary text-brand-primary" : "border-border-default"}`}>{item}</button>
                       ))}
                     </div>
                   </Field>
@@ -243,18 +243,18 @@ export function PostJobView() {
                 </div>
                 <div>
                   <p className="text-label-medium text-text-secondary">Benefits <span className="text-text-tertiary">Optional</span></p>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="mt-[8px] flex flex-wrap gap-[8px]">
                     {BENEFITS.map((benefit) => {
                       const on = draft.benefits.includes(benefit);
                       return (
-                        <button key={benefit} type="button" onClick={() => patch("benefits", on ? draft.benefits.filter((item) => item !== benefit) : [...draft.benefits, benefit])} className={`h-10 rounded-full border px-3 text-body-sm-regular ${on ? "border-brand-primary bg-primary-primary-50 text-brand-primary" : "border-border-default"}`}>
+                        <button key={benefit} type="button" onClick={() => patch("benefits", on ? draft.benefits.filter((item) => item !== benefit) : [...draft.benefits, benefit])} className={`h-[40px] rounded-full border px-[12px] text-body-sm-regular ${on ? "border-brand-primary bg-primary-primary-50 text-brand-primary" : "border-border-default"}`}>
                           {benefit}
                         </button>
                       );
                     })}
                   </div>
                 </div>
-                <div className="grid gap-16 md:grid-cols-2">
+                <div className="grid gap-[16px] md:grid-cols-2">
                   <Field label="Education requirement"><TextInput value={draft.education} onChange={(event) => patch("education", event.target.value)} /></Field>
                   <Field label="Preferred start date"><TextInput type="date" value={draft.startDate} onChange={(event) => patch("startDate", event.target.value)} /></Field>
                   <Field label="Gender preference" hint="Optional"><TextInput value={draft.gender} onChange={(event) => patch("gender", event.target.value)} /></Field>
@@ -263,7 +263,7 @@ export function PostJobView() {
               </div>
             ) : null}
             {phase === "review" ? (
-              <div className="space-y-16">
+              <div className="space-y-[16px]">
                 <div>
                   <h1 className="text-display-small-semibold">Review & preview</h1>
                   <p className="text-body-sm-regular text-text-secondary">This is what reviewers will see. Submit only when it looks right.</p>
@@ -295,10 +295,10 @@ export function PostJobView() {
                 ]} />
               </div>
             ) : null}
-            {saved ? <p className="mt-3 text-body-sm-regular text-success-success-700">{saved}</p> : null}
-            <div className="mt-6 flex flex-wrap justify-between gap-2">
+            {saved ? <p className="mt-[12px] text-body-sm-regular text-success-success-700">{saved}</p> : null}
+            <div className="mt-[24px] flex flex-wrap justify-between gap-[8px]">
               <Button variant="outline" onClick={() => setPhase(phase === "details" ? "choose" : phase === "pay" ? "details" : "pay")}>Back</Button>
-              <div className="flex gap-2">
+              <div className="flex gap-[8px]">
                 <Button variant="outline" onClick={saveDraft}>Save draft</Button>
                 {phase === "details" ? <Button onClick={() => validateDetails() && setPhase("pay")}>Continue</Button> : null}
                 {phase === "pay" ? <Button onClick={() => validatePay() && setPhase("review")}>Continue</Button> : null}
@@ -341,17 +341,17 @@ function Processing({ failed, hold, onDone, onManual }: { failed: boolean; hold?
     <div className="max-w-xl">
       <h1 className="text-display-small-semibold">{failed ? "Post a job" : "Reading your description"}</h1>
       <p className="text-body-sm-regular text-text-secondary">{failed ? "We couldn’t finish the extract." : "This usually takes a few seconds."}</p>
-      <section className="mt-16 rounded-lg border border-border-default bg-white p-6">
+      <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[24px]">
         {failed ? (
           <>
             <h2 className="text-subheading-semibold">We couldn’t extract the job details</h2>
-            <p className="mt-2 text-body-sm-regular text-text-secondary">The description was too short or we lost the connection. You can try again or type the form yourself.</p>
-            <ul className="mt-16 space-y-1 text-body-sm-regular">
+            <p className="mt-[8px] text-body-sm-regular text-text-secondary">The description was too short or we lost the connection. You can try again or type the form yourself.</p>
+            <ul className="mt-[16px] space-y-[4px] text-body-sm-regular">
               <li>Include the job title, location, responsibilities and salary.</li>
               <li>Use a clear, structured description.</li>
               <li>Avoid images or scanned documents.</li>
             </ul>
-            <div className="mt-16 flex gap-2">
+            <div className="mt-[16px] flex gap-[8px]">
               <Button onClick={onDone}>Try again</Button>
               <Button variant="outline" onClick={onManual}>Create manually</Button>
             </div>
@@ -359,12 +359,12 @@ function Processing({ failed, hold, onDone, onManual }: { failed: boolean; hold?
         ) : (
           <>
             <p className="text-body-semibold">Extracting job details…</p>
-            <ul className="mt-16 space-y-2 text-body-sm-regular">
+            <ul className="mt-[16px] space-y-[8px] text-body-sm-regular">
               <li>Analysing description {tick > 0 ? "· done" : ""}</li>
               <li>Identifying key details {tick > 1 ? "· done" : "· in progress"}</li>
               <li>Preparing form {tick > 2 ? "· done" : ""}</li>
             </ul>
-            <button className="mt-16 text-body-sm-semibold text-brand-primary" onClick={onManual}>Prefer to type it yourself? Use manual entry</button>
+            <button className="mt-[16px] text-body-sm-semibold text-brand-primary" onClick={onManual}>Prefer to type it yourself? Use manual entry</button>
           </>
         )}
       </section>
@@ -375,11 +375,11 @@ function Processing({ failed, hold, onDone, onManual }: { failed: boolean; hold?
 function ReviewCard({ title, rows, onEdit }: { title: string; rows: [string, string][]; onEdit: () => void }) {
   return (
     <section className="rounded-md border border-border-default">
-      <div className="flex items-center justify-between border-b border-border-default px-16 py-3">
+      <div className="flex items-center justify-between border-b border-border-default px-[16px] py-[12px]">
         <h2 className="text-body-semibold">{title}</h2>
         <button className="text-body-sm-semibold text-brand-primary" onClick={onEdit}>Edit</button>
       </div>
-      <dl className="grid gap-2 p-16 sm:grid-cols-2">
+      <dl className="grid gap-[8px] p-[16px] sm:grid-cols-2">
         {rows.map(([label, value]) => (
           <div key={label}>
             <dt className="text-label-regular text-text-secondary">{label}</dt>

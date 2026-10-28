@@ -1,11 +1,14 @@
 "use client";
 
-import { Clock, CreditCard, Lock, Megaphone, Sun, UserPlus, X } from "lucide-react";
+import { Clock, CreditCard, Lock, Megaphone, MoreHorizontal, Sun, UserPlus, X } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Field, SelectInput, TextInput } from "@/components/ui/field";
+import { PendingDecision } from "@/components/ui/pending-decision";
 import { SettingsTabs } from "@/components/ui/settings-tabs";
+import { Toggle } from "@/components/ui/toggle";
 import { usePortal } from "@/components/shell/use-portal";
 import {
   closeEmployerAccount,
@@ -25,6 +28,7 @@ import {
   OTP_LENGTH,
   TEAM_ACCESS,
 } from "@/src/config/policy";
+import { cn } from "@/lib/utils";
 import type { AccountSettings, NotificationPrefs, TeamMember, TeamRole } from "@/lib/types";
 
 type Tab = "account" | "team" | "notifications";
@@ -63,7 +67,7 @@ export function SettingsView() {
   const [menuFor, setMenuFor] = useState<string | null>(state === "team-menu" ? "tm-priya" : state === "team-pending-menu" ? "tm-neha" : null);
   const [confirm, setConfirm] = useState<{ id: string; kind: "remove" | "cancel" } | null>(state === "team-remove-confirm" ? { id: "tm-priya", kind: "remove" } : null);
   const [roleEdit, setRoleEdit] = useState<TeamMember | null>(null);
-  const [invite, setInvite] = useState({ name: "", email: "", role: "Recruiter" as TeamRole });
+  const [invite, setInvite] = useState<{ name: string; email: string; role: TeamRole | "" }>({ name: "", email: "", role: "" });
   const [inviteErrors, setInviteErrors] = useState<Record<string, string>>(
     state === "team-invite-invalid" ? { name: "Enter a name.", email: "Enter a valid email." } : {},
   );
@@ -94,7 +98,12 @@ export function SettingsView() {
 
   const dirty = useMemo(() => {
     if (!draft || !savedAccount) return state === "account-dirty";
-    return draft.name !== savedAccount.name || draft.email !== savedAccount.email || draft.phone !== savedAccount.phone;
+    return (
+      state === "account-dirty" ||
+      draft.name !== savedAccount.name ||
+      draft.email !== savedAccount.email ||
+      draft.phone !== savedAccount.phone
+    );
   }, [draft, savedAccount, state]);
 
   async function onSaveAccount() {
@@ -136,129 +145,150 @@ export function SettingsView() {
   }
 
   if (!draft || !prefs) {
-    return <div className="px-16 py-6 text-body-sm-regular text-text-secondary sm:px-32">Loading settings…</div>;
+    return <div className="px-[16px] py-[24px] text-body-sm-regular text-text-secondary sm:px-[32px]">Loading settings…</div>;
   }
 
   return (
-    <div className="mx-auto max-w-[760px] px-16 py-6 sm:px-32">
-      <h1 className="text-subheading-semibold">Settings</h1>
-      <p className="mt-1 text-body-sm-regular text-text-secondary">Manage your account, team access and notifications.</p>
+    <div className="px-[16px] py-[32px] sm:px-[32px]">
+      <h1 className="text-display-small-semibold">Settings</h1>
+      <p className="mt-[4px] text-body-sm-regular text-text-secondary">Manage your account, team access and notifications.</p>
       {suspended ? (
-        <p className="mt-16 rounded-md bg-error-error-50 px-16 py-3 text-body-sm-regular text-error-default">
+        <p className="mt-[16px] rounded-md bg-error-error-50 px-[16px] py-[12px] text-body-sm-regular text-error-default">
           This account is suspended. Saving, invites, and notification changes are locked. This is separate from company verification.
         </p>
       ) : null}
-      <div className="mt-6">
+      <div className="mt-[24px]">
         <SettingsTabs value={tab} onChange={setTab} />
       </div>
 
       {tab === "account" ? (
-        <div className="mt-5 space-y-16">
-          <section className="rounded-lg border border-border-default bg-white p-5">
-            <h2 className="text-body-semibold">Personal account</h2>
-            <div className="mt-16 space-y-16">
+        <div id="settings-panel-account" role="tabpanel" aria-labelledby="settings-tab-account" className="mt-[24px] space-y-[24px]">
+          <section className="rounded-lg border border-border-default bg-white p-[24px]">
+            <h2 className="text-subheading-semibold">Personal account</h2>
+            <p className="mt-[4px] text-body-sm-regular text-text-secondary">These details are used to manage your access and receive important updates.</p>
+            <div className="mt-[20px] grid gap-[24px] md:grid-cols-2">
               <Field label="Your name" error={fieldErrors.name}>
                 <TextInput aria-label="Your name" value={draft.name} disabled={suspended} onChange={(event) => setDraft({ ...draft, name: event.target.value })} />
               </Field>
               <Field label="Role" hint={"Role can't be changed here. Manage team members to assign roles."}>
                 <div className="relative">
-                  <TextInput aria-label="Role" value={draft.role} readOnly className="bg-grey-grey-100 text-text-disabled" />
-                  <Lock size={16} className="absolute top-1/2 right-3 -translate-y-1/2 text-text-secondary" aria-hidden />
+                  <TextInput aria-label="Role" value={draft.role} readOnly className="bg-grey-grey-100 pr-[40px] text-text-disabled" />
+                  <Lock size={16} className="absolute top-[14px] right-[12px] text-text-secondary" aria-hidden />
                 </div>
               </Field>
               <Field label="Email address" error={fieldErrors.email}>
-                <div className="flex flex-wrap items-center gap-2">
-                  <TextInput className="min-w-[220px] flex-1" aria-label="Email address" value={draft.email} disabled={suspended} onChange={(event) => setDraft({ ...draft, email: event.target.value })} />
-                  {draft.emailVerified ? <Verified /> : null}
+                <div className="relative">
+                  <TextInput className="pr-[24px]" aria-label="Email address" value={draft.email} disabled={suspended} onChange={(event) => setDraft({ ...draft, email: event.target.value })} />
+                  {draft.emailVerified ? <Verified className="absolute top-[10px] right-[12px]" /> : null}
                 </div>
               </Field>
-              <Field label="Phone number" error={fieldErrors.phone}>
-                <div className="flex flex-wrap items-center gap-2">
-                  <TextInput className="min-w-[220px] flex-1" aria-label="Phone number" value={draft.phone} readOnly />
-                  {draft.phoneVerified ? <Verified /> : null}
+              <div>
+                <Field label="Phone number" error={fieldErrors.phone}>
+                  <div className="relative">
+                    <TextInput className="pr-[24px]" aria-label="Phone number" value={draft.phone} readOnly />
+                    {draft.phoneVerified ? <Verified className="absolute top-[10px] right-[12px]" /> : null}
+                  </div>
+                </Field>
+                <div className="mt-[4px] flex justify-end">
                   <button type="button" className="text-body-sm-semibold text-brand-primary" disabled={suspended} onClick={() => { setOtp("phone"); setOtpError(false); }}>
                     Change number
                   </button>
                 </div>
-              </Field>
-              <div className="rounded-md bg-info-info-50 px-16 py-3 text-body-sm-regular text-text-primary">
-                You log in with OTP on your verified mobile number. No password is set for this account.
               </div>
-              {accountStatus === "saved" ? <p className="text-body-sm-regular text-success-success-700">Account details saved.</p> : null}
-              {accountError ? <p className="text-body-sm-regular text-error-default">{accountError}</p> : null}
-              <Button disabled={!dirty || suspended || accountStatus === "saving"} onClick={onSaveAccount}>
+            </div>
+            <div className="mt-[20px] flex flex-col items-stretch gap-[16px] lg:flex-row lg:items-end">
+              <div className="min-w-[0px] flex-1">
+                <p className="mb-[8px] text-label-medium text-text-secondary">Login method</p>
+                <div className="rounded-sm bg-primary-primary-50 px-[12px] py-[12px] text-body-sm-regular text-text-primary">
+                  You log in with OTP on your verified mobile number. No password is set for this account.
+                </div>
+              </div>
+              <Button
+                className={!dirty ? "bg-grey-grey-100 text-text-disabled hover:bg-grey-grey-100 disabled:opacity-100" : undefined}
+                disabled={!dirty || suspended || accountStatus === "saving"}
+                onClick={onSaveAccount}
+              >
                 {accountStatus === "saving" || state === "account-saving" ? "Saving…" : "Save changes"}
               </Button>
             </div>
+            {accountStatus === "saved" ? <p className="text-body-sm-regular text-success-success-700">Account details saved.</p> : null}
+            {accountError ? <p className="text-body-sm-regular text-error-default">{accountError}</p> : null}
           </section>
-          <section className="rounded-lg border border-error-default bg-error-error-50 p-6">
-            <h2 className="text-body-semibold">Danger zone</h2>
-            <p className="mt-1 text-body-sm-regular text-text-secondary">Close your employer account.</p>
-            <p className="text-label-medium text-text-secondary">Consequences: {ACCOUNT_CLOSURE.note}</p>
-            {closeNote ? <p className="mt-3 text-body-sm-regular text-error-default">{closeNote}</p> : null}
-            <Button className="mt-16" variant="outline" onClick={() => { setCloseOpen(true); setCloseNote(""); }}>
-              <span className="text-error-default">Close employer account</span>
-            </Button>
+          <section className="flex flex-col gap-[16px] rounded-lg border border-error-default bg-error-error-50 p-[24px] sm:flex-row sm:items-center">
+            <div className="min-w-[0px] flex-1">
+              <h2 className="text-body-semibold">Danger zone</h2>
+              <p className="mt-[4px] text-body-sm-regular text-text-secondary">Close your employer account.</p>
+              <p className="text-label-medium text-text-secondary">Consequences: {ACCOUNT_CLOSURE.note} <PendingTag /></p>
+              {closeNote ? <p className="mt-[8px] text-body-sm-regular text-error-default">{closeNote}</p> : null}
+            </div>
+            <Button variant="danger" onClick={() => { setCloseOpen(true); setCloseNote(""); }}>Close employer account</Button>
           </section>
         </div>
       ) : null}
 
       {tab === "team" ? (
-        <div className="mt-5 space-y-16">
-          <section className="rounded-lg border border-border-default bg-white p-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
+        <div id="settings-panel-team" role="tabpanel" aria-labelledby="settings-tab-team" className="mt-[24px] space-y-[24px]">
+          <section className="rounded-lg border border-border-default bg-white p-[24px]">
+            <div className="flex flex-wrap items-start justify-between gap-[12px]">
               <div>
-                <h2 className="text-body-semibold">Team members</h2>
+                <h2 className="text-subheading-semibold">Team members</h2>
                 <p className="text-body-sm-regular text-text-secondary">Invite people to help you manage jobs and applicants.</p>
               </div>
               <Button onClick={() => document.getElementById("invite-name")?.focus()}>+ Invite member</Button>
             </div>
-            <div className="mt-16 overflow-x-auto">
+            <div className="mt-[16px] overflow-x-auto">
               <table className="w-full min-w-[640px] text-left text-body-sm-regular">
                 <thead className="text-label-medium text-text-secondary">
                   <tr>
-                    {["Name", "Email", "Role", "Status", ""].map((label) => (
-                      <th key={label} className="py-2 font-medium">{label}</th>
-                    ))}
+                    <th className="py-[8px] font-medium">Name</th>
+                    <th className="py-[8px] font-medium">Email</th>
+                    <th className="py-[8px] font-medium">Role</th>
+                    <th className="py-[8px] font-medium">
+                      <span className="inline-flex items-center gap-[8px]">
+                        Access <PendingTag />
+                      </span>
+                    </th>
+                    <th className="py-[8px] font-medium">Status</th>
+                    <th className="py-[8px] font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {team.map((member) => (
                     <tr key={member.id} className="border-t border-border-default">
-                      <td className="py-3">
-                        <span className="flex items-center gap-2">
-                          <span className="flex h-32 w-32 items-center justify-center rounded-full bg-primary-primary-50 text-label-semibold text-brand-primary">{member.initials}</span>
+                      <td className="py-[12px]">
+                        <span className="flex items-center gap-[8px]">
+                          <span className="flex h-[32px] w-[32px] items-center justify-center rounded-full bg-primary-primary-50 text-label-semibold text-brand-primary">{member.initials}</span>
                           <span className="font-medium">{member.name}</span>
-                          {member.you ? <span className="rounded-full bg-grey-grey-100 px-2 py-0.5 text-label-medium text-text-secondary">You</span> : null}
+                          {member.you ? <span className="rounded-full bg-grey-grey-100 px-[8px] py-[2px] text-label-medium text-text-secondary">You</span> : null}
                         </span>
                       </td>
-                      <td className="py-3 text-text-secondary">{member.email}</td>
-                      <td className="py-3">
-                        <span className="inline-flex rounded-full bg-primary-primary-50 px-2 py-0.5 text-label-medium text-brand-primary">{member.role}</span>
-                        <p className="mt-1 text-label-regular text-text-secondary">{TEAM_ACCESS[member.role]}</p>
+                      <td className="py-[12px] text-text-secondary">{member.email}</td>
+                      <td className="py-[12px]">
+                        <span className="inline-flex rounded-full bg-primary-primary-50 px-[8px] py-[2px] text-label-medium text-brand-primary">{member.role}</span>
                       </td>
-                      <td className="py-3">
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-label-medium ${member.status === "Active" ? "bg-success-success-50 text-success-success-700" : "bg-warning-warning-50 text-warning-warning-700"}`}>
-                          {member.status}
+                      <td className="py-[12px] text-text-secondary"><PendingDecision value={TEAM_ACCESS[member.role]} /></td>
+                      <td className="py-[12px]">
+                        <span className={`inline-flex rounded-full px-[8px] py-[2px] text-label-medium ${member.status === "Active" ? "bg-success-success-50 text-success-success-700" : "bg-warning-warning-50 text-warning-warning-700"}`}>
+                          {member.status === "Active" ? "Active" : "Pending invite"}
                         </span>
                       </td>
-                      <td className="relative py-3 text-right">
-                        {member.you || member.role === "Owner" ? null : (
-                          <button aria-label={`Actions for ${member.name}`} className="rounded-md px-2 py-1" onClick={() => setMenuFor(menuFor === member.id ? null : member.id)}>
-                            ···
+                      <td className="relative py-[12px] text-right">
+                        {member.you || member.role === "Owner" ? <span className="text-text-tertiary">—</span> : (
+                          <button aria-label={`Actions for ${member.name}`} className="inline-flex h-[32px] w-[32px] items-center justify-center rounded-md text-text-secondary hover:bg-grey-grey-100" onClick={() => setMenuFor(menuFor === member.id ? null : member.id)}>
+                            <MoreHorizontal size={16} />
                           </button>
                         )}
                         {menuFor === member.id ? (
-                          <div className="absolute right-0 z-20 w-44 rounded-md border border-border-default bg-white py-1 text-left shadow-lg">
+                          <div className="absolute right-[0px] z-20 w-[176px] rounded-md border border-border-default bg-white py-[4px] text-left shadow-lg">
                             {member.status === "Pending" ? (
                               <>
-                                <button className="block w-full px-3 py-2 text-left text-body-sm-regular hover:bg-grey-grey-100" onClick={() => { void resendInvite(member.id).then(setTeam); setMenuFor(null); setNotice(`Resend recorded for ${member.email}. The invite is still Pending.`); }}>Resend invite</button>
-                                <button className="block w-full px-3 py-2 text-left text-body-sm-regular text-error-default hover:bg-grey-grey-100" onClick={() => { setConfirm({ id: member.id, kind: "cancel" }); setMenuFor(null); }}>Cancel invite</button>
+                                <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular hover:bg-grey-grey-100" onClick={() => { void resendInvite(member.id).then(setTeam); setMenuFor(null); setNotice(`Resend recorded for ${member.email}. The invite is still Pending.`); }}>Resend invite</button>
+                                <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular text-error-default hover:bg-grey-grey-100" onClick={() => { setConfirm({ id: member.id, kind: "cancel" }); setMenuFor(null); }}>Cancel invite</button>
                               </>
                             ) : (
                               <>
-                                <button className="block w-full px-3 py-2 text-left text-body-sm-regular hover:bg-grey-grey-100" onClick={() => { setRoleEdit(member); setMenuFor(null); }}>Edit role</button>
-                                <button className="block w-full px-3 py-2 text-left text-body-sm-regular text-error-default hover:bg-grey-grey-100" onClick={() => { setConfirm({ id: member.id, kind: "remove" }); setMenuFor(null); }}>Remove</button>
+                                <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular hover:bg-grey-grey-100" onClick={() => { setRoleEdit(member); setMenuFor(null); }}>Edit role</button>
+                                <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular text-error-default hover:bg-grey-grey-100" onClick={() => { setConfirm({ id: member.id, kind: "remove" }); setMenuFor(null); }}>Remove</button>
                               </>
                             )}
                           </div>
@@ -269,43 +299,47 @@ export function SettingsView() {
                 </tbody>
               </table>
             </div>
-            {notice ? <p className="mt-3 text-body-sm-regular text-text-secondary">{notice}</p> : null}
-            <div className="mt-16 rounded-md bg-background-secondary px-16 py-3 text-body-sm-regular text-text-secondary">
-              Role permissions: Only owners can change roles, manage branch access, and remove team members.{" "}
-              <span className="text-text-tertiary" title="TODO: a roles help page does not exist yet">Learn about roles</span>
+            {notice ? <p className="mt-[12px] text-body-sm-regular text-text-secondary">{notice}</p> : null}
+            <div className="mt-[16px] rounded-sm bg-info-info-50 px-[16px] py-[12px] text-body-sm-regular text-text-secondary">
+              <p className="text-body-sm-semibold text-text-primary">Role permissions</p>
+              Only owners can change roles and remove team members.
             </div>
           </section>
-          <section className="rounded-lg border border-border-default bg-white p-5">
-            <h2 className="text-body-semibold">Invite a new member</h2>
-            <div className="mt-16 grid gap-3 sm:grid-cols-2">
+          <section className="rounded-lg border border-border-default bg-white p-[20px]">
+            <h2 className="text-subheading-semibold">Invite a new member</h2>
+            <p className="mt-[4px] text-body-sm-regular text-text-secondary">They&apos;ll get an email with a link to join your team.</p>
+            <div className="mt-[16px] grid gap-[12px] sm:grid-cols-2">
               <Field label="Name" error={inviteErrors.name}>
-                <TextInput id="invite-name" value={invite.name} disabled={suspended} onChange={(event) => setInvite({ ...invite, name: event.target.value })} />
+                <TextInput id="invite-name" placeholder="Enter full name" value={invite.name} disabled={suspended} onChange={(event) => setInvite({ ...invite, name: event.target.value })} />
               </Field>
               <Field label="Email" error={inviteErrors.email}>
-                <TextInput type="email" value={invite.email} disabled={suspended} onChange={(event) => setInvite({ ...invite, email: event.target.value })} />
+                <TextInput type="email" placeholder="Enter email address" value={invite.email} disabled={suspended} onChange={(event) => setInvite({ ...invite, email: event.target.value })} />
               </Field>
-              <Field label="Role">
-                <SelectInput value={invite.role} disabled={suspended} onChange={(event) => setInvite({ ...invite, role: event.target.value as TeamRole })}>
+              <Field label="Role" error={inviteErrors.role}>
+                <SelectInput aria-label="Invite role" value={invite.role} disabled={suspended} onChange={(event) => setInvite({ ...invite, role: event.target.value as TeamRole | "" })}>
+                  <option value="">Select role</option>
                   {ROLES.filter((role) => role !== "Owner").map((role) => (
                     <option key={role} value={role}>{role}</option>
                   ))}
                 </SelectInput>
               </Field>
             </div>
-            {inviteStatus === "saved" ? <p className="mt-3 text-body-sm-regular text-success-success-700">Invite saved as Pending. It has not been delivered.</p> : null}
-            {inviteStatus === "error" ? <p className="mt-3 text-body-sm-regular text-error-default">Could not send the invite. The list was not changed.</p> : null}
+            {inviteStatus === "saved" ? <p className="mt-[12px] text-body-sm-regular text-success-success-700">Invite saved as Pending. It has not been delivered.</p> : null}
+            {inviteStatus === "error" ? <p className="mt-[12px] text-body-sm-regular text-error-default">Could not send the invite. The list was not changed.</p> : null}
             <Button
-              className="mt-16"
+              className="mt-[16px]"
               disabled={suspended || inviteStatus === "saving"}
               onClick={async () => {
                 const errors: Record<string, string> = {};
                 if (!invite.name.trim()) errors.name = "Enter a name.";
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(invite.email)) errors.email = "Enter a valid email.";
+                if (!invite.role) errors.role = "Select a role.";
                 setInviteErrors(errors);
-                if (Object.keys(errors).length) return;
+                if (Object.keys(errors).length || !invite.role) return;
+                const role = invite.role;
                 setInviteStatus("saving");
                 try {
-                  await sendInvite({ ...invite, fail: state === "team-invite-error" });
+                  await sendInvite({ name: invite.name, email: invite.email, role, fail: state === "team-invite-error" });
                   setTeam(await loadSettings().then((loaded) => loaded.team));
                   setInvite({ name: "", email: "", role: "Recruiter" });
                   setInviteStatus("saved");
@@ -321,50 +355,58 @@ export function SettingsView() {
       ) : null}
 
       {tab === "notifications" ? (
-        <section className="mt-5 rounded-lg border border-border-default bg-white p-5">
-          <h2 className="text-body-semibold">Notification preferences</h2>
-          <p className="mt-1 text-label-regular text-text-tertiary">
-            TODO: channel availability is undecided (email, in-app, WhatsApp). Toggles are saved on this device only.
-          </p>
-          {prefStatus === "saving" ? <p className="mt-3 text-body-sm-regular text-text-secondary">Saving…</p> : null}
-          {prefStatus === "saved" ? <p className="mt-3 text-body-sm-regular text-success-success-700">Your preferences are saved automatically.</p> : null}
-          {prefStatus === "error" ? <p className="mt-3 text-body-sm-regular text-error-default">Could not save preferences. The last successful values are still stored.</p> : null}
-          <PrefRow icon={<UserPlus size={16} />} title="New applicant" description="When someone applies to a job.">
-            <Toggle label="Email" checked={prefs.newApplicant.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, newApplicant: { ...prefs.newApplicant, email } }, state === "notifications-error")} />
-            <Toggle label="In-app" checked={prefs.newApplicant.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, newApplicant: { ...prefs.newApplicant, inApp } })} />
-          </PrefRow>
-          <PrefRow icon={<Sun size={16} />} title="Daily summary" description="One summary of new applicants.">
-            <Toggle label="Email" checked={prefs.dailySummary.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, dailySummary: { ...prefs.dailySummary, email } })} />
-            <label className="text-label-medium text-text-secondary">
-              Send at
-              <SelectInput className="mt-1" aria-label="Send at" value={prefs.dailySummary.sendAt} disabled={suspended} onChange={(event) => persistPrefs({ ...prefs, dailySummary: { ...prefs.dailySummary, sendAt: event.target.value } })}>
-                {SEND_TIMES.map((time) => <option key={time}>{time}</option>)}
-              </SelectInput>
-            </label>
-          </PrefRow>
-          <PrefRow icon={<Megaphone size={16} />} title="WhatsApp alerts" description="Add and verify your WhatsApp number to enable alerts.">
-            <Toggle label="WhatsApp" checked={prefs.whatsapp.verified && prefs.whatsapp.enabled} disabled={suspended || !prefs.whatsapp.verified} onChange={(enabled) => persistPrefs({ ...prefs, whatsapp: { ...prefs.whatsapp, enabled } })} />
-            <Button variant="outline" size="sm" disabled={suspended} onClick={() => { setOtp("whatsapp"); setOtpError(state === "whatsapp-failed"); }}>Add number</Button>
-            {prefs.whatsapp.verified ? <Verified /> : null}
-          </PrefRow>
-          <PrefRow icon={<Clock size={16} />} title="Job expiry reminders" description="Before a live job expires.">
-            <Toggle label="Email" checked={prefs.expiryReminders.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, email } })} />
-            <Toggle label="In-app" checked={prefs.expiryReminders.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, inApp } })} />
-            <label className="text-label-medium text-text-secondary">
-              Remind me
-              <SelectInput className="mt-1" aria-label="Remind me" value={prefs.expiryReminders.remindMe} disabled={suspended} onChange={(event) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, remindMe: event.target.value } })}>
-                {REMIND_OPTIONS.map((option) => <option key={option}>{option}</option>)}
-              </SelectInput>
-            </label>
-          </PrefRow>
-          <PrefRow icon={<Megaphone size={16} />} title="Product updates" description="Changes to the employer portal.">
-            <Toggle label="Email" checked={prefs.productUpdates.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, productUpdates: { ...prefs.productUpdates, email } })} />
-            <Toggle label="In-app" checked={prefs.productUpdates.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, productUpdates: { ...prefs.productUpdates, inApp } })} />
-          </PrefRow>
-          <PrefRow icon={<CreditCard size={16} />} title="Billing and payments" description="Credits, invoices, and plan changes.">
-            <Toggle label="Email" checked={prefs.billing.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, billing: { ...prefs.billing, email } })} />
-            <Toggle label="In-app" checked={prefs.billing.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, billing: { ...prefs.billing, inApp } })} />
-          </PrefRow>
+        <section id="settings-panel-notifications" role="tabpanel" className="mt-[24px] rounded-lg border border-border-default bg-white p-[24px]">
+          <h2 className="text-subheading-semibold">Notification preferences</h2>
+          <p className="mt-[4px] text-body-sm-regular text-text-secondary">Choose how you want to receive updates. You can change these anytime.</p>
+          <PrefStatus status={prefStatus} onRetry={() => persistPrefs(prefs, false)} />
+          <div className="mt-[4px] space-y-[12px]">
+            <PrefRow icon={<UserPlus size={16} />} title="New applicant" description="Get an email and in-app notification for every new application.">
+              <ChannelToggle row="New applicant" channel="Email" checked={prefs.newApplicant.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, newApplicant: { ...prefs.newApplicant, email } }, state === "notifications-error")} />
+              <ChannelToggle row="New applicant" channel="In-app" checked={prefs.newApplicant.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, newApplicant: { ...prefs.newApplicant, inApp } })} />
+            </PrefRow>
+            <PrefRow icon={<Sun size={16} />} title="Daily summary" description="Receive one email each morning with new applicants and job performance.">
+              <ChannelToggle row="Daily summary" channel="Email" checked={prefs.dailySummary.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, dailySummary: { ...prefs.dailySummary, email } })} />
+              <label className="text-body-sm-regular text-text-secondary">
+                Send at
+                <span className="mt-[4px] flex items-center gap-[8px]">
+                  <SelectInput className="w-[144px]" aria-label="Daily summary send time" value={prefs.dailySummary.sendAt} disabled={suspended} onChange={(event) => persistPrefs({ ...prefs, dailySummary: { ...prefs.dailySummary, sendAt: event.target.value } })}>
+                    {SEND_TIMES.map((time) => <option key={time}>{time}</option>)}
+                  </SelectInput>
+                  <PendingTag />
+                </span>
+              </label>
+            </PrefRow>
+            <PrefRow
+              icon={<Megaphone size={16} />}
+              title="WhatsApp alerts"
+              description="Get important updates on your business WhatsApp number."
+              note={<p className="mt-[4px] rounded-sm bg-info-info-50 px-[12px] py-[12px] text-body-sm-regular text-text-primary">Add and verify your WhatsApp number to enable alerts. You&apos;ll receive a verification code.</p>}
+            >
+              <ChannelToggle row="WhatsApp alerts" channel="WhatsApp" checked={prefs.whatsapp.verified && prefs.whatsapp.enabled} disabled={suspended || !prefs.whatsapp.verified} onChange={(enabled) => persistPrefs({ ...prefs, whatsapp: { ...prefs.whatsapp, enabled } })} />
+              <Button variant="outline" size="sm" disabled={suspended} onClick={() => { setOtp("whatsapp"); setOtpError(state === "whatsapp-failed"); }}>Add number</Button>
+            </PrefRow>
+            <PrefRow icon={<Clock size={16} />} title="Job expiry reminders" description="Get notified before your jobs expire so you can renew them on time.">
+              <ChannelToggle row="Job expiry reminders" channel="Email" checked={prefs.expiryReminders.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, email } })} />
+              <ChannelToggle row="Job expiry reminders" channel="In-app" checked={prefs.expiryReminders.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, inApp } })} />
+              <label className="text-body-sm-regular text-text-secondary">
+                Remind me
+                <span className="mt-[4px] flex items-center gap-[8px]">
+                  <SelectInput className="w-[192px]" aria-label="Job expiry reminder" value={prefs.expiryReminders.remindMe} disabled={suspended} onChange={(event) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, remindMe: event.target.value } })}>
+                    {REMIND_OPTIONS.map((option) => <option key={option}>{option}</option>)}
+                  </SelectInput>
+                  <PendingTag />
+                </span>
+              </label>
+            </PrefRow>
+            <PrefRow icon={<Megaphone size={16} />} title="Product updates" description="Receive important updates about new features, tips and announcements.">
+              <ChannelToggle row="Product updates" channel="Email" checked={prefs.productUpdates.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, productUpdates: { ...prefs.productUpdates, email } })} />
+              <ChannelToggle row="Product updates" channel="In-app" checked={prefs.productUpdates.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, productUpdates: { ...prefs.productUpdates, inApp } })} />
+            </PrefRow>
+            <PrefRow icon={<CreditCard size={16} />} title="Billing and payments" description="Get notified about invoices, payment confirmations and billing updates.">
+              <ChannelToggle row="Billing and payments" channel="Email" checked={prefs.billing.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, billing: { ...prefs.billing, email } })} />
+              <ChannelToggle row="Billing and payments" channel="In-app" checked={prefs.billing.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, billing: { ...prefs.billing, inApp } })} />
+            </PrefRow>
+          </div>
         </section>
       ) : null}
 
@@ -393,7 +435,7 @@ export function SettingsView() {
         body={
           <div>
             <p>Confirm you want to close {draft.companyName}.</p>
-            <p className="mt-2">Consequences: {ACCOUNT_CLOSURE.note}</p>
+            <p className="mt-[8px]">Consequences: {ACCOUNT_CLOSURE.note} <PendingTag /></p>
           </div>
         }
         onCancel={() => setCloseOpen(false)}
@@ -453,38 +495,89 @@ function statusFrom(state: string, kind: "account" | "notifications"): SaveState
   return "idle";
 }
 
-function Verified() {
-  return <span className="inline-flex h-6 items-center rounded-full bg-success-success-50 px-2 text-label-medium text-success-success-700">Verified</span>;
+function Verified({ className }: { className?: string }) {
+  return <span className={cn("inline-flex h-[24px] items-center rounded-full bg-primary-primary-50 px-[8px] text-label-medium text-brand-primary", className)}>Verified</span>;
 }
 
-function Toggle({ label, checked, disabled, onChange }: { label: string; checked: boolean; disabled?: boolean; onChange: (value: boolean) => void }) {
+function PendingTag() {
+  return <span className="inline-flex items-center rounded-full bg-warning-warning-50 px-[8px] py-[2px] text-label-medium text-warning-warning-700">Pending decision</span>;
+}
+
+function ChannelToggle({
+  row,
+  channel,
+  checked,
+  disabled,
+  onChange,
+}: {
+  row: string;
+  channel: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (value: boolean) => void;
+}) {
   return (
-    <label className="inline-flex items-center gap-2 text-label-medium text-text-secondary">
-      {label}
-      <button
-        type="button"
-        role="switch"
-        aria-label={label}
-        aria-checked={checked}
-        disabled={disabled}
-        onClick={() => onChange(!checked)}
-        className={`relative h-6 w-10 rounded-full ${checked ? "bg-brand-primary" : "bg-grey-grey-300"} disabled:opacity-50`}
-      >
-        <span className={`absolute top-1 h-16 w-16 rounded-full bg-white ${checked ? "left-5" : "left-1"}`} />
-      </button>
-    </label>
+    <span className="inline-flex items-center gap-[8px] text-body-sm-regular text-text-secondary">
+      {channel}
+      <Toggle label={`${row} · ${channel}`} checked={checked} disabled={disabled} onChange={onChange} />
+    </span>
   );
 }
 
-function PrefRow({ icon, title, description, children }: { icon: ReactNode; title: string; description: string; children: ReactNode }) {
-  return (
-    <div className="mt-16 flex flex-col gap-3 border-t border-border-default pt-16 sm:flex-row sm:items-start">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-primary-50 text-brand-primary">{icon}</span>
-      <div className="min-w-0 flex-1">
-        <p className="text-body-sm-semibold">{title}</p>
-        <p className="text-body-sm-regular text-text-secondary">{description}</p>
+function PrefStatus({ status, onRetry }: { status: SaveState; onRetry: () => void }) {
+  if (status === "saving") {
+    return (
+      <div className="mt-[16px]">
+        <Banner tone="info" title="Saving" body="Saving your notification preferences." />
       </div>
-      <div className="flex flex-wrap items-center gap-3">{children}</div>
+    );
+  }
+  if (status === "saved") {
+    return (
+      <div className="mt-[16px]">
+        <Banner tone="success" title="Saved" body="Your notification preferences are saved." />
+      </div>
+    );
+  }
+  if (status === "error") {
+    return (
+      <div className="mt-[16px]">
+        <Banner
+          tone="danger"
+          title="Could not save preferences"
+          body="The last successful values are still stored."
+          action={<Button size="sm" variant="outline" onClick={onRetry}>Retry</Button>}
+        />
+      </div>
+    );
+  }
+  return null;
+}
+
+function PrefRow({
+  icon,
+  title,
+  description,
+  note,
+  children,
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  note?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-md border border-border-default px-[16px] py-[16px]">
+      <div className="flex flex-col gap-[16px] lg:flex-row lg:items-center">
+        <span className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full bg-primary-primary-50 text-brand-primary">{icon}</span>
+        <div className="min-w-[0px] flex-1">
+          <p className="text-body-sm-semibold">{title}</p>
+          <p className="text-body-sm-regular text-text-secondary">{description}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-[4px]">{children}</div>
+      </div>
+      {note}
     </div>
   );
 }
@@ -495,15 +588,15 @@ function OtpDialog({ title, failed, onClose, onVerified }: { title: string; fail
   const [error, setError] = useState(failed ? "Could not verify that number. Try again." : "");
   const [phase, setPhase] = useState<"idle" | "verifying">(failed ? "idle" : "idle");
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-16">
-      <div className="w-full max-w-[420px] rounded-md bg-white p-5">
-        <div className="flex items-center gap-3">
+    <div className="fixed inset-[0px] z-40 flex items-center justify-center bg-black/40 p-[16px]">
+      <div className="w-full max-w-[420px] rounded-md bg-white p-[20px]">
+        <div className="flex items-center gap-[12px]">
           <h2 className="flex-1 text-subheading-semibold">{title}</h2>
           <button aria-label="Close" onClick={onClose}><X size={18} /></button>
         </div>
-        <p className="mt-2 text-body-sm-regular text-text-secondary">Enter the mobile number, then the {OTP_LENGTH}-digit code. Demo code {OTP_DEMO_CODE}.</p>
-        <TextInput className="mt-3" aria-label="New mobile number" value={phone} onChange={(event) => setPhone(event.target.value)} />
-        <div className="mt-3 flex gap-2">
+        <p className="mt-[8px] text-body-sm-regular text-text-secondary">Enter the mobile number, then the {OTP_LENGTH}-digit code. Demo code {OTP_DEMO_CODE}.</p>
+        <TextInput className="mt-[12px]" aria-label="New mobile number" value={phone} onChange={(event) => setPhone(event.target.value)} />
+        <div className="mt-[12px] flex gap-[8px]">
           {Array.from({ length: OTP_LENGTH }).map((_, index) => (
             <input
               key={index}
@@ -517,13 +610,13 @@ function OtpDialog({ title, failed, onClose, onVerified }: { title: string; fail
                 chars[index] = digit;
                 setCode(chars.join("").slice(0, OTP_LENGTH));
               }}
-              className="h-48 w-10 rounded-sm border border-border-default text-center text-subheading-semibold"
+              className="h-[48px] w-[40px] rounded-sm border border-border-default text-center text-subheading-semibold"
             />
           ))}
         </div>
-        {error ? <p className="mt-2 text-body-sm-regular text-error-default">{error}</p> : null}
+        {error ? <p className="mt-[8px] text-body-sm-regular text-error-default">{error}</p> : null}
         <Button
-          className="mt-16 w-full"
+          className="mt-[16px] w-full"
           disabled={code.length < OTP_LENGTH || phase === "verifying"}
           onClick={() => {
             setPhase("verifying");

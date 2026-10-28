@@ -7,7 +7,7 @@ export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectE
     <select
       {...props}
       className={cn(
-        "h-11 w-full appearance-none rounded-sm border border-border-default bg-white px-3 pr-32 text-body-sm-regular text-text-primary outline-none focus:border-brand-primary",
+        "h-[44px] w-full appearance-none rounded-sm border border-border-default bg-white px-[12px] pr-[32px] text-body-sm-regular text-text-primary outline-none focus:border-brand-primary",
         className,
       )}
     />

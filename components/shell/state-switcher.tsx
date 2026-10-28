@@ -12,32 +12,32 @@ export function StateSwitcher() {
   const states = statesForPath(pathname);
 
   return (
-    <div className="fixed bottom-16 left-16 z-50">
+    <div className="fixed bottom-[16px] left-[16px] z-50">
       {open ? (
-        <div className="mb-2 max-h-[70vh] w-[280px] overflow-auto rounded-md border border-border-default bg-white p-3 shadow-lg">
+        <div className="mb-[8px] max-h-[70vh] w-[280px] overflow-auto rounded-md border border-border-default bg-white p-[12px] shadow-lg">
           <p className="text-label-semibold tracking-wide text-text-secondary uppercase">Dev states</p>
-          <div className="mt-2 flex flex-col">
+          <div className="mt-[8px] flex flex-col">
             {states.map((item) => (
               <button
                 key={item.id}
                 onClick={() => pushState(item.id)}
-                className={`rounded-md px-2 py-1.5 text-left text-body-sm-regular ${state === item.id ? "bg-primary-primary-50 text-brand-primary" : "hover:bg-grey-grey-100"}`}
+                className={`rounded-md px-[8px] py-[6px] text-left text-body-sm-regular ${state === item.id ? "bg-primary-primary-50 text-brand-primary" : "hover:bg-grey-grey-100"}`}
               >
                 {item.label}
               </button>
             ))}
           </div>
-          <label className="mt-3 block text-label-medium text-text-secondary">
+          <label className="mt-[12px] block text-label-medium text-text-secondary">
             Account
-            <select className="mt-1 h-9 w-full rounded-sm border border-border-default px-2 text-body-sm-regular" value={account} onChange={(event) => setQuery("account", event.target.value)}>
+            <select className="mt-[4px] h-[36px] w-full rounded-sm border border-border-default px-[8px] text-body-sm-regular" value={account} onChange={(event) => setQuery("account", event.target.value)}>
               <option>Active</option>
               <option>Suspended</option>
             </select>
           </label>
-          <label className="mt-2 block text-label-medium text-text-secondary">
+          <label className="mt-[8px] block text-label-medium text-text-secondary">
             Verification
             <select
-              className="mt-1 h-9 w-full rounded-sm border border-border-default px-2 text-body-sm-regular"
+              className="mt-[4px] h-[36px] w-full rounded-sm border border-border-default px-[8px] text-body-sm-regular"
               value={verification}
               onChange={(event) => setQuery("verification", event.target.value)}
             >
@@ -48,7 +48,7 @@ export function StateSwitcher() {
           </label>
         </div>
       ) : null}
-      <button onClick={() => setOpen((value) => !value)} className="rounded-full bg-grey-grey-900 px-3 py-2 text-label-semibold text-white">
+      <button onClick={() => setOpen((value) => !value)} className="rounded-full bg-grey-grey-900 px-[12px] py-[8px] text-label-semibold text-white">
         States
       </button>
     </div>

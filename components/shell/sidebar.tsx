@@ -59,7 +59,7 @@ export function Sidebar({
         mobile ? "w-[240px]" : compact ? "w-[72px]" : "w-[240px]",
       )}
     >
-      <div className="flex h-[72px] items-center justify-between px-5">
+      <div className="flex h-[72px] items-center justify-between px-[20px]">
         {compact ? null : (
           <Link href={href("/")} className="text-display-small-bold leading-none tracking-[-0.04em] text-brand-primary">
             around
@@ -69,20 +69,20 @@ export function Sidebar({
           {compact ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
         </button>
       </div>
-      <nav className="flex flex-1 flex-col px-3">
-        <div className="flex flex-col gap-1">
+      <nav className="flex flex-1 flex-col px-[12px]">
+        <div className="flex flex-col gap-[4px]">
           {MAIN.map((item) => (
             <NavItem key={item.href} {...item} href={href(item.href)} active={active(item.href)} compact={compact} onNavigate={onNavigate} />
           ))}
         </div>
-        <div className="mt-auto border-t border-border-default pt-3">
+        <div className="mt-auto border-t border-border-default pt-[12px]">
           {FOOTER.map((item) => (
             <NavItem key={item.href} {...item} href={href(item.href)} active={active(item.href)} compact={compact} onNavigate={onNavigate} />
           ))}
           <Link
             href="/login"
             onClick={onNavigate}
-            className="mt-1 flex h-11 items-center gap-3 rounded-md px-3 text-body-sm-medium text-error-default"
+            className="mt-[4px] flex h-[44px] items-center gap-[12px] rounded-md px-[12px] text-body-sm-medium text-error-default"
           >
             <LogOut size={18} />
             {compact ? null : "Logout"}
@@ -115,9 +115,9 @@ function NavItem({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex h-11 items-center gap-3 rounded-md px-3 text-body-sm-medium",
+        "flex h-[44px] items-center gap-[12px] rounded-md px-[12px] text-body-sm-medium",
         active ? "bg-primary-primary-50 text-brand-primary" : "text-text-primary hover:bg-grey-grey-100",
-        compact && "justify-center px-0",
+        compact && "justify-center px-[0px]",
       )}
     >
       <Icon size={18} />

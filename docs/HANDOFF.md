@@ -21,9 +21,9 @@ Demo OTP code, local only: `482913`.
 | `verification-pending` (E00d / V08) | Verification banner, status Pending. Stats are zeros. Drafts list. Action: “View verification status”. Publishing locked. |
 | `returned` (E00e) | “Civil Engineer was returned for correction.” Active jobs 1, “+1 returned”. |
 | `expiring` (E00f) | “Civil Engineer expires in 2 days.” Extend / Renew job. |
-| `plan-limit` (E00g) | “You have used all 3 job posts on your plan.” Post a job disabled. Upgrade plan. |
+| `plan-limit` (E00g) | Job-post limit reached. The included count is shown as Pending decision (`policy.plan.jobPostLimit`). Upgrade plan. |
 | `notifications` (E00h) | Notifications panel open. “Mark all as read”. |
-| `account-menu` (E00i) | Account menu: Raipur Builder, hr@raipurbuilder.in. |
+| `account-menu` (E00i) | Account menu: Raipur Builder, hiring@raipurbuilder.in. |
 | `loading` (E00j) | Skeleton. |
 | `error` (E00k) | “Couldn't load your dashboard”. “Check your connection and try again. Your jobs and applicants are safe.” Retry. |
 | `new-applicants` (E00l) | New applicants 9, “+2 new”, two highlighted rows. |
@@ -121,7 +121,7 @@ Change status writes New, Shortlisted, Interviewing, Hired, or Rejected. Notes: 
 | `preview` | 448px drawer over a 40% scrim. “This preview uses your unsaved edits and does not save them.” |
 | `documents` (E11) | Verification documents. GST uploaded, others empty, shop licence at 60%, other failed (“connection lost”). Approval status card. |
 
-Logo: JPG or PNG, 2MB (`policy.logo`). Remove clears the image back to initials.
+Logo: JPG or PNG. The byte limit stays in `policy.logo` and the screen shows Pending decision. Remove clears the image back to initials.
 
 ## Verification `/verification`
 
@@ -148,7 +148,7 @@ Progress: Company, Mobile, Company proof, Representative, Review.
 | `v03-other` | “Other documents are sent for manual review.” |
 | `v04` | Work email (recommended) or PAN/Aadhaar. ID consent starts unticked. |
 | `v04-partial` / `incorrect` / `expired` / `verified` | Email code states. |
-| `v04-id` / `v04-id-invalid` / `v04-id-uploaded` | ID upload. Invalid: “Use a PDF, JPG or PNG up to 5 MB.” |
+| `v04-id` / `v04-id-invalid` / `v04-id-uploaded` | ID upload. Invalid copy does not state the byte limit as a fact; the limit stays in `policy.documents`. |
 | `v05` | Review rows and Edit. Consent required. Submit disabled until it is ticked. |
 | `v05-submitting` | “Submitting…”. Edits disabled. |
 | `v05-failed` | “Couldn’t submit. Check your connection and try again. Your entries are kept.” |
@@ -162,7 +162,7 @@ Phone ending in `0000`, or a company name containing “fail”, forces the netw
 
 ## Settings `/settings`
 
-Employer account is Raipur Builder (`hr@raipurbuilder.in`). Team rows use that domain. There is no password.
+Employer account is Raipur Builder (`hiring@raipurbuilder.in`). Team rows use that domain. There is no password.
 
 Tabs: Account, Team members, Notifications. One column.
 
@@ -191,7 +191,7 @@ Daily summary time defaults to `policy.notifications.dailySummaryDefaultTime` (9
 
 ## Billing `/billing`
 
-Credit balance “4 job credits”. “1 of 2 free jobs used”. Pack prices are “₹ —”. History table. Buy pack does not charge. TODO in `policy.plan`.
+Credit balance “4 job credits”. Free allowance and the live-post limit show as Pending decision (`policy.plan`). Pack prices are “₹ —”. History table. Buy pack does not charge.
 
 ## Help `/help`
 

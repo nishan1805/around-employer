@@ -14,14 +14,14 @@ Figma names are lowercased. `/` and spaces become `-`.
 
 ## Spacing, radius, shadow, type
 
-- Spacing keys are pixel sizes. `--space-16` is 16px, so the utility is `p-16`, not Tailwind’s default 4rem.
+- Spacing values live in `--space-*` as pixels (`--space-16` is 16px). Components use one explicit pixel scale, such as `p-[16px]` and `gap-[12px]`. Numeric Tailwind spacing keys are not overridden.
 - Radius: `none` 0, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 20, `2xl` 32, `3xl` 128, `4xl` 256.
 - Shadows: `sm`, `sm-1`, `md`, `md-1`, `lg`, `lg-1`, `xl`, `xl-1`, `2xl`, `3xl`.
 - Type is Inter, letter-spacing 0. Keys look like `body-sm-semibold` (14/20, weight 600). `DASHBOARD_MAX_FONT_SIZE` is 24. Marketing sizes 32–80 are not included.
 
 ## Wiring
 
-`tailwind.config.ts` extends the theme with `themeExtend` from `tailwind.tokens.ts`. Every key points at a CSS variable (`"16": "var(--space-16)"`, `"brand-primary": "var(--color-brand-primary)"`, font sizes from `fontSizeTuples`).
+`tailwind.config.ts` extends the theme with `themeExtend` from `tailwind.tokens.ts`. Colour, radius, shadow, and type keys point at CSS variables (`"brand-primary": "var(--color-brand-primary)"`, font sizes from `fontSizeTuples`). Spacing is not on the numeric scale.
 
 `app/globals.css` imports `tokens.css` and loads the config:
 

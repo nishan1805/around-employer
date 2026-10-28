@@ -7,7 +7,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
     <input
       {...props}
       className={cn(
-        "h-11 w-full rounded-sm border border-border-default bg-white px-3 text-body-sm-regular text-text-primary outline-none placeholder:text-text-tertiary focus:border-brand-primary",
+        "h-[44px] w-full rounded-sm border border-border-default bg-white px-[12px] text-body-sm-regular text-text-primary outline-none placeholder:text-text-tertiary focus:border-brand-primary",
         className,
       )}
     />
@@ -19,7 +19,7 @@ export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
     <textarea
       {...props}
       className={cn(
-        "min-h-28 w-full rounded-sm border border-border-default bg-white px-3 py-3 text-body-sm-regular text-text-primary outline-none placeholder:text-text-tertiary focus:border-brand-primary",
+        "min-h-[112px] w-full rounded-sm border border-border-default bg-white px-[12px] py-[12px] text-body-sm-regular text-text-primary outline-none placeholder:text-text-tertiary focus:border-brand-primary",
         className,
       )}
     />

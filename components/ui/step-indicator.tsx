@@ -12,8 +12,8 @@ export function StepIndicator({
 }) {
   return (
     <div>
-      {label ? <p className="mb-2 text-label-medium text-text-secondary">{label}</p> : null}
-      <ol className="flex gap-2 overflow-x-auto lg:block lg:space-y-2">
+      {label ? <p className="mb-[8px] text-label-medium text-text-secondary">{label}</p> : null}
+      <ol className="flex gap-[8px] overflow-x-auto lg:block lg:space-y-[8px]">
         {steps.map((step, index) => {
           const active = index === current;
           const done = index < current;
@@ -21,12 +21,12 @@ export function StepIndicator({
             <li
               key={step.id}
               className={cn(
-                "shrink-0 rounded-md border px-3 py-3 text-body-sm-regular lg:w-full",
+                "shrink-0 rounded-md border px-[12px] py-[12px] text-body-sm-regular lg:w-full",
                 active ? "border-brand-primary bg-white font-semibold text-brand-primary" : "border-border-default bg-white text-text-secondary",
                 done && "text-text-primary",
               )}
             >
-              <span className="mr-2 text-label-regular">0{index + 1}</span>
+              <span className="mr-[8px] text-label-regular">0{index + 1}</span>
               {step.label}
             </li>
           );

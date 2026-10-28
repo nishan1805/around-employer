@@ -17,13 +17,13 @@ export function EmptyState({
 }) {
   const Icon = icon === "search" ? FileSearch : Inbox;
   return (
-    <div className="flex flex-col items-center px-6 py-64 text-center">
-      <div className="mb-16 flex h-28 w-28 items-center justify-center rounded-full bg-primary-primary-50 text-brand-primary">
+    <div className="flex flex-col items-center px-[24px] py-[64px] text-center">
+      <div className="mb-[16px] flex h-[112px] w-[112px] items-center justify-center rounded-full bg-primary-primary-50 text-brand-primary">
         <Icon size={40} strokeWidth={1.5} />
       </div>
       <h3 className="text-body-semibold">{title}</h3>
-      <p className="mt-1 max-w-sm text-body-sm-regular text-text-secondary">{body}</p>
-      {action ? <div className="mt-16">{action}</div> : null}
+      <p className="mt-[4px] max-w-sm text-body-sm-regular text-text-secondary">{body}</p>
+      {action ? <div className="mt-[16px]">{action}</div> : null}
     </div>
   );
 }
@@ -38,13 +38,13 @@ export function ErrorState({
   onRetry: () => void;
 }) {
   return (
-    <div className="flex min-h-[420px] flex-col items-center justify-center px-6 text-center">
-      <div className="mb-16 flex h-48 w-48 items-center justify-center rounded-full border border-border-default text-text-secondary">
+    <div className="flex min-h-[420px] flex-col items-center justify-center px-[24px] text-center">
+      <div className="mb-[16px] flex h-[48px] w-[48px] items-center justify-center rounded-full border border-border-default text-text-secondary">
         <AlertCircle size={22} />
       </div>
       <h2 className="text-body-semibold">{title}</h2>
-      <p className="mt-1 max-w-md text-body-sm-regular text-text-secondary">{body}</p>
-      <Button className="mt-16" onClick={onRetry}>
+      <p className="mt-[4px] max-w-md text-body-sm-regular text-text-secondary">{body}</p>
+      <Button className="mt-[16px]" onClick={onRetry}>
         Retry
       </Button>
     </div>

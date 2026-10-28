@@ -29,23 +29,23 @@ export const LOCATIONS = [
 ];
 
 export const COMPANY: CompanyProfile = {
-  name: "Shree Ganesh Retail Mart",
-  industry: "Retail & Grocery",
+  name: EMPLOYER.companyName,
+  industry: "Construction",
   description:
-    "Family-run grocery and household store in Pandri since 2009. Three branches across Raipur and Bhilai, offering daily essentials, fresh produce and warm service to local families.",
-  workplaceLocation: "Pandri, Raipur",
-  workingHours: "9:00 AM – 9:00 PM",
-  website: "https://www.shreeganeshmart.in",
-  linkedin: "https://www.linkedin.com/company/shreeganeshshmart",
-  instagram: "https://www.instagram.com/shreeganeshshmart",
-  logoInitials: "SG",
+    "Construction company in Shankar Nagar, Raipur. We hire engineers, supervisors and site teams across Raipur and Bhilai.",
+  workplaceLocation: EMPLOYER.location,
+  workingHours: "9:00 AM – 6:00 PM",
+  website: "https://www.raipurbuilder.in",
+  linkedin: "https://www.linkedin.com/company/raipurbuilder",
+  instagram: "https://www.instagram.com/raipurbuilder",
+  logoInitials: EMPLOYER.avatarInitials,
   logoDataUrl: null,
 };
 
 export const SETTINGS: AccountSettings = {
   name: "Rakesh Agrawal",
   role: "Owner",
-  email: "hiring@raipurbuilder.in",
+  email: EMPLOYER.email,
   phone: "+91 98XXX XXXXX",
   emailVerified: true,
   phoneVerified: true,
@@ -64,7 +64,7 @@ export const TEAM: TeamMember[] = [
   {
     id: "tm-owner",
     name: "Rakesh Agrawal",
-    email: "hiring@raipurbuilder.in",
+    email: EMPLOYER.email,
     role: "Owner",
     status: "Active",
     initials: "RA",

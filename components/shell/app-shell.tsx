@@ -18,18 +18,18 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} />
       </div>
       {mobileOpen ? (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <button aria-label="Close menu" className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-[0px] z-40 lg:hidden">
+          <button aria-label="Close menu" className="absolute inset-[0px] bg-black/40" onClick={() => setMobileOpen(false)} />
           <div className="relative h-full">
             <Sidebar collapsed={false} mobile onToggle={() => setMobileOpen(false)} onNavigate={() => setMobileOpen(false)} />
           </div>
         </div>
       ) : null}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-[0px] flex-1 flex-col">
         <TopBar onMenu={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-y-auto bg-background-secondary">
+        <main className="flex-1 overflow-y-auto bg-dashboard-bg">
           {account === "Suspended" ? (
-            <div className="px-16 pt-16 sm:px-32">
+            <div className="px-[16px] pt-[16px] sm:px-[32px]">
               <Banner
                 tone="danger"
                 title="Account suspended"

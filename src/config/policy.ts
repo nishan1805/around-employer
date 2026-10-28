@@ -133,7 +133,7 @@ export const policy: PolicyConfig = {
   },
   referenceId: {
     example: "AR-VER-2026-00481",
-    showBeforeDecision: true,
+    showBeforeDecision: false,
   },
   plan: {
     jobPostLimit: 3,
@@ -165,6 +165,7 @@ export const EXPIRY_REMINDER_DEFAULT = policy.notifications.expiryReminderDefaul
 export const ACCOUNT_CLOSURE = policy.accountClosure;
 export const TEAM_ACCESS = policy.teamAccess.byRole;
 export const VERIFICATION_REFERENCE_ID = policy.referenceId.example;
+export const SHOW_REFERENCE_ID = policy.referenceId.showBeforeDecision;
 export const PLAN_JOB_POST_LIMIT = policy.plan.jobPostLimit;
 export const FREE_JOB_ALLOWANCE = policy.plan.freeJobAllowance;
 export const CREDIT_PACKS = policy.plan.creditPacks;

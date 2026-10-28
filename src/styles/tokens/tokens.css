@@ -176,6 +176,7 @@
   --color-surface-primary: var(--palette-white-white);
   --color-background-primary: var(--color-surface-primary);
   --color-background-secondary: var(--color-grey-grey-50);
+  --color-dashboard-bg: #f9fafc;
   --color-surface-default: var(--palette-white-white);
   --color-surface-elevated: var(--palette-white-white);
   --color-text-primary: var(--color-grey-grey-900);
@@ -338,6 +339,7 @@
   --color-surface-primary: var(--palette-black-black);
   --color-background-primary: var(--color-surface-primary);
   --color-background-secondary: var(--color-grey-grey-900);
+  --color-dashboard-bg: #f9fafc;
   --color-surface-default: var(--color-grey-grey-900);
   --color-surface-elevated: var(--color-grey-grey-800);
   --color-text-primary: var(--color-grey-grey-50);

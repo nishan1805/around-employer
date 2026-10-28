@@ -10,8 +10,9 @@ import { Banner } from "@/components/ui/banner";
 import { VerificationBanner } from "@/components/ui/verification-banner";
 import { EmptyState, ErrorState, SkeletonBlock } from "@/components/ui/feedback";
 import { usePortal } from "@/components/shell/use-portal";
-import { DASHBOARD_ACTIVE } from "@/lib/fixtures";
-import { VERIFICATION_SLA_LABEL } from "@/src/config/policy";
+import { PendingDecision } from "@/components/ui/pending-decision";
+import { DASHBOARD_ACTIVE, EMPLOYER } from "@/lib/fixtures";
+import { JOB_REVIEW_SLA_LABEL, PLAN_JOB_POST_LIMIT, SHOW_REFERENCE_ID, VERIFICATION_REFERENCE_ID, VERIFICATION_SLA_LABEL } from "@/src/config/policy";
 import { formatRelative } from "@/lib/format";
 import type { ApplicantStatus, JobStatus } from "@/lib/types";
 
@@ -61,14 +62,14 @@ export function DashboardView() {
           : DASHBOARD_ACTIVE;
 
   return (
-    <div className="space-y-16 px-16 py-6 sm:px-32">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-[16px] px-[16px] py-[24px] sm:px-[32px]">
+      <div className="flex flex-wrap items-center justify-between gap-[12px]">
         <h1 className="text-subheading-semibold">Dashboard</h1>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex h-10 items-center gap-2 rounded-md border border-border-default bg-white px-3 text-body-sm-regular">
+        <div className="flex items-center gap-[8px]">
+          <span className="inline-flex h-[40px] items-center gap-[8px] rounded-md border border-border-default bg-white px-[12px] text-body-sm-regular">
             <CalendarCheck size={16} /> Last 7 days
           </span>
-          <button aria-label="Refresh" className="flex h-10 w-10 items-center justify-center rounded-md border border-border-default bg-white">
+          <button aria-label="Refresh" className="flex h-[40px] w-[40px] items-center justify-center rounded-md border border-border-default bg-white">
             <RefreshCw size={16} />
           </button>
           {empty ? (
@@ -93,7 +94,12 @@ export function DashboardView() {
         <VerificationBanner
           status={state === "v12" ? "pending" : "pending"}
           title="Company verification · Pending"
-          body={`We are checking your business details. You can save job drafts meanwhile; publishing unlocks once verified (${VERIFICATION_SLA_LABEL}).`}
+          body={
+            <>
+              We are checking your business details. You can save job drafts meanwhile; publishing unlocks once verified. Review time{" "}
+              <PendingDecision value={VERIFICATION_SLA_LABEL} />.
+            </>
+          }
           action={
             <Button href="/?state=v08b" variant="primary" size="sm">
               View verification status
@@ -101,7 +107,7 @@ export function DashboardView() {
           }
         />
       ) : state === "suspended" ? null : (
-        <div className="flex items-center justify-between rounded-lg bg-success-success-50 px-5 py-16">
+        <div className="flex items-center justify-between rounded-lg bg-success-success-50 px-[20px] py-[16px]">
           <div>
             <p className="text-body-semibold text-success-success-700">Company verified</p>
             <p className="text-body-sm-regular text-text-secondary">Your company shows a verified badge to job seekers on Around Jobs.</p>
@@ -110,7 +116,15 @@ export function DashboardView() {
       )}
 
       {state === "pending-review" ? (
-        <Banner tone="info" title='Job “Sales Associate” is pending review' body={`Usually within 24 hours. We'll notify you when it goes live.`} />
+        <Banner
+          tone="info"
+          title='Job “Sales Associate” is pending review'
+          body={
+            <>
+              We&apos;ll notify you when it goes live. Review time <PendingDecision value={JOB_REVIEW_SLA_LABEL} />.
+            </>
+          }
+        />
       ) : null}
       {state === "returned" ? (
         <Banner
@@ -126,7 +140,7 @@ export function DashboardView() {
           title="Civil Engineer expires in 2 days."
           body="Renew or extend it to keep receiving applicants."
           action={
-            <div className="flex gap-2">
+            <div className="flex gap-[8px]">
               <Button variant="outline" size="sm">Extend</Button>
               <Button size="sm" href="/jobs/store-sales-associate">Renew job</Button>
             </div>
@@ -136,8 +150,12 @@ export function DashboardView() {
       {state === "plan-limit" ? (
         <Banner
           tone="warning"
-          title="You have used all 3 job posts on your plan."
-          body="Upgrade to post more jobs."
+          title="You have reached the job-post limit on your plan."
+          body={
+            <>
+              Included live posts <PendingDecision value={PLAN_JOB_POST_LIMIT} />. Upgrade to post more jobs.
+            </>
+          }
           action={<Button variant="outline" size="sm" href="/billing">Upgrade plan</Button>}
         />
       ) : null}
@@ -145,7 +163,7 @@ export function DashboardView() {
         <Banner tone="info" title="Manual review" body="This submission needs a person to review it. Drafts stay available while that happens." />
       ) : null}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-4">
         <Stat icon={<Briefcase size={18} />} tint="bg-primary-primary-50 text-brand-primary" label="Active jobs" value={String(activeCount)} note={note} />
         <Stat icon={<Users size={18} />} tint="bg-secondary-secondary-50 text-secondary-secondary-700" label="New applicants" value={String(applicants)} delta={zeroMetrics ? undefined : state === "new-applicants" ? "+2 new" : "+4"} />
         <Stat icon={<TrendingUp size={18} />} tint="bg-features-features-50 text-features-features-500" label="Job views" value={views.toLocaleString("en-IN")} delta={zeroMetrics ? undefined : "+18%"} />
@@ -153,14 +171,14 @@ export function DashboardView() {
       </div>
 
       {pending ? (
-        <section className="rounded-lg border border-border-default bg-white p-5">
-          <div className="mb-3 flex items-center justify-between">
+        <section className="rounded-lg border border-border-default bg-white p-[20px]">
+          <div className="mb-[12px] flex items-center justify-between">
             <h2 className="text-body-semibold">Your drafts</h2>
             <Button href="/post-job" size="sm" variant="outline">New draft</Button>
           </div>
           {jobs.map((item) => (
-            <div key={item.id} className="flex items-center gap-3 border-t border-border-default py-3">
-              <div className="min-w-0 flex-1">
+            <div key={item.id} className="flex items-center gap-[12px] border-t border-border-default py-[12px]">
+              <div className="min-w-[0px] flex-1">
                 <p className="text-body-sm-semibold">{item.title}</p>
                 <p className="text-label-regular text-text-secondary">Draft · saved recently</p>
               </div>
@@ -170,12 +188,12 @@ export function DashboardView() {
           ))}
         </section>
       ) : (
-        <div className="grid grid-cols-1 gap-16 xl:grid-cols-2">
-          <section className="rounded-lg border border-border-default bg-white p-16">
-            <div className="mb-3 flex items-center justify-between">
+        <div className="grid grid-cols-1 gap-[16px] xl:grid-cols-2">
+          <section className="rounded-lg border border-border-default bg-white p-[16px]">
+            <div className="mb-[12px] flex items-center justify-between">
               <h2 className="text-body-semibold">
                 Recent applicants{" "}
-                {state === "new-applicants" ? <span className="ml-1 rounded-full bg-primary-primary-50 px-2 py-0.5 text-label-medium text-brand-primary">2 new</span> : null}
+                {state === "new-applicants" ? <span className="ml-[4px] rounded-full bg-primary-primary-50 px-[8px] py-[2px] text-label-medium text-brand-primary">2 new</span> : null}
               </h2>
               <Link href={href("/applicants")} className="text-body-sm-semibold text-brand-primary">View all →</Link>
             </div>
@@ -185,7 +203,7 @@ export function DashboardView() {
               <table className="w-full text-left text-body-sm-regular">
                 <thead className="text-label-medium text-text-secondary">
                   <tr>
-                    <th className="py-2 font-medium">Candidate</th>
+                    <th className="py-[8px] font-medium">Candidate</th>
                     <th className="font-medium">Applied for</th>
                     <th className="font-medium">Applied on</th>
                     <th className="font-medium">Status</th>
@@ -194,9 +212,9 @@ export function DashboardView() {
                 <tbody>
                   {RECENT.map((person, index) => (
                     <tr key={person.id} className={state === "new-applicants" && index < 2 ? "bg-primary-primary-50" : ""}>
-                      <td className="py-2">
-                        <Link href={`/applicants/${person.id}`} className="flex items-center gap-2 font-medium">
-                          <span className={`flex h-32 w-32 items-center justify-center rounded-full text-label-medium ${person.tone}`}>{person.initials}</span>
+                      <td className="py-[8px]">
+                        <Link href={`/applicants/${person.id}`} className="flex items-center gap-[8px] font-medium">
+                          <span className={`flex h-[32px] w-[32px] items-center justify-center rounded-full text-label-medium ${person.tone}`}>{person.initials}</span>
                           {person.name}
                         </Link>
                       </td>
@@ -209,8 +227,8 @@ export function DashboardView() {
               </table>
             )}
           </section>
-          <section className="rounded-lg border border-border-default bg-white p-16">
-            <div className="mb-3 flex items-center justify-between">
+          <section className="rounded-lg border border-border-default bg-white p-[16px]">
+            <div className="mb-[12px] flex items-center justify-between">
               <h2 className="text-body-semibold">Active jobs</h2>
               <Link href={href("/jobs")} className="text-body-sm-semibold text-brand-primary">Manage →</Link>
             </div>
@@ -221,7 +239,7 @@ export function DashboardView() {
                 <table className="w-full min-w-[520px] text-left text-body-sm-regular">
                   <thead className="text-label-medium text-text-secondary">
                     <tr>
-                      <th className="py-2 font-medium">Job title</th>
+                      <th className="py-[8px] font-medium">Job title</th>
                       <th className="font-medium">Type & Location</th>
                       <th className="font-medium">Views</th>
                       <th className="font-medium">Applicants</th>
@@ -231,7 +249,7 @@ export function DashboardView() {
                   <tbody>
                     {jobs.map((item) => (
                       <tr key={item.id} className="border-t border-border-default">
-                        <td className="py-3 font-semibold">
+                        <td className="py-[12px] font-semibold">
                           <Link href={`/jobs/${item.id === "civil" || item.id === "architect" || item.id === "sales" ? "store-sales-associate" : item.id}`}>{item.title}</Link>
                         </td>
                         <td className="text-text-secondary">{item.employmentType} · {item.location}</td>
@@ -254,8 +272,8 @@ export function DashboardView() {
 
 function Stat({ icon, tint, label, value, note, delta }: { icon: ReactNode; tint: string; label: string; value: string; note?: string; delta?: string }) {
   return (
-    <div className="flex gap-3 rounded-lg border border-border-default bg-white p-16">
-      <div className={`flex h-11 w-11 items-center justify-center rounded-md ${tint}`}>{icon}</div>
+    <div className="flex gap-[12px] rounded-lg border border-border-default bg-white p-[16px]">
+      <div className={`flex h-[44px] w-[44px] items-center justify-center rounded-md ${tint}`}>{icon}</div>
       <div>
         <p className="text-label-medium text-text-secondary">{label}</p>
         <p className="text-display-small-semibold">{value}</p>
@@ -268,15 +286,15 @@ function Stat({ icon, tint, label, value, note, delta }: { icon: ReactNode; tint
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-16 px-16 py-6 sm:px-32">
-      <SkeletonBlock className="h-7 w-160" />
-      <SkeletonBlock className="h-64 w-full" />
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => <SkeletonBlock key={index} className="h-96" />)}
+    <div className="space-y-[16px] px-[16px] py-[24px] sm:px-[32px]">
+      <SkeletonBlock className="h-[28px] w-[160px]" />
+      <SkeletonBlock className="h-[64px] w-full" />
+      <div className="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => <SkeletonBlock key={index} className="h-[96px]" />)}
       </div>
-      <div className="grid grid-cols-1 gap-16 xl:grid-cols-2">
-        <SkeletonBlock className="h-256" />
-        <SkeletonBlock className="h-256" />
+      <div className="grid grid-cols-1 gap-[16px] xl:grid-cols-2">
+        <SkeletonBlock className="h-[256px]" />
+        <SkeletonBlock className="h-[256px]" />
       </div>
     </div>
   );
@@ -284,24 +302,32 @@ function DashboardSkeleton() {
 
 function StatusCard() {
   return (
-    <div className="space-y-16 px-16 py-6 sm:px-32">
-      <h1 className="text-subheading-semibold">Shree Ganesh Retail Mart</h1>
-      <Banner tone="warning" title="Verification pending" body="Reference AR-VER-2026-00481 · submitted 28 Oct 2026. Format is a placeholder until the ID scheme is decided." />
-      <section className="rounded-lg border border-border-default bg-white p-5">
+    <div className="space-y-[16px] px-[16px] py-[24px] sm:px-[32px]">
+      <h1 className="text-subheading-semibold">{EMPLOYER.companyName}</h1>
+      <Banner
+        tone="warning"
+        title="Verification pending"
+        body={
+          <>
+            Submitted 28 Oct 2026. Reference {SHOW_REFERENCE_ID ? VERIFICATION_REFERENCE_ID : null} <PendingDecision value={VERIFICATION_REFERENCE_ID} show={SHOW_REFERENCE_ID} />.
+          </>
+        }
+      />
+      <section className="rounded-lg border border-border-default bg-white p-[20px]">
         <Link href="/" className="text-body-sm-semibold text-brand-primary">← Back to portal</Link>
-        <h2 className="mt-16 text-body-semibold">Verification request</h2>
+        <h2 className="mt-[16px] text-body-semibold">Verification request</h2>
         {[
           ["Status", "Pending"],
           ["Document type", "GST certificate"],
           ["Representative", "Work email"],
           ["Submitted", "28 Oct 2026"],
         ].map(([label, value]) => (
-          <div key={label} className="mt-3 flex gap-6 text-body-sm-regular">
-            <span className="w-160 text-text-secondary">{label}</span>
+          <div key={label} className="mt-[12px] flex gap-[24px] text-body-sm-regular">
+            <span className="w-[160px] text-text-secondary">{label}</span>
             <span className="font-medium">{value}</span>
           </div>
         ))}
-        <div className="mt-6 grid gap-16 sm:grid-cols-3">
+        <div className="mt-[24px] grid gap-[16px] sm:grid-cols-3">
           <Step label="Submitted" detail="Done" />
           <Step label="In review" detail="Current" />
           <Step label="Decision" detail="Waiting" />
@@ -322,12 +348,12 @@ function Step({ label, detail }: { label: string; detail: string }) {
 
 function InfoRequest() {
   return (
-    <div className="mx-auto max-w-[640px] space-y-16 px-16 py-6">
-      <h1 className="text-subheading-semibold">Shree Ganesh Retail Mart</h1>
-      <section className="rounded-lg border border-border-default bg-white p-5">
+    <div className="mx-auto max-w-[640px] space-y-[16px] px-[16px] py-[24px]">
+      <h1 className="text-subheading-semibold">{EMPLOYER.companyName}</h1>
+      <section className="rounded-lg border border-border-default bg-white p-[20px]">
         <Banner tone="warning" title="Additional information required" body="Upload a shop & establishment licence or a utility bill. The address on your GST certificate doesn't match the address you entered." />
-        <p className="mt-16 text-body-sm-regular text-text-secondary">Your drafts are kept.</p>
-        <div className="mt-16"><Button href="/verification?state=v03">Upload document</Button></div>
+        <p className="mt-[16px] text-body-sm-regular text-text-secondary">Your drafts are kept.</p>
+        <div className="mt-[16px]"><Button href="/verification?state=v03">Upload document</Button></div>
       </section>
     </div>
   );
@@ -335,12 +361,12 @@ function InfoRequest() {
 
 function Rejected() {
   return (
-    <div className="mx-auto max-w-[640px] space-y-16 px-16 py-6">
-      <h1 className="text-subheading-semibold">Shree Ganesh Retail Mart</h1>
-      <section className="space-y-3 rounded-lg border border-border-default bg-white p-5">
-        <Banner tone="danger" title="Verification rejected" body="The business name on the document doesn't match “Shree Ganesh Retail Mart”." />
+    <div className="mx-auto max-w-[640px] space-y-[16px] px-[16px] py-[24px]">
+      <h1 className="text-subheading-semibold">{EMPLOYER.companyName}</h1>
+      <section className="space-y-[12px] rounded-lg border border-border-default bg-white p-[20px]">
+        <Banner tone="danger" title="Verification rejected" body={`The business name on the document doesn't match “${EMPLOYER.companyName}”.`} />
         <p className="text-body-sm-regular text-text-secondary">Fix your details or upload a different document, then resubmit. Your drafts are kept. Resubmit limits are still a pending policy decision.</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-[8px]">
           <Button href="/verification?state=v01">Edit details & reapply</Button>
           <Button variant="outline" href="/help">Contact support</Button>
         </div>

@@ -10,13 +10,13 @@ export function Field({
   children,
 }: {
   label?: string;
-  hint?: string;
+  hint?: ReactNode;
   error?: string;
   required?: boolean;
   children: ReactNode;
 }) {
   return (
-    <label className="flex w-full flex-col gap-1.5 text-left">
+    <label className="flex w-full flex-col gap-[6px] text-left">
       {label ? (
         <span className="text-label-medium text-text-secondary">
           {label}

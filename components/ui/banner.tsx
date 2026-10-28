@@ -9,7 +9,7 @@ export function Banner({
 }: {
   tone: "success" | "warning" | "info" | "danger";
   title: string;
-  body?: string;
+  body?: ReactNode;
   action?: ReactNode;
 }) {
   const styles = {
@@ -19,8 +19,8 @@ export function Banner({
     danger: "bg-error-error-50",
   };
   return (
-    <div className={`flex flex-col gap-3 rounded-md px-16 py-3 sm:flex-row sm:items-center ${styles[tone]}`}>
-      <div className="min-w-0 flex-1">
+    <div className={`flex flex-col gap-[12px] rounded-md px-[16px] py-[12px] sm:flex-row sm:items-center ${styles[tone]}`}>
+      <div className="min-w-[0px] flex-1">
         <p className="text-body-sm-semibold text-text-primary">{title}</p>
         {body ? <p className="text-body-sm-regular text-text-secondary">{body}</p> : null}
       </div>

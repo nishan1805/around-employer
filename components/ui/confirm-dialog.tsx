@@ -28,7 +28,7 @@ export function ConfirmDialog({
   return (
     <ModalCard title={title} onClose={onCancel}>
       <div className="text-body-sm-regular text-text-secondary">{body}</div>
-      <div className="mt-16 flex justify-end gap-2">
+      <div className="mt-[16px] flex justify-end gap-[8px]">
         <Button variant="outline" onClick={onCancel}>{cancelLabel}</Button>
         <Button variant={tone === "danger" ? "danger" : "primary"} onClick={onConfirm}>{confirmLabel}</Button>
       </div>

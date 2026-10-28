@@ -7,8 +7,9 @@ import { Banner } from "@/components/ui/feedback";
 import { Field, SelectInput, TextArea, TextInput } from "@/components/ui/field";
 import { Drawer } from "@/components/ui/overlay";
 import { usePortal } from "@/components/shell/use-portal";
+import { PendingDecision } from "@/components/ui/pending-decision";
+import { DOCUMENT_OPTIONS, EMPLOYER, INDUSTRIES } from "@/lib/fixtures";
 import { DOCUMENT_ACCEPT_LABEL, DOCUMENT_MAX_BYTES, LOGO_MAX_BYTES } from "@/src/config/policy";
-import { DOCUMENT_OPTIONS, INDUSTRIES } from "@/lib/fixtures";
 import { VERIFICATION_LABEL } from "@/lib/status";
 import type { CompanyProfile } from "@/lib/types";
 
@@ -31,7 +32,7 @@ export function CompanyView() {
   function onLogo(file: File | undefined) {
     if (!file) return;
     if (!["image/jpeg", "image/png"].includes(file.type) || file.size > LOGO_MAX_BYTES) {
-      setLogoError("Use a JPG or PNG up to 2MB.");
+      setLogoError("Use a JPG or PNG. The size limit is still a pending decision.");
       return;
     }
     const reader = new FileReader();
@@ -58,22 +59,22 @@ export function CompanyView() {
   if (state === "documents") return <DocumentsCard />;
 
   return (
-    <div className="px-16 py-6 sm:px-32">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="px-[16px] py-[24px] sm:px-[32px]">
+      <div className="flex flex-wrap items-start justify-between gap-[12px]">
         <div>
           <h1 className="text-subheading-semibold">Company Profile</h1>
           <p className="text-body-sm-regular text-text-secondary">Manage your company information. This will be visible to job seekers on your company page.</p>
-          <p className="mt-1 text-label-medium text-text-secondary">Verification: {VERIFICATION_LABEL[verification]}</p>
+          <p className="mt-[4px] text-label-medium text-text-secondary">Verification: {VERIFICATION_LABEL[verification]}</p>
         </div>
         <Button variant="outline" onClick={() => setPreview(true)}>
           <Eye size={16} /> Preview profile
         </Button>
       </div>
-      {message ? <div className="mt-16"><Banner tone="success" title={message} /></div> : null}
-      <section className="mt-16 rounded-lg border border-border-default bg-white p-5">
+      {message ? <div className="mt-[16px]"><Banner tone="success" title={message} /></div> : null}
+      <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
         <h2 className="text-body-semibold">Company Logo</h2>
-        <div className="mt-16 flex flex-wrap items-center gap-16">
-          <div className="flex h-64 w-64 items-center justify-center overflow-hidden rounded-md bg-primary-primary-50 text-body-semibold text-brand-primary">
+        <div className="mt-[16px] flex flex-wrap items-center gap-[16px]">
+          <div className="flex h-[64px] w-[64px] items-center justify-center overflow-hidden rounded-md bg-primary-primary-50 text-body-semibold text-brand-primary">
             {company.logoDataUrl ? (
               // Local file preview; next/image cannot optimize a data URL the user just picked.
               // eslint-disable-next-line @next/next/no-img-element
@@ -83,21 +84,23 @@ export function CompanyView() {
             )}
           </div>
           <div>
-            <p className="text-body-sm-regular text-text-secondary">Square logo works best. Recommended size: 512 × 512 px (JPG, PNG, up to 2MB).</p>
-            <div className="mt-2 flex gap-2">
-              <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-sm border border-border-default px-3 text-body-sm-semibold">
+            <p className="text-body-sm-regular text-text-secondary">
+              Square logo works best. Recommended size: 512 × 512 px (JPG, PNG). Size limit <PendingDecision value={LOGO_MAX_BYTES} />.
+            </p>
+            <div className="mt-[8px] flex gap-[8px]">
+              <label className="inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-sm border border-border-default px-[12px] text-body-sm-semibold">
                 <Upload size={16} /> Change logo
                 <input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(event) => onLogo(event.target.files?.[0])} />
               </label>
               <Button variant="danger" size="sm" onClick={() => update("logoDataUrl", null)}>Remove</Button>
             </div>
-            {logoError ? <p className="mt-1 text-label-regular text-error-default">{logoError}</p> : null}
+            {logoError ? <p className="mt-[4px] text-label-regular text-error-default">{logoError}</p> : null}
           </div>
         </div>
       </section>
-      <section className="mt-16 rounded-lg border border-border-default bg-white p-5">
+      <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
         <h2 className="text-body-semibold">Basic Information</h2>
-        <div className="mt-16 grid gap-16 md:grid-cols-2">
+        <div className="mt-[16px] grid gap-[16px] md:grid-cols-2">
           <Field label="Company name" required error={errors.name}>
             <TextInput value={company.name} onChange={(event) => update("name", event.target.value)} />
           </Field>
@@ -108,16 +111,16 @@ export function CompanyView() {
           </Field>
         </div>
       </section>
-      <section className="mt-16 rounded-lg border border-border-default bg-white p-5">
+      <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
         <h2 className="text-body-semibold">About Company</h2>
         <Field label="Description" required error={errors.description}>
           <TextArea maxLength={500} value={company.description} onChange={(event) => update("description", event.target.value)} />
         </Field>
-        <p className="mt-1 text-right text-label-regular text-text-tertiary">{company.description.length}/500</p>
+        <p className="mt-[4px] text-right text-label-regular text-text-tertiary">{company.description.length}/500</p>
       </section>
-      <section className="mt-16 rounded-lg border border-border-default bg-white p-5">
+      <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
         <h2 className="text-body-semibold">Location & Working Hours</h2>
-        <div className="mt-16 grid gap-16 md:grid-cols-2">
+        <div className="mt-[16px] grid gap-[16px] md:grid-cols-2">
           <Field label="Workplace location" required error={errors.workplaceLocation}>
             <TextInput value={company.workplaceLocation} onChange={(event) => update("workplaceLocation", event.target.value)} />
           </Field>
@@ -126,24 +129,24 @@ export function CompanyView() {
           </Field>
         </div>
       </section>
-      <section className="mt-16 rounded-lg border border-border-default bg-white p-5">
+      <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
         <h2 className="text-body-semibold">Website & Social Links</h2>
         <p className="text-body-sm-regular text-text-secondary">Add your website and social media links. These links will be shown on your company page.</p>
-        <div className="mt-16 grid gap-16 lg:grid-cols-3">
+        <div className="mt-[16px] grid gap-[16px] lg:grid-cols-3">
           <Field label="Website"><TextInput value={company.website} onChange={(event) => update("website", event.target.value)} /></Field>
           <Field label="LinkedIn"><TextInput value={company.linkedin} onChange={(event) => update("linkedin", event.target.value)} /></Field>
           <Field label="Instagram"><TextInput value={company.instagram} onChange={(event) => update("instagram", event.target.value)} /></Field>
         </div>
       </section>
-      <div className="mt-16 flex justify-end gap-2">
+      <div className="mt-[16px] flex justify-end gap-[8px]">
         <Button variant="outline" onClick={() => { resetCompany(); setMessage("Edits discarded."); }}>Cancel</Button>
         <Button onClick={onSave} disabled={!dirty && state !== "errors"}>Save changes</Button>
       </div>
       {preview ? (
         <Drawer title="Profile preview" onClose={() => setPreview(false)}>
           <p className="text-body-sm-regular text-text-secondary">Job seekers will see this on your company page. This preview uses your unsaved edits and does not save them.</p>
-          <div className="mt-16 flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-md bg-primary-primary-50 font-semibold text-brand-primary">
+          <div className="mt-[16px] flex items-center gap-[12px]">
+            <div className="flex h-[56px] w-[56px] items-center justify-center overflow-hidden rounded-md bg-primary-primary-50 font-semibold text-brand-primary">
               {company.logoDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img alt="" src={company.logoDataUrl} className="h-full w-full object-cover" />
@@ -157,15 +160,15 @@ export function CompanyView() {
               {verification === "verified" ? <p className="text-label-medium text-success-success-700">Verified</p> : null}
             </div>
           </div>
-          <h3 className="mt-6 text-body-semibold">About</h3>
-          <p className="mt-2 text-body-sm-regular">{company.description}</p>
-          <p className="mt-16 flex items-center gap-2 text-body-sm-regular"><MapPin size={16} /> {company.workplaceLocation} · {company.workingHours}</p>
-          <ul className="mt-16 space-y-2 text-body-sm-regular text-brand-primary">
+          <h3 className="mt-[24px] text-body-semibold">About</h3>
+          <p className="mt-[8px] text-body-sm-regular">{company.description}</p>
+          <p className="mt-[16px] flex items-center gap-[8px] text-body-sm-regular"><MapPin size={16} /> {company.workplaceLocation} · {company.workingHours}</p>
+          <ul className="mt-[16px] space-y-[8px] text-body-sm-regular text-brand-primary">
             {company.website ? <li>{company.website}</li> : null}
             {company.linkedin ? <li>{company.linkedin}</li> : null}
             {company.instagram ? <li>{company.instagram}</li> : null}
           </ul>
-          <div className="mt-6"><Button variant="outline" onClick={() => setPreview(false)}>Close</Button></div>
+          <div className="mt-[24px]"><Button variant="outline" onClick={() => setPreview(false)}>Close</Button></div>
         </Drawer>
       ) : null}
     </div>
@@ -192,17 +195,19 @@ function DocumentsCard() {
   }
 
   return (
-    <div className="px-16 py-6 sm:px-32">
-      <h1 className="text-subheading-semibold">Shree Ganesh Retail Mart</h1>
-      <div className="mt-16"><Banner tone="warning" title="Additional info required" body="Upload the missing company documents. Publishing stays locked." /></div>
-      <div className="mt-16 grid gap-16 lg:grid-cols-[minmax(0,1.4fr)_360px]">
-        <section className="rounded-lg border border-border-default bg-white p-5">
+    <div className="px-[16px] py-[24px] sm:px-[32px]">
+      <h1 className="text-subheading-semibold">{EMPLOYER.companyName}</h1>
+      <div className="mt-[16px]"><Banner tone="warning" title="Additional info required" body="Upload the missing company documents. Publishing stays locked." /></div>
+      <div className="mt-[16px] grid gap-[16px] lg:grid-cols-[minmax(0,1.4fr)_360px]">
+        <section className="rounded-lg border border-border-default bg-white p-[20px]">
           <h2 className="text-body-semibold">Verification documents</h2>
-          <p className="mt-1 text-body-sm-regular text-text-secondary">{DOCUMENT_ACCEPT_LABEL}, up to 5 MB.</p>
-          <ul className="mt-16 divide-y divide-line">
+          <p className="mt-[4px] text-body-sm-regular text-text-secondary">
+            {DOCUMENT_ACCEPT_LABEL}. Size limit <PendingDecision value={DOCUMENT_MAX_BYTES} />.
+          </p>
+          <ul className="mt-[16px] divide-y divide-line">
             {rows.map((row) => (
-              <li key={row.id} className="flex items-center gap-3 py-3">
-                <div className="min-w-0 flex-1">
+              <li key={row.id} className="flex items-center gap-[12px] py-[12px]">
+                <div className="min-w-[0px] flex-1">
                   <p className="text-body-sm-semibold">{row.label}</p>
                   <p className="text-label-regular text-text-secondary">
                     {row.failed ? `Upload failed · ${row.file || "file"} · connection lost` : row.progress && row.progress < 100 ? `Uploading ${row.file} · ${row.progress}%` : row.file ? `Uploaded · ${row.file}` : "Not uploaded"}
@@ -216,13 +221,13 @@ function DocumentsCard() {
             ))}
           </ul>
         </section>
-        <section className="rounded-lg border border-border-default bg-white p-5">
+        <section className="rounded-lg border border-border-default bg-white p-[20px]">
           <h2 className="text-body-semibold">Approval status</h2>
-          <p className="mt-3 text-label-regular text-text-secondary">Account</p>
+          <p className="mt-[12px] text-label-regular text-text-secondary">Account</p>
           <p className="text-body-sm-medium">Active · you can sign in and save drafts</p>
-          <p className="mt-3 text-label-regular text-text-secondary">Company verification</p>
+          <p className="mt-[12px] text-label-regular text-text-secondary">Company verification</p>
           <p className="text-body-sm-medium">Additional info required</p>
-          <p className="mt-3 text-label-regular text-text-secondary">Job approval</p>
+          <p className="mt-[12px] text-label-regular text-text-secondary">Job approval</p>
           <p className="text-body-sm-medium">Checked per job · see My jobs</p>
         </section>
       </div>

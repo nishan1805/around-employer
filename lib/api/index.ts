@@ -1,4 +1,5 @@
 import { APPLICANTS, COMPANY, JOBS, NOTIFICATIONS, SETTINGS, TEAM } from "@/lib/fixtures";
+import { VERIFICATION_REFERENCE_ID } from "@/src/config/policy";
 import type {
   AccountSettings,
   Applicant,
@@ -73,5 +74,5 @@ export function getSettings(): Promise<{ account: AccountSettings; team: TeamMem
  */
 export function submitVerification(payload: unknown): Promise<{ referenceId: string; status: "pending" }> {
   void payload;
-  return mock({ referenceId: "AR-VER-2026-00481", status: "pending" });
+  return mock({ referenceId: VERIFICATION_REFERENCE_ID, status: "pending" });
 }

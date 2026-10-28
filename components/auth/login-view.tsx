@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { PendingDecision } from "@/components/ui/pending-decision";
 import { Field, TextInput } from "@/components/ui/field";
 import {
   OTP_DEMO_CODE,
@@ -50,18 +51,18 @@ export function LoginView({ state }: { state: string }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background-secondary px-16">
-      <section className="w-full max-w-[480px] rounded-lg border border-border-default bg-white p-32">
+    <main className="flex min-h-screen items-center justify-center bg-dashboard-bg px-[16px]">
+      <section className="w-full max-w-[480px] rounded-lg border border-border-default bg-white p-[32px]">
         <p className="text-display-small-bold tracking-[-0.04em] text-brand-primary">around</p>
-        <h1 className="mt-16 text-subheading-semibold">Employer portal</h1>
-        <p className="mt-1 text-body-sm-regular text-text-secondary">Log in with the mobile number you verified.</p>
-        <div className="mt-16 flex flex-col gap-2 sm:flex-row sm:items-end">
+        <h1 className="mt-[16px] text-subheading-semibold">Employer portal</h1>
+        <p className="mt-[4px] text-body-sm-regular text-text-secondary">Log in with the mobile number you verified.</p>
+        <div className="mt-[16px] flex flex-col gap-[8px] sm:flex-row sm:items-end">
           <Field label="Mobile number">
             <TextInput value={phone} onChange={(event) => setPhone(event.target.value.replace(/\D/g, "").slice(0, 10))} />
           </Field>
           <Button onClick={() => { setPhase("code"); setCooldown(OTP_RESEND_COOLDOWN_SECONDS); }}>Send OTP</Button>
         </div>
-        <div className="mt-16 flex gap-2">
+        <div className="mt-[16px] flex gap-[8px]">
           {Array.from({ length: OTP_LENGTH }).map((_, index) => (
             <input
               key={index}
@@ -75,14 +76,18 @@ export function LoginView({ state }: { state: string }) {
                 chars[index] = digit;
                 setCode(chars.join("").slice(0, OTP_LENGTH));
               }}
-              className="h-14 w-48 rounded-sm border border-border-default text-center text-subheading-semibold"
+              className="h-[56px] w-[48px] rounded-sm border border-border-default text-center text-subheading-semibold"
             />
           ))}
         </div>
-        <p className="mt-3 text-label-regular text-text-secondary">
+        <p className="mt-[12px] text-label-regular text-text-secondary">
           {phase === "incorrect" ? "That code is incorrect." : null}
           {phase === "expired" ? "This code has expired." : null}
-          {phase === "locked" ? `Locked for ${Math.round(OTP_LOCKOUT_SECONDS / 60)} minutes after ${OTP_MAX_ATTEMPTS} attempts.` : null}
+          {phase === "locked" ? (
+            <>
+              This code is locked. Limits <PendingDecision value={`${OTP_MAX_ATTEMPTS} attempts / ${OTP_LOCKOUT_SECONDS} seconds`} />.
+            </>
+          ) : null}
           {phase === "network" ? "Network error. Try again." : null}
           {phase === "suspended" ? "This account is suspended. Contact support." : null}
           {phase === "verifying" ? "Verifying…" : null}
@@ -90,13 +95,13 @@ export function LoginView({ state }: { state: string }) {
             ? cooldown > 0 ? `Resend OTP in 0:${String(cooldown).padStart(2, "0")}` : "You can resend the code."
             : null}
         </p>
-        <Button className="mt-16 w-full" disabled={code.length < OTP_LENGTH || phase === "locked" || phase === "verifying"} onClick={verify}>
+        <Button className="mt-[16px] w-full" disabled={code.length < OTP_LENGTH || phase === "locked" || phase === "verifying"} onClick={verify}>
           {phase === "verifying" ? "Verifying…" : "Log in"}
         </Button>
-        <p className="mt-16 text-center text-body-sm-regular">
+        <p className="mt-[16px] text-center text-body-sm-regular">
           <Link href="/verification" className="font-semibold text-brand-primary">Register your business</Link>
         </p>
-        <p className="mt-2 text-center text-label-regular text-text-tertiary">Demo code {OTP_DEMO_CODE}</p>
+        <p className="mt-[8px] text-center text-label-regular text-text-tertiary">Demo code {OTP_DEMO_CODE}</p>
       </section>
     </main>
   );

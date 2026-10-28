@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { APPLICANTS, COMPANY, JOBS, NOTIFICATIONS, SETTINGS, TEAM } from "@/lib/fixtures";
+import { VERIFICATION_REFERENCE_ID } from "@/src/config/policy";
 import { uid } from "@/lib/utils";
 import type {
   AccountSettings,
@@ -56,7 +57,7 @@ export function EmployerProvider({ children }: { children: ReactNode }) {
   const [team, setTeam] = useState<TeamMember[]>(() => structuredClone(TEAM));
   const [location, setLocation] = useState("Shankar Nagar, Raipur");
   const [verificationStatus, setVerificationStatus] = useState<EmployerValue["verificationStatus"]>("verified");
-  const [referenceId] = useState("AR-VER-2026-00481");
+  const [referenceId] = useState(VERIFICATION_REFERENCE_ID);
 
   const value = useMemo<EmployerValue>(
     () => ({

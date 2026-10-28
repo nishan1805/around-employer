@@ -12,7 +12,7 @@ const tone: Record<ApplicantStatus, string> = {
 /** Figma: stage chip on applicants and the candidate header. Code Connect target. */
 export function StageChip({ status }: { status: ApplicantStatus }) {
   return (
-    <span className={cn("inline-flex h-6 items-center rounded-full px-2.5 text-label-medium", tone[status])}>
+    <span className={cn("inline-flex h-[24px] items-center rounded-full px-[10px] text-label-medium", tone[status])}>
       {status === "Rejected" ? "Not selected" : status}
     </span>
   );

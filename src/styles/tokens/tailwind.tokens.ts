@@ -7,7 +7,7 @@ function colorVars() {
   const colors: Record<string, string> = {
     white: "var(--palette-white-white)",
     black: "var(--palette-black-black)",
-    "dashboard-bg": "var(--palette-dashboard-bg)",
+    "dashboard-bg": "var(--color-dashboard-bg)",
     "palette-orange-orange-50": "var(--palette-orange-orange-50)",
     "palette-orange-orange-100": "var(--palette-orange-orange-100)",
     "palette-orange-orange-200": "var(--palette-orange-orange-200)",
@@ -117,25 +117,6 @@ function colorVars() {
   return colors;
 }
 
-const spacing: Record<string, string> = {};
-spacing["4"] = "var(--space-4)";
-spacing["8"] = "var(--space-8)";
-spacing["12"] = "var(--space-12)";
-spacing["16"] = "var(--space-16)";
-spacing["20"] = "var(--space-20)";
-spacing["24"] = "var(--space-24)";
-spacing["32"] = "var(--space-32)";
-spacing["40"] = "var(--space-40)";
-spacing["48"] = "var(--space-48)";
-spacing["64"] = "var(--space-64)";
-spacing["80"] = "var(--space-80)";
-spacing["96"] = "var(--space-96)";
-spacing["128"] = "var(--space-128)";
-spacing["160"] = "var(--space-160)";
-spacing["192"] = "var(--space-192)";
-spacing["224"] = "var(--space-224)";
-spacing["256"] = "var(--space-256)";
-
 const borderRadius: Record<string, string> = {};
 borderRadius["none"] = "var(--radius-none)";
 borderRadius["xs"] = "var(--radius-xs)";
@@ -161,7 +142,6 @@ boxShadow["3xl"] = "var(--shadow-3xl)";
 
 export const themeExtend = {
   colors: colorVars(),
-  spacing,
   borderRadius,
   boxShadow,
   fontSize: fontSizeTuples,
