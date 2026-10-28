@@ -7,7 +7,7 @@ Demo OTP code, local only: `482913`.
 ## Shell
 
 - Sidebar: Dashboard, Post a Job, My Jobs, Applicants, Company Profile, Billing, Settings, Help & Support, Logout.
-- Navbar: city search (`/search`), location, notifications, account menu (Company profile, Billing, Settings, Help, Logout).
+- Top bar: page title, Post a Job, notifications, and the Raipur Builder account menu (Company profile, Billing, Settings, Help, Logout). The sidebar width and top bar height stay fixed. Page content sits in a centred column with 32px side padding: 1440px for list and table pages, 1280px otherwise, 768px for Post a Job, and 1040px for Settings.
 - Account `Suspended`: red account banner on every portal page. It is not the verification banner. Posting and publishing stay locked. Drafts can still be edited.
 - Dev panel (`npm run dev`): `?state=`, `?account=`, `?verification=`.
 
@@ -66,18 +66,19 @@ Validation: search and location filters only. Loading/error are not separate fra
 
 ## Post a job `/post-job`
 
-Figma names this flow E08a–j. There is no E09 post-a-job set (E09 in the file is an older My Jobs row).
+Figma frames are E08a choose, E08b paste, E08c processing, E08e extract failed, E08f AI-filled details, E08g manual details, E08h pay, E08i review, and E08j submit confirm. There is no E08d.
 
-| State | Copy |
-| --- | --- |
-| `choose` | “Post a job”. Paste a description, or enter details manually. Nothing goes live until review. |
-| `paste` | “Paste a job description”. Extract stays disabled under 20 characters. “Your text is saved as you go.” |
-| `processing` | “Extracting job details…”. Analysing description / Identifying key details / Preparing form. “Use manual entry”. |
-| `extract-failed` | “We couldn’t extract the job details”. Tips: include title, location, responsibilities and salary; use a clear description; avoid images or scans. Try again / Create manually. |
-| `details` / `details-ai` / `details-invalid` | Step indicator: Job details, Pay & requirements, Review. Required: title, category, location, description. Invalid state shows those errors. |
-| `pay` | Salary type Fixed or Range. Salary required. Range also needs a maximum. Benefits optional. |
-| `review` | Summary with Edit links. |
-| `confirm` | “Submit for review?” Job becomes `pending_review`. |
+| State | Frame | Copy |
+| --- | --- | --- |
+| `choose` | E08a | “Post a job”. Paste a description, or enter details manually. Nothing goes live until review. |
+| `paste` | E08b | “Paste a job description”. Extract stays disabled under 20 characters. “Your text is saved as you go.” |
+| `processing` | E08c | “Extracting job details…”. Analysing description / Identifying key details / Preparing form. “Use manual entry”. |
+| `extract-failed` | E08e | “We couldn’t extract the job details”. Tips: include title, location, responsibilities and salary; use a clear description; avoid images or scans. Try again / Create manually. |
+| `details` / `details-invalid` | E08g | Step indicator: Job details, Pay & requirements, Review. Required: title, category, location, description. Invalid state shows those errors. |
+| `details-ai` | E08f | Same form, filled from the pasted description. |
+| `pay` | E08h | Salary type Fixed or Range. Salary required. Range also needs a maximum. Benefits optional. |
+| `review` | E08i | Summary with Edit links. |
+| `confirm` | E08j | “Submit for review?” Job becomes `pending_review`. |
 | `gate` | “Verification gate”. Submit disabled. “Continue verification”. Same block when account is Suspended or verification is not `verified`. |
 
 Save draft is allowed on the form steps and writes a `draft` job. It does not submit for review.
@@ -187,7 +188,7 @@ Tabs: Account, Team members, Notifications. One column.
 | `whatsapp` / `whatsapp-failed` | Add-number OTP. The WhatsApp switch stays disabled until the number is verified. |
 | `suspended` | Account banner. Edits locked. |
 
-Daily summary time defaults to `policy.notifications.dailySummaryDefaultTime` (9:00 AM). Expiry reminders default to `policy.notifications.expiryReminderDefault` (3 days before expiry). Both are TODO. “Learn about roles” is plain text, not a link. Branch access is omitted because team records do not have it.
+Daily summary time defaults to `policy.notifications.dailySummaryDefaultTime` (9:00 AM). Expiry reminders default to `policy.notifications.expiryReminderDefault` (3 days before expiry). Both show a Pending decision tag. “Learn about roles” links to Help. Access copy is shown in the cells; only the Access header carries the Pending decision tag. Branch access is omitted because team records do not have it. The hiring address is `HIRING_EMAIL` in `src/config/employer.ts`.
 
 ## Billing `/billing`
 
@@ -195,7 +196,7 @@ Credit balance “4 job credits”. Free allowance and the live-post limit show 
 
 ## Help `/help`
 
-Four topic cards. Contact form. Success: “Saved locally. TODO: deliver this once a support channel is chosen.” Email and message are required.
+Four topic cards. Contact form. Success says the message was saved on this device and marks delivery as Pending decision. Email and message are required.
 
 ## Login `/login`
 
@@ -211,7 +212,3 @@ Four topic cards. Contact form. Success: “Saved locally. TODO: deliver this on
 | `suspended` | “This account is suspended. Contact support.” |
 
 “Register your business” opens `/verification`.
-
-## Search `/search`
-
-Empty query: “Search places, restaurants, events and offers.” With a query: “No Around places matched …”. TODO: city search API. Employer jobs are not searched here.

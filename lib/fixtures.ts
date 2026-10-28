@@ -1,3 +1,4 @@
+import { HIRING_EMAIL } from "@/src/config/employer";
 import { DAILY_SUMMARY_DEFAULT_TIME, EXPIRY_REMINDER_DEFAULT } from "@/src/config/policy";
 import type {
   AccountSettings,
@@ -14,7 +15,7 @@ const DESC =
 
 export const EMPLOYER = {
   companyName: "Raipur Builder",
-  email: "hiring@raipurbuilder.in",
+  email: HIRING_EMAIL,
   ownerName: "Rakesh Agrawal",
   avatarInitials: "RB",
   location: "Shankar Nagar, Raipur",
@@ -388,13 +389,13 @@ const amitDetail: Applicant["detail"] = {
       title: "UI/UX Designer",
       org: "Nable Invent Solutions · Internship",
       dates: "Apr 2023 – Aug 2023 (5 months)",
-      description: "Designed responsive marketing pages and a component library used by the product squad.",
+      description: "Worked on web and mobile design projects, created wireframes, high-fidelity designs and collaborated with the development team.",
     },
     {
       title: "Frontend Developer",
       org: "CredoHire · Internship",
       dates: "Aug 2023 – Sep 2023 (2 months)",
-      description: "Built interface prototypes in React and paired with design on the hiring dashboard.",
+      description: "Worked on front end development using React, Tailwind and Next.js.",
     },
   ],
   education: {

@@ -40,7 +40,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
   const unread = notifications.some((item) => item.unread);
 
   return (
-    <header className="flex h-[72px] min-w-[0px] items-center gap-[4px] overflow-hidden border-b border-border-default bg-white px-[24px]">
+    <header className="flex h-[72px] w-full shrink-0 items-center gap-[16px] overflow-hidden border-b border-border-default bg-white px-[32px]">
       <button className="shrink-0 lg:hidden" aria-label="Open menu" onClick={onMenu}>
         <Menu size={20} />
       </button>

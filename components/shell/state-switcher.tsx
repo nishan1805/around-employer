@@ -21,7 +21,7 @@ export function StateSwitcher() {
               <button
                 key={item.id}
                 onClick={() => pushState(item.id)}
-                className={`rounded-md px-[8px] py-[6px] text-left text-body-sm-regular ${state === item.id ? "bg-primary-primary-50 text-brand-primary" : "hover:bg-grey-grey-100"}`}
+                className={`rounded-md px-[8px] py-[8px] text-left text-body-sm-regular ${state === item.id ? "bg-primary-primary-50 text-brand-primary" : "hover:bg-grey-grey-100"}`}
               >
                 {item.label}
               </button>
@@ -29,7 +29,7 @@ export function StateSwitcher() {
           </div>
           <label className="mt-[12px] block text-label-medium text-text-secondary">
             Account
-            <select className="mt-[4px] h-[36px] w-full rounded-sm border border-border-default px-[8px] text-body-sm-regular" value={account} onChange={(event) => setQuery("account", event.target.value)}>
+            <select className="mt-[4px] h-[40px] w-full rounded-sm border border-border-default px-[8px] text-body-sm-regular" value={account} onChange={(event) => setQuery("account", event.target.value)}>
               <option>Active</option>
               <option>Suspended</option>
             </select>
@@ -37,7 +37,7 @@ export function StateSwitcher() {
           <label className="mt-[8px] block text-label-medium text-text-secondary">
             Verification
             <select
-              className="mt-[4px] h-[36px] w-full rounded-sm border border-border-default px-[8px] text-body-sm-regular"
+              className="mt-[4px] h-[40px] w-full rounded-sm border border-border-default px-[8px] text-body-sm-regular"
               value={verification}
               onChange={(event) => setQuery("verification", event.target.value)}
             >

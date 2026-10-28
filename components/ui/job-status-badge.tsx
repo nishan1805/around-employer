@@ -15,7 +15,7 @@ const tone: Record<JobStatus, string> = {
 /** Figma: Around / Job Status Badge. Code Connect target. */
 export function JobStatusBadge({ status }: { status: JobStatus }) {
   return (
-    <span className={cn("inline-flex h-[24px] items-center rounded-full px-[10px] text-label-medium", tone[status])}>
+    <span className={cn("inline-flex h-[24px] items-center rounded-full px-[12px] text-label-medium", tone[status])}>
       {JOB_STATUS_LABEL[status]}
     </span>
   );

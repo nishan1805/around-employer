@@ -32,7 +32,7 @@ Requires Node 20+ (developed on Node 22).
 app/(portal)          Shell routes: dashboard, jobs, applicants, company, verification, settings, billing, help, search
 app/(auth)/login      Employer login (no shell)
 components/ui         Button, Input, Select, Banner, Verification Banner, Job Status Badge, Stage Chip, Step Indicator, Resume Upload, Confirm Dialog, Progress Bar
-components/shell      Sidebar, navbar, dev state switcher
+components/shell      Sidebar, employer top bar, dev state switcher
 lib/api               Mock services. Replace the function bodies when the API exists.
 lib/fixtures.ts       Sample jobs, applicants, and company
 src/config/policy.ts  File limits, SLAs, OTP, channels, reference ID
@@ -45,7 +45,7 @@ docs/HANDOFF.md       Screen states and copy
 | Path | Screen |
 | --- | --- |
 | `/` | Dashboard |
-| `/post-job` | Post a job wizard (Figma E08) |
+| `/post-job` | Post a job wizard (Figma E08a–j, no E08d) |
 | `/jobs` | My Jobs |
 | `/jobs/[id]` | Job details |
 | `/jobs/[id]/applicants` | Applicants for one job |
@@ -56,10 +56,9 @@ docs/HANDOFF.md       Screen states and copy
 | `/billing` | Job credits |
 | `/settings` | Account, team, notifications, security |
 | `/help` | Help & support |
-| `/search` | Navbar city search |
 | `/login` | Employer login |
 
-Sidebar and navbar items all go to one of these routes. Logout goes to `/login`.
+Sidebar and top bar items all go to one of these routes. Logout goes to `/login`.
 
 ## States
 

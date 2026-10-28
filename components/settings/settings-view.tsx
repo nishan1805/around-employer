@@ -1,12 +1,12 @@
 "use client";
 
-import { Clock, CreditCard, Lock, Megaphone, MoreHorizontal, Sun, UserPlus, X } from "lucide-react";
+import { Clock, CreditCard, Info, Lock, Megaphone, MoreVertical, Sun, UserPlus, X } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Field, SelectInput, TextInput } from "@/components/ui/field";
-import { PendingDecision } from "@/components/ui/pending-decision";
 import { SettingsTabs } from "@/components/ui/settings-tabs";
 import { Toggle } from "@/components/ui/toggle";
 import { usePortal } from "@/components/shell/use-portal";
@@ -63,7 +63,7 @@ export function SettingsView() {
   );
   const [otpError, setOtpError] = useState(state === "change-number-error" || state === "whatsapp-failed");
   const [closeOpen, setCloseOpen] = useState(state === "close-confirm" || state === "close-unavailable");
-  const [closeNote, setCloseNote] = useState(state === "close-unavailable" ? "Closing an account is unavailable. The mock API does not support it." : "");
+  const [closeNote, setCloseNote] = useState("");
   const [menuFor, setMenuFor] = useState<string | null>(state === "team-menu" ? "tm-priya" : state === "team-pending-menu" ? "tm-neha" : null);
   const [confirm, setConfirm] = useState<{ id: string; kind: "remove" | "cancel" } | null>(state === "team-remove-confirm" ? { id: "tm-priya", kind: "remove" } : null);
   const [roleEdit, setRoleEdit] = useState<TeamMember | null>(null);
@@ -145,11 +145,11 @@ export function SettingsView() {
   }
 
   if (!draft || !prefs) {
-    return <div className="px-[16px] py-[24px] text-body-sm-regular text-text-secondary sm:px-[32px]">Loading settings…</div>;
+    return <div className="text-body-sm-regular text-text-secondary">Loading settings…</div>;
   }
 
   return (
-    <div className="px-[16px] py-[32px] sm:px-[32px]">
+    <div>
       <h1 className="text-display-small-semibold">Settings</h1>
       <p className="mt-[4px] text-body-sm-regular text-text-secondary">Manage your account, team access and notifications.</p>
       {suspended ? (
@@ -179,14 +179,14 @@ export function SettingsView() {
               <Field label="Email address" error={fieldErrors.email}>
                 <div className="relative">
                   <TextInput className="pr-[24px]" aria-label="Email address" value={draft.email} disabled={suspended} onChange={(event) => setDraft({ ...draft, email: event.target.value })} />
-                  {draft.emailVerified ? <Verified className="absolute top-[10px] right-[12px]" /> : null}
+                  {draft.emailVerified ? <Verified className="absolute top-[12px] right-[12px]" /> : null}
                 </div>
               </Field>
               <div>
                 <Field label="Phone number" error={fieldErrors.phone}>
                   <div className="relative">
                     <TextInput className="pr-[24px]" aria-label="Phone number" value={draft.phone} readOnly />
-                    {draft.phoneVerified ? <Verified className="absolute top-[10px] right-[12px]" /> : null}
+                    {draft.phoneVerified ? <Verified className="absolute top-[12px] right-[12px]" /> : null}
                   </div>
                 </Field>
                 <div className="mt-[4px] flex justify-end">
@@ -236,9 +236,9 @@ export function SettingsView() {
               </div>
               <Button onClick={() => document.getElementById("invite-name")?.focus()}>+ Invite member</Button>
             </div>
-            <div className="mt-[16px] overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-body-sm-regular">
-                <thead className="text-label-medium text-text-secondary">
+            <div className="mt-[16px] overflow-hidden rounded-lg border border-border-default">
+              <table className="w-full text-left text-body-sm-regular">
+                <thead className="bg-grey-grey-50 text-label-medium text-text-secondary">
                   <tr>
                     <th className="py-[8px] font-medium">Name</th>
                     <th className="py-[8px] font-medium">Email</th>
@@ -259,30 +259,30 @@ export function SettingsView() {
                         <span className="flex items-center gap-[8px]">
                           <span className="flex h-[32px] w-[32px] items-center justify-center rounded-full bg-primary-primary-50 text-label-semibold text-brand-primary">{member.initials}</span>
                           <span className="font-medium">{member.name}</span>
-                          {member.you ? <span className="rounded-full bg-grey-grey-100 px-[8px] py-[2px] text-label-medium text-text-secondary">You</span> : null}
+                          {member.you ? <span className="rounded-full bg-grey-grey-100 px-[8px] py-[4px] text-label-medium text-text-secondary">You</span> : null}
                         </span>
                       </td>
-                      <td className="py-[12px] text-text-secondary">{member.email}</td>
+                      <td className="py-[12px] whitespace-nowrap text-text-secondary">{member.email}</td>
                       <td className="py-[12px]">
-                        <span className="inline-flex rounded-full bg-primary-primary-50 px-[8px] py-[2px] text-label-medium text-brand-primary">{member.role}</span>
+                        <span className={`inline-flex rounded-full px-[8px] py-[4px] text-label-medium ${roleTone(member.role)}`}>{member.role}</span>
                       </td>
-                      <td className="py-[12px] text-text-secondary"><PendingDecision value={TEAM_ACCESS[member.role]} /></td>
+                      <td className="py-[12px] whitespace-nowrap text-text-secondary">{TEAM_ACCESS[member.role]}</td>
                       <td className="py-[12px]">
-                        <span className={`inline-flex rounded-full px-[8px] py-[2px] text-label-medium ${member.status === "Active" ? "bg-success-success-50 text-success-success-700" : "bg-warning-warning-50 text-warning-warning-700"}`}>
+                        <span className={`inline-flex rounded-full px-[8px] py-[4px] text-label-medium ${member.status === "Active" ? "bg-success-success-50 text-success-success-700" : "bg-warning-warning-50 text-warning-warning-700"}`}>
                           {member.status === "Active" ? "Active" : "Pending invite"}
                         </span>
                       </td>
                       <td className="relative py-[12px] text-right">
                         {member.you || member.role === "Owner" ? <span className="text-text-tertiary">—</span> : (
-                          <button aria-label={`Actions for ${member.name}`} className="inline-flex h-[32px] w-[32px] items-center justify-center rounded-md text-text-secondary hover:bg-grey-grey-100" onClick={() => setMenuFor(menuFor === member.id ? null : member.id)}>
-                            <MoreHorizontal size={16} />
+                          <button aria-label={`Actions for ${member.name}`} className={`inline-flex h-[32px] w-[32px] items-center justify-center rounded-sm border bg-white ${menuFor === member.id ? "border-brand-primary text-brand-primary" : "border-border-default text-text-secondary"}`} onClick={() => setMenuFor(menuFor === member.id ? null : member.id)}>
+                            <MoreVertical size={16} />
                           </button>
                         )}
                         {menuFor === member.id ? (
                           <div className="absolute right-[0px] z-20 w-[176px] rounded-md border border-border-default bg-white py-[4px] text-left shadow-lg">
                             {member.status === "Pending" ? (
                               <>
-                                <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular hover:bg-grey-grey-100" onClick={() => { void resendInvite(member.id).then(setTeam); setMenuFor(null); setNotice(`Resend recorded for ${member.email}. The invite is still Pending.`); }}>Resend invite</button>
+                                <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular hover:bg-grey-grey-100" onClick={() => { void resendInvite(member.id).then(setTeam); setMenuFor(null); setNotice(`Invite resent to ${member.email}.`); }}>Resend invite</button>
                                 <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular text-error-default hover:bg-grey-grey-100" onClick={() => { setConfirm({ id: member.id, kind: "cancel" }); setMenuFor(null); }}>Cancel invite</button>
                               </>
                             ) : (
@@ -300,56 +300,66 @@ export function SettingsView() {
               </table>
             </div>
             {notice ? <p className="mt-[12px] text-body-sm-regular text-text-secondary">{notice}</p> : null}
-            <div className="mt-[16px] rounded-sm bg-info-info-50 px-[16px] py-[12px] text-body-sm-regular text-text-secondary">
-              <p className="text-body-sm-semibold text-text-primary">Role permissions</p>
-              Only owners can change roles and remove team members.
+            <div className="mt-[16px] flex items-center gap-[12px] rounded-sm bg-info-info-50 px-[16px] py-[12px]">
+              <Info size={20} className="shrink-0 text-information-default" aria-hidden />
+              <div className="min-w-[0px] flex-1">
+                <p className="text-body-sm-semibold text-text-primary">Role permissions</p>
+                <p className="text-body-sm-regular text-text-secondary">Only owners can change roles and remove team members.</p>
+              </div>
+              <Link href="/help" className="shrink-0 text-body-sm-medium text-brand-primary">Learn about roles</Link>
             </div>
           </section>
           <section className="rounded-lg border border-border-default bg-white p-[20px]">
             <h2 className="text-subheading-semibold">Invite a new member</h2>
             <p className="mt-[4px] text-body-sm-regular text-text-secondary">They&apos;ll get an email with a link to join your team.</p>
-            <div className="mt-[16px] grid gap-[12px] sm:grid-cols-2">
-              <Field label="Name" error={inviteErrors.name}>
-                <TextInput id="invite-name" placeholder="Enter full name" value={invite.name} disabled={suspended} onChange={(event) => setInvite({ ...invite, name: event.target.value })} />
-              </Field>
-              <Field label="Email" error={inviteErrors.email}>
-                <TextInput type="email" placeholder="Enter email address" value={invite.email} disabled={suspended} onChange={(event) => setInvite({ ...invite, email: event.target.value })} />
-              </Field>
-              <Field label="Role" error={inviteErrors.role}>
-                <SelectInput aria-label="Invite role" value={invite.role} disabled={suspended} onChange={(event) => setInvite({ ...invite, role: event.target.value as TeamRole | "" })}>
-                  <option value="">Select role</option>
-                  {ROLES.filter((role) => role !== "Owner").map((role) => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
-                </SelectInput>
-              </Field>
+            <div className="mt-[16px] flex items-start gap-[16px]">
+              <div className="min-w-[0px] flex-1">
+                <Field label="Name" error={inviteErrors.name}>
+                  <TextInput id="invite-name" placeholder="Enter full name" value={invite.name} disabled={suspended} onChange={(event) => setInvite({ ...invite, name: event.target.value })} />
+                </Field>
+              </div>
+              <div className="min-w-[0px] flex-1">
+                <Field label="Email address" error={inviteErrors.email}>
+                  <TextInput type="email" placeholder="Enter email address" value={invite.email} disabled={suspended} onChange={(event) => setInvite({ ...invite, email: event.target.value })} />
+                </Field>
+              </div>
+              <div className="min-w-[0px] flex-1">
+                <Field label="Role" error={inviteErrors.role}>
+                  <SelectInput aria-label="Invite role" value={invite.role} disabled={suspended} onChange={(event) => setInvite({ ...invite, role: event.target.value as TeamRole | "" })}>
+                    <option value="">Select role</option>
+                    {ROLES.filter((role) => role !== "Owner").map((role) => (
+                      <option key={role} value={role}>{role}</option>
+                    ))}
+                  </SelectInput>
+                </Field>
+              </div>
+              <Button
+                className="mt-[24px] shrink-0"
+                disabled={suspended || inviteStatus === "saving"}
+                onClick={async () => {
+                  const errors: Record<string, string> = {};
+                  if (!invite.name.trim()) errors.name = "Enter a name.";
+                  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(invite.email)) errors.email = "Enter a valid email.";
+                  if (!invite.role) errors.role = "Select a role.";
+                  setInviteErrors(errors);
+                  if (Object.keys(errors).length || !invite.role) return;
+                  const role = invite.role;
+                  setInviteStatus("saving");
+                  try {
+                    await sendInvite({ name: invite.name, email: invite.email, role, fail: state === "team-invite-error" });
+                    setTeam(await loadSettings().then((loaded) => loaded.team));
+                    setInvite({ name: "", email: "", role: "" });
+                    setInviteStatus("saved");
+                  } catch {
+                    setInviteStatus("error");
+                  }
+                }}
+              >
+                {inviteStatus === "saving" ? "Sending…" : "Send invite"}
+              </Button>
             </div>
-            {inviteStatus === "saved" ? <p className="mt-[12px] text-body-sm-regular text-success-success-700">Invite saved as Pending. It has not been delivered.</p> : null}
-            {inviteStatus === "error" ? <p className="mt-[12px] text-body-sm-regular text-error-default">Could not send the invite. The list was not changed.</p> : null}
-            <Button
-              className="mt-[16px]"
-              disabled={suspended || inviteStatus === "saving"}
-              onClick={async () => {
-                const errors: Record<string, string> = {};
-                if (!invite.name.trim()) errors.name = "Enter a name.";
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(invite.email)) errors.email = "Enter a valid email.";
-                if (!invite.role) errors.role = "Select a role.";
-                setInviteErrors(errors);
-                if (Object.keys(errors).length || !invite.role) return;
-                const role = invite.role;
-                setInviteStatus("saving");
-                try {
-                  await sendInvite({ name: invite.name, email: invite.email, role, fail: state === "team-invite-error" });
-                  setTeam(await loadSettings().then((loaded) => loaded.team));
-                  setInvite({ name: "", email: "", role: "Recruiter" });
-                  setInviteStatus("saved");
-                } catch {
-                  setInviteStatus("error");
-                }
-              }}
-            >
-              {inviteStatus === "saving" ? "Sending…" : "Send invite"}
-            </Button>
+            {inviteStatus === "saved" ? <p className="mt-[12px] text-body-sm-regular text-success-success-700">Invite saved as pending.</p> : null}
+            {inviteStatus === "error" ? <p className="mt-[12px] text-body-sm-regular text-error-default">Could not send the invite. Try again.</p> : null}
           </section>
         </div>
       ) : null}
@@ -443,17 +453,19 @@ export function SettingsView() {
           void closeEmployerAccount().then((result) => {
             setCloseOpen(false);
             if (!result.ok || !ACCOUNT_CLOSURE.supportedByMockApi) {
-              setCloseNote("Closing an account is unavailable. The mock API does not support it.");
+              setCloseNote(ACCOUNT_CLOSURE.note);
             }
           });
         }}
       />
       <ConfirmDialog
         open={Boolean(confirm)}
-        title={confirm?.kind === "cancel" ? "Cancel this invite?" : "Remove this member?"}
+        title={confirm?.kind === "cancel" ? "Cancel this invite?" : `Remove ${team.find((member) => member.id === confirm?.id)?.name ?? "this member"} from your team?`}
         tone="danger"
-        confirmLabel={confirm?.kind === "cancel" ? "Cancel invite" : "Remove"}
-        body="This updates the team list in the mock store."
+        confirmLabel={confirm?.kind === "cancel" ? "Cancel invite" : "Remove member"}
+        body={confirm?.kind === "cancel"
+          ? "They will not be able to join with this invite. You can send a new one later."
+          : `${(team.find((member) => member.id === confirm?.id)?.name ?? "They").split(" ")[0]} will lose access to ${draft.companyName}’s jobs and applicants right away. You can invite them again later.`}
         onCancel={() => setConfirm(null)}
         onConfirm={() => {
           if (!confirm) return;
@@ -500,7 +512,13 @@ function Verified({ className }: { className?: string }) {
 }
 
 function PendingTag() {
-  return <span className="inline-flex items-center rounded-full bg-warning-warning-50 px-[8px] py-[2px] text-label-medium text-warning-warning-700">Pending decision</span>;
+  return <span className="inline-flex items-center rounded-full bg-warning-warning-50 px-[8px] py-[4px] text-label-medium text-warning-warning-700">Pending decision</span>;
+}
+
+function roleTone(role: TeamRole) {
+  if (role === "Owner") return "bg-features-features-50 text-features-features-700";
+  if (role === "Recruiter") return "bg-grey-grey-100 text-text-secondary";
+  return "bg-primary-primary-50 text-primary-primary-700";
 }
 
 function ChannelToggle({

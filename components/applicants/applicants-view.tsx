@@ -33,7 +33,7 @@ export function ApplicantsView({ jobId }: { jobId?: string }) {
   );
   if (state === "loading") {
     return (
-      <div className="space-y-[12px] px-[16px] py-[24px] sm:px-[32px]">
+      <div className="space-y-[12px] ">
         {Array.from({ length: 6 }).map((_, index) => <SkeletonBlock key={index} className="h-[48px]" />)}
       </div>
     );
@@ -54,7 +54,7 @@ export function ApplicantsView({ jobId }: { jobId?: string }) {
   if (jobId) return <SplitReview jobTitle={scoped[0]?.jobTitle ?? "Store Sales Associate"} people={scoped} onStatus={setApplicantStatus} />;
 
   return (
-    <div className="px-[16px] py-[24px] sm:px-[32px]">
+    <div className="">
       <h1 className="text-subheading-semibold">Applicants</h1>
       <p className="text-body-sm-regular text-text-secondary">Manage and track all applicants for your job listings.</p>
       <div className="mt-[16px] flex gap-[16px] overflow-x-auto border-b border-border-default">
@@ -67,7 +67,7 @@ export function ApplicantsView({ jobId }: { jobId?: string }) {
       <div className="mt-[16px] flex flex-wrap gap-[8px]">
         <label className="relative min-w-[220px] flex-1">
           <Search size={16} className="absolute top-1/2 left-[12px] -translate-y-1/2 text-text-tertiary" />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, skill, or job" className="h-[44px] w-full rounded-md border border-border-default bg-white pr-[12px] pl-[36px]" />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, skill, or job" className="h-[44px] w-full rounded-md border border-border-default bg-white pr-[12px] pl-[40px]" />
         </label>
         <input value={role} onChange={(event) => setRole(event.target.value)} placeholder="Job" className="h-[44px] rounded-md border border-border-default bg-white px-[12px]" />
       </div>
@@ -75,8 +75,7 @@ export function ApplicantsView({ jobId }: { jobId?: string }) {
         {rows.length === 0 ? (
           <EmptyState icon="search" title="No applicants match your search" body="Try a different name or skill, or clear the filters to see all applicants." action={<Button variant="outline" onClick={() => { setQuery(""); setRole(""); }}>Clear filters</Button>} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] text-left text-body-sm-regular">
+            <table className="w-full text-left text-body-sm-regular">
               <thead className="bg-background-secondary text-label-medium text-text-secondary">
                 <tr>
                   {["Applicant", "Job", "Status", "Applied On", "Experience", "Location", ""].map((label) => (
@@ -91,16 +90,15 @@ export function ApplicantsView({ jobId }: { jobId?: string }) {
                       <Link href={`/applicants/${person.id}`} className="text-brand-primary">{person.name}</Link>
                     </td>
                     <td className="px-[16px] py-[12px]">{person.jobTitle}</td>
-                    <td className="px-[16px] py-[12px]"><ApplicantBadge status={person.status} /></td>
-                    <td className="px-[16px] py-[12px]">{formatDate(person.appliedOn)}</td>
-                    <td className="px-[16px] py-[12px]">{person.experience}</td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap"><ApplicantBadge status={person.status} /></td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap">{formatDate(person.appliedOn)}</td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap">{person.experience}</td>
                     <td className="px-[16px] py-[12px]">{person.location}</td>
                     <td className="px-[16px] py-[12px]"><Link href={`/applicants/${person.id}`} className="text-body-sm-semibold text-brand-primary">View</Link></td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
         )}
       </div>
     </div>
@@ -122,7 +120,7 @@ function SplitReview({
   const selected = people.find((person) => person.id === selectedId) ?? people[0];
   if (!selected) return <EmptyState title="No applicants yet" body="Applicants will appear here after someone applies." />;
   return (
-    <div className="px-[16px] py-[24px] sm:px-[32px]">
+    <div className="">
       <h1 className="text-subheading-semibold">Applicants</h1>
       <p className="text-body-sm-regular text-text-secondary">{jobTitle} · {people.length} applicants</p>
       <div className="mt-[16px] grid gap-[16px] lg:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.2fr)]">

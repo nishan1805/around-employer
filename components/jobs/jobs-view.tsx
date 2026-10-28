@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, MoreHorizontal, Search } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -28,8 +28,7 @@ export function JobsView() {
   const router = useRouter();
   const { jobs, state, patchJob, removeJob, duplicateJob, account, verification } = usePortal();
   const [tab, setTab] = useState<"all" | JobStatus>(state === "returned" ? "returned" : "all");
-  const [query, setQuery] = useState(state === "no-results" ? "Barista" : "");
-  const [location, setLocation] = useState(state === "no-results" ? "Bhilai" : "");
+  const [clearedEmpty, setClearedEmpty] = useState(false);
   const [page, setPage] = useState(1);
   const [menuFor, setMenuFor] = useState<string | null>(state === "actions" ? "front-desk" : state === "returned" ? null : null);
   const [confirm, setConfirm] = useState<{ id: string; action: "pause" | "resume" | "close" | "delete" | "renew" } | null>(null);
@@ -42,13 +41,7 @@ export function JobsView() {
     return base;
   }, [source]);
 
-  const filtered = source.filter((job) => {
-    const tabOk = tab === "all" || job.status === tab;
-    const text = `${job.title} ${job.location} ${job.category}`.toLowerCase();
-    const queryOk = text.includes(query.toLowerCase());
-    const locationOk = !location || job.location.toLowerCase().includes(location.toLowerCase());
-    return tabOk && queryOk && locationOk;
-  });
+  const filtered = state === "no-results" && !clearedEmpty ? [] : source.filter((job) => tab === "all" || job.status === tab);
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
   const openMenu = state === "returned" ? rows.find((job) => job.title === "Kitchen Helper")?.id ?? menuFor : menuFor;
@@ -63,7 +56,7 @@ export function JobsView() {
   }
 
   return (
-    <div className="px-[16px] py-[24px] sm:px-[32px]">
+    <div>
       <div className="flex flex-wrap items-start justify-between gap-[12px]">
         <div>
           <h1 className="text-subheading-semibold">My Jobs</h1>
@@ -76,7 +69,7 @@ export function JobsView() {
           {counts.returned} jobs were returned for correction. Review the reason on each job, fix it and resubmit.
         </p>
       ) : null}
-      <div className="mt-[16px] flex gap-[16px] overflow-x-auto border-b border-border-default">
+      <div className="mt-[16px] flex flex-wrap gap-x-[16px] gap-y-[8px] border-b border-border-default">
         {TABS.map((item) => (
           <button
             key={item.id}
@@ -90,26 +83,6 @@ export function JobsView() {
           </button>
         ))}
       </div>
-      <div className="mt-[16px] flex flex-wrap gap-[8px]">
-        <label className="relative min-w-[240px] flex-1">
-          <Search size={16} className="absolute top-1/2 left-[12px] -translate-y-1/2 text-text-tertiary" />
-          <input
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by job title, location, or keyword..."
-            className="h-[44px] w-full rounded-md border border-border-default bg-white pr-[12px] pl-[36px]"
-          />
-        </label>
-        <button
-          onClick={() => setLocation(location ? "" : "Bhilai")}
-          className={`inline-flex h-[44px] items-center gap-[8px] rounded-full border px-[12px] text-body-sm-regular ${location ? "border-brand-primary text-brand-primary" : "border-border-default bg-white"}`}
-        >
-          <MapPin size={16} /> {location || "Location"}
-        </button>
-      </div>
       <div className="mt-[16px] overflow-hidden rounded-lg border border-border-default bg-white">
         {source.length === 0 ? (
           <EmptyState title="No jobs posted yet" body="Post your first job to start receiving applicants." action={<Button href="/post-job">Post a Job</Button>} />
@@ -121,29 +94,25 @@ export function JobsView() {
             action={
               <Button
                 variant="outline"
-                onClick={() => {
-                  setQuery("");
-                  setLocation("");
-                }}
+                onClick={() => setClearedEmpty(true)}
               >
                 Clear filters
               </Button>
             }
           />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[960px] text-left text-body-sm-regular">
+            <table className="w-full text-left text-body-sm-regular">
               <thead className="bg-background-secondary text-label-medium text-text-secondary">
                 <tr>
                   {["Job", "Location", "Category", "Employment Type", "Status", "Views", "Applicants", "Posted On", ""].map((label) => (
-                    <th key={label} className="px-[16px] py-[12px] font-medium">{label}</th>
+                    <th key={label} className={`px-[16px] py-[12px] font-medium ${label === "Job" ? "" : "whitespace-nowrap"}`}>{label}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((job) => (
                   <tr key={job.id} className="border-t border-border-default">
-                    <td className="px-[16px] py-[12px]">
+                    <td className="px-[16px] py-[12px] break-words">
                       <Link href={`/jobs/${job.id}`} className="font-semibold text-brand-primary">{job.title}</Link>
                       {job.listReason && job.status === "returned" ? (
                         <p className="text-label-regular text-error-default">
@@ -152,13 +121,13 @@ export function JobsView() {
                         </p>
                       ) : null}
                     </td>
-                    <td className="px-[16px] py-[12px] text-text-secondary">{job.location}</td>
-                    <td className="px-[16px] py-[12px]">{job.category}</td>
-                    <td className="px-[16px] py-[12px]">{job.employmentType}</td>
-                    <td className="px-[16px] py-[12px]"><JobBadge status={job.status} /></td>
-                    <td className="px-[16px] py-[12px]">{job.views}</td>
-                    <td className="px-[16px] py-[12px]">{job.applicants}</td>
-                    <td className="px-[16px] py-[12px]">{formatDate(job.postedOn)}</td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap text-text-secondary">{job.location}</td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap">{job.category}</td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap">{job.employmentType}</td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap"><JobBadge status={job.status} /></td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap">{job.views}</td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap">{job.applicants}</td>
+                    <td className="px-[16px] py-[12px] whitespace-nowrap">{formatDate(job.postedOn)}</td>
                     <td className="relative px-[16px] py-[12px]">
                       <button aria-label="Job actions" onClick={() => setMenuFor(openMenu === job.id ? null : job.id)}>
                         <MoreHorizontal size={18} />
@@ -169,18 +138,17 @@ export function JobsView() {
                 ))}
               </tbody>
             </table>
-          </div>
         )}
       </div>
       {filtered.length > 0 ? (
         <div className="mt-[16px] flex flex-wrap items-center justify-between gap-[12px] text-body-sm-regular text-text-secondary">
           <p>Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, filtered.length)} of {filtered.length} jobs</p>
           <div className="flex items-center gap-[4px]">
-            <button disabled={page === 1} onClick={() => setPage((value) => value - 1)} className="h-[36px] w-[36px] rounded-full border border-border-default disabled:opacity-40">‹</button>
+            <button disabled={page === 1} onClick={() => setPage((value) => value - 1)} className="h-[40px] w-[40px] rounded-full border border-border-default disabled:opacity-40">‹</button>
             {Array.from({ length: Math.min(pages, 5) }).map((_, index) => (
-              <button key={index} onClick={() => setPage(index + 1)} className={`h-[36px] w-[36px] rounded-full border ${page === index + 1 ? "border-brand-primary text-brand-primary" : "border-border-default"}`}>{index + 1}</button>
+              <button key={index} onClick={() => setPage(index + 1)} className={`h-[40px] w-[40px] rounded-full border ${page === index + 1 ? "border-brand-primary text-brand-primary" : "border-border-default"}`}>{index + 1}</button>
             ))}
-            <button disabled={page === pages} onClick={() => setPage((value) => value + 1)} className="h-[36px] w-[36px] rounded-full border border-border-default disabled:opacity-40">›</button>
+            <button disabled={page === pages} onClick={() => setPage((value) => value + 1)} className="h-[40px] w-[40px] rounded-full border border-border-default disabled:opacity-40">›</button>
             <span className="ml-[8px]">{pageSize} per page</span>
           </div>
         </div>

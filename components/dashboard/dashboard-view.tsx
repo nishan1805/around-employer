@@ -62,7 +62,7 @@ export function DashboardView() {
           : DASHBOARD_ACTIVE;
 
   return (
-    <div className="space-y-[16px] px-[16px] py-[24px] sm:px-[32px]">
+    <div className="space-y-[16px] ">
       <div className="flex flex-wrap items-center justify-between gap-[12px]">
         <h1 className="text-subheading-semibold">Dashboard</h1>
         <div className="flex items-center gap-[8px]">
@@ -193,7 +193,7 @@ export function DashboardView() {
             <div className="mb-[12px] flex items-center justify-between">
               <h2 className="text-body-semibold">
                 Recent applicants{" "}
-                {state === "new-applicants" ? <span className="ml-[4px] rounded-full bg-primary-primary-50 px-[8px] py-[2px] text-label-medium text-brand-primary">2 new</span> : null}
+                {state === "new-applicants" ? <span className="ml-[4px] rounded-full bg-primary-primary-50 px-[8px] py-[4px] text-label-medium text-brand-primary">2 new</span> : null}
               </h2>
               <Link href={href("/applicants")} className="text-body-sm-semibold text-brand-primary">View all →</Link>
             </div>
@@ -286,7 +286,7 @@ function Stat({ icon, tint, label, value, note, delta }: { icon: ReactNode; tint
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-[16px] px-[16px] py-[24px] sm:px-[32px]">
+    <div className="space-y-[16px] ">
       <SkeletonBlock className="h-[28px] w-[160px]" />
       <SkeletonBlock className="h-[64px] w-full" />
       <div className="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-4">
@@ -302,7 +302,7 @@ function DashboardSkeleton() {
 
 function StatusCard() {
   return (
-    <div className="space-y-[16px] px-[16px] py-[24px] sm:px-[32px]">
+    <div className="space-y-[16px] ">
       <h1 className="text-subheading-semibold">{EMPLOYER.companyName}</h1>
       <Banner
         tone="warning"
@@ -348,7 +348,7 @@ function Step({ label, detail }: { label: string; detail: string }) {
 
 function InfoRequest() {
   return (
-    <div className="mx-auto max-w-[640px] space-y-[16px] px-[16px] py-[24px]">
+    <div className="mx-auto max-w-[640px] space-y-[16px]">
       <h1 className="text-subheading-semibold">{EMPLOYER.companyName}</h1>
       <section className="rounded-lg border border-border-default bg-white p-[20px]">
         <Banner tone="warning" title="Additional information required" body="Upload a shop & establishment licence or a utility bill. The address on your GST certificate doesn't match the address you entered." />
@@ -361,7 +361,7 @@ function InfoRequest() {
 
 function Rejected() {
   return (
-    <div className="mx-auto max-w-[640px] space-y-[16px] px-[16px] py-[24px]">
+    <div className="mx-auto max-w-[640px] space-y-[16px]">
       <h1 className="text-subheading-semibold">{EMPLOYER.companyName}</h1>
       <section className="space-y-[12px] rounded-lg border border-border-default bg-white p-[20px]">
         <Banner tone="danger" title="Verification rejected" body={`The business name on the document doesn't match “${EMPLOYER.companyName}”.`} />

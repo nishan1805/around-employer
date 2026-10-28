@@ -13,7 +13,7 @@ const HISTORY = [
 
 export function BillingView() {
   return (
-    <div className="px-[16px] py-[24px] sm:px-[32px]">
+    <div>
       <h1 className="text-subheading-semibold">Billing & job credits</h1>
       <p className="text-body-sm-regular text-text-secondary">{EMPLOYER.companyName}</p>
       <div className="mt-[16px] grid gap-[16px] md:grid-cols-2">
@@ -32,7 +32,7 @@ export function BillingView() {
       </div>
       <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
         <h2 className="text-body-semibold">How credits work</h2>
-        <p className="mt-[8px] text-body-sm-regular text-text-secondary">Each month you can keep a set number of jobs live for free. Beyond that, posting or renewing a job uses 1 credit. Pausing doesn’t refund credits; closing early doesn’t either. Prices shown may change. TODO: prices are unset until billing is decided.</p>
+        <p className="mt-[8px] text-body-sm-regular text-text-secondary">Each month you can keep a set number of jobs live for free. Beyond that, posting or renewing a job uses 1 credit. Pausing doesn’t refund credits; closing early doesn’t either. Prices <PendingDecision value="credit pack prices" />.</p>
       </section>
       <div className="mt-[16px] grid gap-[16px] lg:grid-cols-3">
         {CREDIT_PACKS.map((pack) => (

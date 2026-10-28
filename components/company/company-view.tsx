@@ -59,7 +59,7 @@ export function CompanyView() {
   if (state === "documents") return <DocumentsCard />;
 
   return (
-    <div className="px-[16px] py-[24px] sm:px-[32px]">
+    <div className="">
       <div className="flex flex-wrap items-start justify-between gap-[12px]">
         <div>
           <h1 className="text-subheading-semibold">Company Profile</h1>
@@ -195,7 +195,7 @@ function DocumentsCard() {
   }
 
   return (
-    <div className="px-[16px] py-[24px] sm:px-[32px]">
+    <div className="">
       <h1 className="text-subheading-semibold">{EMPLOYER.companyName}</h1>
       <div className="mt-[16px]"><Banner tone="warning" title="Additional info required" body="Upload the missing company documents. Publishing stays locked." /></div>
       <div className="mt-[16px] grid gap-[16px] lg:grid-cols-[minmax(0,1.4fr)_360px]">

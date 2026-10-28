@@ -6,7 +6,7 @@ export function PendingDecision({ value, show = false }: { value: string | numbe
   return (
     <span className="inline-flex flex-wrap items-center gap-[8px]">
       {show ? <span>{value}</span> : null}
-      <span className="inline-flex items-center rounded-full bg-warning-warning-50 px-[8px] py-[2px] text-label-medium text-warning-warning-700">
+      <span className="inline-flex items-center rounded-full bg-warning-warning-50 px-[8px] py-[4px] text-label-medium text-warning-warning-700">
         Pending decision
       </span>
     </span>

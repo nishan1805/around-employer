@@ -66,6 +66,7 @@ const AI_DRAFT: Draft = {
   salary: "25000",
 };
 
+/** Figma Post a Job frames: E08a choose, E08b paste, E08c processing, E08e extract failed, E08f AI-filled details, E08g manual details, E08h pay, E08i review, E08j submit confirm. There is no E08d. */
 const STEPS = ["Job details", "Pay & requirements", "Review"];
 
 export function PostJobView() {
@@ -141,9 +142,10 @@ export function PostJobView() {
   const chars = paste.length;
 
   return (
-    <div className="px-[16px] py-[24px] sm:px-[32px]">
+    <div>
+      {/* E08a Choose method */}
       {phase === "choose" ? (
-        <div className="mx-auto max-w-3xl">
+        <div>
           <h1 className="text-display-small-semibold">Post a job</h1>
           <p className="mt-[4px] text-body-sm-regular text-text-secondary">Paste a description and we’ll fill the form, or enter the details yourself. Nothing goes live until you submit it for review.</p>
           <div className="mt-[24px] grid gap-[16px] md:grid-cols-2">
@@ -159,6 +161,7 @@ export function PostJobView() {
         </div>
       ) : null}
 
+      {/* E08b Paste description */}
       {phase === "paste" ? (
         <div>
           <h1 className="text-display-small-semibold">Paste a job description</h1>
@@ -178,9 +181,11 @@ export function PostJobView() {
         </div>
       ) : null}
 
+      {/* E08c Processing */}
       {phase === "processing" ? (
         <Processing hold={state === "processing"} onDone={() => { setDraft(AI_DRAFT); setPhase("details"); }} onManual={() => setPhase("details")} failed={false} />
       ) : null}
+      {/* E08e Processing failed */}
       {phase === "failed" ? (
         <Processing failed onDone={() => setPhase("paste")} onManual={() => setPhase("details")} />
       ) : null}
@@ -189,6 +194,7 @@ export function PostJobView() {
         <div className="grid gap-[16px] lg:grid-cols-[240px_minmax(0,1fr)]">
           <StepIndicator steps={STEPS.map((label) => ({ id: label, label }))} current={stepIndex} />
           <section className="rounded-lg border border-border-default bg-white p-[20px]">
+            {/* E08f AI-filled details and E08g manual details */}
             {phase === "details" ? (
               <div className="space-y-[16px]">
                 {state === "details-ai" ? <Banner tone="info" title="Filled from your description" body="Check every field before you continue. Nothing is posted yet." /> : null}
@@ -223,6 +229,7 @@ export function PostJobView() {
                 <Field label="Skills" hint="Comma separated"><TextInput value={draft.skills} onChange={(event) => patch("skills", event.target.value)} /></Field>
               </div>
             ) : null}
+            {/* E08h Pay & requirements */}
             {phase === "pay" ? (
               <div className="space-y-[16px]">
                 <h1 className="text-display-small-semibold">Pay & requirements</h1>
@@ -262,6 +269,7 @@ export function PostJobView() {
                 </div>
               </div>
             ) : null}
+            {/* E08i Review */}
             {phase === "review" ? (
               <div className="space-y-[16px]">
                 <div>
@@ -311,6 +319,7 @@ export function PostJobView() {
         </div>
       ) : null}
 
+      {/* E08j Submit confirm */}
       <ConfirmDialog
         open={confirm}
         title="Submit for review?"
@@ -338,7 +347,7 @@ function Processing({ failed, hold, onDone, onManual }: { failed: boolean; hold?
     return () => window.clearTimeout(timer);
   }, [failed, hold, onDone, tick]);
   return (
-    <div className="max-w-xl">
+    <div className="w-full">
       <h1 className="text-display-small-semibold">{failed ? "Post a job" : "Reading your description"}</h1>
       <p className="text-body-sm-regular text-text-secondary">{failed ? "We couldn’t finish the extract." : "This usually takes a few seconds."}</p>
       <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[24px]">

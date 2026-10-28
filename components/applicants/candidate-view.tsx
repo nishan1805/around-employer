@@ -23,7 +23,7 @@ export function CandidateView({ id }: { id: string }) {
   const [menu, setMenu] = useState(false);
 
   if (state === "loading") {
-    return <div className="space-y-[12px] px-[16px] py-[24px] sm:px-[32px]"><SkeletonBlock className="h-[112px]" /><SkeletonBlock className="h-[80px]" /></div>;
+    return <div className="space-y-[12px] "><SkeletonBlock className="h-[112px]" /><SkeletonBlock className="h-[80px]" /></div>;
   }
   if (state === "error" || !person) {
     return <ErrorState title="Couldn't load this candidate" body="Check your connection and try again." onRetry={() => router.push(`/applicants/${id}`)} />;
@@ -44,7 +44,7 @@ export function CandidateView({ id }: { id: string }) {
   }
 
   return (
-    <div className="px-[16px] py-[24px] sm:px-[32px]">
+    <div>
       <Link href="/applicants" className="text-body-sm-medium">‹ Back to Applicants</Link>
       <section className="mt-[16px] flex flex-wrap items-center gap-[16px] rounded-lg border border-border-default bg-white p-[20px]">
         <span className="flex h-[56px] w-[56px] items-center justify-center rounded-full bg-primary-primary-50 text-body-semibold text-brand-primary">{candidate.initials}</span>
@@ -87,7 +87,7 @@ export function CandidateView({ id }: { id: string }) {
         ))}
       </div>
       {tab === "overview" ? (
-        <div className="mt-[16px] grid gap-[16px] lg:grid-cols-[minmax(0,1.6fr)_360px]">
+        <div className="mt-[16px] grid gap-[16px] lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-[16px]">
             {detail?.skills.length ? (
               <Card title="Skills">
@@ -104,16 +104,16 @@ export function CandidateView({ id }: { id: string }) {
                   {detail.experienceItems.map((item, index) => (
                     <div key={item.title} className="flex items-start gap-[16px]">
                       <div className="flex flex-col items-center self-stretch pt-[4px]">
-                        <span className="size-[10px] shrink-0 rounded-full bg-brand-primary" />
+                        <span className="size-[12px] shrink-0 rounded-full bg-brand-primary" />
                         {index < detail.experienceItems.length - 1 ? <span className="mt-[4px] w-[2px] flex-1 bg-grey-grey-200" /> : null}
                       </div>
                       <div className="grid min-w-[0px] flex-1 gap-[8px] pb-[8px] md:grid-cols-[250px_minmax(0,1fr)]">
                         <div>
                           <p className="text-body-sm-semibold">{item.title}</p>
                           <p className="text-body-sm-regular text-text-secondary">{item.org}</p>
-                          <p className="mt-[4px] flex items-center gap-[6px] text-label-regular text-text-secondary"><Calendar size={16} /> {item.dates}</p>
+                          <p className="mt-[4px] flex items-center gap-[8px] text-label-regular text-text-secondary"><Calendar size={16} /> {item.dates}</p>
                         </div>
-                        <p className="text-body-sm-regular text-text-secondary">{item.description}</p>
+                        <p className="max-w-[72ch] text-body-sm-regular text-text-secondary">{item.description}</p>
                       </div>
                     </div>
                   ))}
@@ -144,7 +144,7 @@ export function CandidateView({ id }: { id: string }) {
             </Card>
             {detail?.about ? (
               <Card title="About">
-                <p className="text-body-sm-regular text-text-secondary">{detail.about}</p>
+                <p className="max-w-[72ch] text-body-sm-regular text-text-secondary">{detail.about}</p>
               </Card>
             ) : null}
             {detail?.links.length ? (

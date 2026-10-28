@@ -16,7 +16,7 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <label className="flex w-full flex-col gap-[6px] text-left">
+    <label className="flex w-full flex-col gap-[8px] text-left">
       {label ? (
         <span className="text-label-medium text-text-secondary">
           {label}

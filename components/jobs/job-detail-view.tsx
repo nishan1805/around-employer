@@ -16,7 +16,7 @@ import type { Job, JobStatus } from "@/lib/types";
 
 const STATE_STATUS: Record<string, JobStatus> = {
   active: "active",
-  "pending-review": "pending_review",
+"pending-review": "pending_review",
   returned: "returned",
   paused: "paused",
   closed: "closed",
@@ -32,7 +32,7 @@ export function JobDetailView({ id }: { id: string }) {
   const found = jobs.find((item) => item.id === id) ?? jobs[0];
   if (state === "loading") {
     return (
-      <div className="space-y-[16px] px-[16px] py-[24px] sm:px-[32px]">
+      <div className="space-y-[16px] ">
         <SkeletonBlock className="h-[32px] w-[256px]" />
         <SkeletonBlock className="h-[96px] w-full" />
         <SkeletonBlock className="h-[256px] w-full" />
@@ -58,10 +58,10 @@ export function JobDetailView({ id }: { id: string }) {
   };
 
   return (
-    <div className="space-y-[16px] px-[16px] py-[24px] sm:px-[32px]">
+    <div className="space-y-[16px] ">
       <p className="text-body-sm-regular text-text-secondary">
         <Link href="/jobs" className="font-medium text-text-primary">‹ My Jobs</Link>
-        <span> · {job.title}</span>
+        <span className="inline-block max-w-[72ch] truncate align-bottom"> · {job.title}</span>
       </p>
       {status === "pending_review" ? (
         <Banner
@@ -161,10 +161,10 @@ export function JobDetailView({ id }: { id: string }) {
         </div>
       </div>
 
-      <div className="grid gap-[16px] lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
+      <div className="grid gap-[16px] lg:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
         <section className="rounded-lg border border-border-default bg-white p-[20px]">
           <h2 className="text-body-semibold">Job Description</h2>
-          <p className="mt-[12px] text-body-sm-regular text-text-secondary">{job.description}</p>
+          <p className="mt-[12px] max-w-[72ch] text-body-sm-regular text-text-secondary">{job.description}</p>
           <h3 className="mt-[20px] text-body-sm-semibold">Skills</h3>
           <div className="mt-[8px] flex flex-wrap gap-[8px]">
             {job.skills.map((skill) => (
