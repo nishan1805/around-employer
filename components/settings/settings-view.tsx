@@ -412,7 +412,7 @@ export function SettingsView() {
               title="Job expiry reminders"
               description="Get notified before your jobs expire so you can renew them on time."
               extra={
-                <div className="mt-[12px] flex flex-wrap items-center gap-[8px] text-body-sm-regular text-text-secondary">
+                <div className="mt-[12px] flex w-full basis-full flex-wrap items-center gap-[8px] border-t border-border-default pt-[12px] text-body-sm-regular text-text-secondary">
                   Remind me
                   <SelectInput className="w-[192px]" aria-label="Job expiry reminder" value={prefs.expiryReminders.remindMe} disabled={suspended} onChange={(event) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, remindMe: event.target.value } })}>
                     {REMIND_OPTIONS.map((option) => <option key={option}>{option}</option>)}

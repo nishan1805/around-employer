@@ -23,8 +23,8 @@ export function BillingView() {
         </section>
         <section className="rounded-lg border border-border-default bg-white p-[20px]">
           <p className="text-label-medium text-text-secondary">Free allowance</p>
-          <p className="mt-[8px] text-heading-semibold">
-            <PendingDecision value={FREE_JOB_ALLOWANCE} />
+          <p className="mt-[8px]">
+            <PendingDecision value={FREE_JOB_ALLOWANCE} className="px-[12px] py-[6px] text-heading-semibold" />
           </p>
           <p className="mt-[8px] text-label-regular text-text-secondary">
             Included live posts <PendingDecision value={PLAN_JOB_POST_LIMIT} />
@@ -35,7 +35,7 @@ export function BillingView() {
       <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
         <h2 className="text-subheading-semibold">How credits work</h2>
         <p className="mt-[8px] text-body-sm-regular text-text-secondary">
-          Each month you can keep a set number of jobs live for free. Beyond that, posting or renewing a job uses 1 credit. Pausing doesn’t refund credits; closing early doesn’t either. Prices shown may change
+          Each month you can keep a set number of jobs live for free. Beyond that, posting or renewing a job uses 1 credit. Pausing doesn’t refund credits; closing early doesn’t either. Prices shown may change.
         </p>
       </section>
       <div className="mt-[16px] grid gap-[16px] lg:grid-cols-3">

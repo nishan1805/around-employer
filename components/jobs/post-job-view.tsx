@@ -272,18 +272,18 @@ export function PostJobView() {
                     ))}
                   </div>
                 </div>
-                <div className="grid gap-[16px] md:grid-cols-2">
-                  <Field label="Experience required">
-                    <div className="grid grid-cols-2 gap-[8px]">
-                      <SelectInput aria-label="Minimum experience" value={draft.experience.split("–")[0]?.trim() ?? ""} onChange={(event) => patch("experience", `${event.target.value} – ${draft.experience.split("–")[1]?.trim() || "3 years"}`)}>
-                        <option value="">Minimum</option>
-                        {["Fresher", "1 year", "1 – 3 years"].map((item) => <option key={item}>{item}</option>)}
-                      </SelectInput>
-                      <SelectInput aria-label="Maximum experience" value={draft.experience.split("–")[1]?.trim() ?? ""} onChange={(event) => patch("experience", `${draft.experience.split("–")[0]?.trim() || "1 year"} – ${event.target.value}`)}>
-                        <option value="">Maximum</option>
-                        {["3 years", "5 years", "8 years"].map((item) => <option key={item}>{item}</option>)}
-                      </SelectInput>
-                    </div>
+                <div className="grid gap-[16px] md:grid-cols-3">
+                  <Field label="Minimum experience">
+                    <SelectInput aria-label="Minimum experience" value={draft.experience.split("–")[0]?.trim() ?? ""} onChange={(event) => patch("experience", `${event.target.value} – ${draft.experience.split("–")[1]?.trim() || ""}`.replace(/\s+–\s+$/, ""))}>
+                      <option value="">Minimum</option>
+                      {["Fresher", "1 year", "2 years", "3 years"].map((item) => <option key={item}>{item}</option>)}
+                    </SelectInput>
+                  </Field>
+                  <Field label="Maximum experience">
+                    <SelectInput aria-label="Maximum experience" value={draft.experience.split("–")[1]?.trim() ?? ""} onChange={(event) => patch("experience", `${draft.experience.split("–")[0]?.trim() || ""} – ${event.target.value}`.replace(/^\s+–\s+/, ""))}>
+                      <option value="">Maximum</option>
+                      {["3 years", "5 years", "8 years"].map((item) => <option key={item}>{item}</option>)}
+                    </SelectInput>
                   </Field>
                   <Field label="Application deadline (optional)">
                     <label className="relative flex h-[44px] items-center rounded-sm border border-border-default px-[12px] text-body-sm-regular">
