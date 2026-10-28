@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Banner } from "@/components/ui/feedback";
-import { Navbar } from "@/components/shell/navbar";
+import { TopBar } from "@/components/shell/top-bar";
 import { Sidebar } from "@/components/shell/sidebar";
 import { StateSwitcher } from "@/components/shell/state-switcher";
 import { usePortal } from "@/components/shell/use-portal";
@@ -26,7 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       ) : null}
       <div className="flex min-w-0 flex-1 flex-col">
-        <Navbar onMenu={() => setMobileOpen(true)} />
+        <TopBar onMenu={() => setMobileOpen(true)} />
         <main className="flex-1 overflow-y-auto bg-background-secondary">
           {account === "Suspended" ? (
             <div className="px-16 pt-16 sm:px-32">

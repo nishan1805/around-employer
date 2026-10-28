@@ -1,10 +1,11 @@
 "use client";
 
-import { Bell, Clock, CreditCard, Lock, Megaphone, Sun, User, UserPlus, Users, X } from "lucide-react";
+import { Clock, CreditCard, Lock, Megaphone, Sun, UserPlus, X } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Field, SelectInput, TextInput } from "@/components/ui/field";
+import { SettingsTabs } from "@/components/ui/settings-tabs";
 import { usePortal } from "@/components/shell/use-portal";
 import {
   closeEmployerAccount,
@@ -22,19 +23,14 @@ import {
   EXPIRY_REMINDER_DEFAULT,
   OTP_DEMO_CODE,
   OTP_LENGTH,
-  policy,
+  TEAM_ACCESS,
 } from "@/src/config/policy";
 import type { AccountSettings, NotificationPrefs, TeamMember, TeamRole } from "@/lib/types";
 
 type Tab = "account" | "team" | "notifications";
 type SaveState = "idle" | "saving" | "saved" | "error";
 
-const ROLES: { id: TeamRole; description: string }[] = [
-  { id: "Owner", description: "Full access, including team and billing." },
-  { id: "Hiring manager", description: "Can post jobs and manage applicants." },
-  { id: "Recruiter", description: "Can review applicants and notes." },
-  { id: "Viewer", description: "Can view jobs and applicants only." },
-];
+const ROLES: TeamRole[] = ["Owner", "Hiring manager", "Recruiter"];
 
 const SEND_TIMES = [DAILY_SUMMARY_DEFAULT_TIME, "8:00 AM", "10:00 AM", "6:00 PM"];
 const REMIND_OPTIONS = [EXPIRY_REMINDER_DEFAULT, "1 day before expiry", "7 days before expiry"];
@@ -64,8 +60,8 @@ export function SettingsView() {
   const [otpError, setOtpError] = useState(state === "change-number-error" || state === "whatsapp-failed");
   const [closeOpen, setCloseOpen] = useState(state === "close-confirm" || state === "close-unavailable");
   const [closeNote, setCloseNote] = useState(state === "close-unavailable" ? "Closing an account is unavailable. The mock API does not support it." : "");
-  const [menuFor, setMenuFor] = useState<string | null>(state === "team-menu" ? "tm-hiring" : state === "team-pending-menu" ? "tm-recruiting" : null);
-  const [confirm, setConfirm] = useState<{ id: string; kind: "remove" | "cancel" } | null>(state === "team-remove-confirm" ? { id: "tm-hiring", kind: "remove" } : null);
+  const [menuFor, setMenuFor] = useState<string | null>(state === "team-menu" ? "tm-priya" : state === "team-pending-menu" ? "tm-neha" : null);
+  const [confirm, setConfirm] = useState<{ id: string; kind: "remove" | "cancel" } | null>(state === "team-remove-confirm" ? { id: "tm-priya", kind: "remove" } : null);
   const [roleEdit, setRoleEdit] = useState<TeamMember | null>(null);
   const [invite, setInvite] = useState({ name: "", email: "", role: "Recruiter" as TeamRole });
   const [inviteErrors, setInviteErrors] = useState<Record<string, string>>(
@@ -146,16 +142,14 @@ export function SettingsView() {
   return (
     <div className="mx-auto max-w-[760px] px-16 py-6 sm:px-32">
       <h1 className="text-subheading-semibold">Settings</h1>
-      <p className="mt-1 text-body-sm-regular text-text-secondary">Manage your account, team access, notifications and other preferences.</p>
+      <p className="mt-1 text-body-sm-regular text-text-secondary">Manage your account, team access and notifications.</p>
       {suspended ? (
         <p className="mt-16 rounded-md bg-error-error-50 px-16 py-3 text-body-sm-regular text-error-default">
           This account is suspended. Saving, invites, and notification changes are locked. This is separate from company verification.
         </p>
       ) : null}
-      <div className="mt-5 flex gap-6 overflow-x-auto border-b border-border-default" role="tablist">
-        <TabButton id="account" label="Account" icon={<User size={16} />} active={tab === "account"} onClick={() => setTab("account")} />
-        <TabButton id="team" label="Team members" icon={<Users size={16} />} active={tab === "team"} onClick={() => setTab("team")} />
-        <TabButton id="notifications" label="Notifications" icon={<Bell size={16} />} active={tab === "notifications"} onClick={() => setTab("notifications")} />
+      <div className="mt-6">
+        <SettingsTabs value={tab} onChange={setTab} />
       </div>
 
       {tab === "account" ? (
@@ -166,9 +160,9 @@ export function SettingsView() {
               <Field label="Your name" error={fieldErrors.name}>
                 <TextInput aria-label="Your name" value={draft.name} disabled={suspended} onChange={(event) => setDraft({ ...draft, name: event.target.value })} />
               </Field>
-              <Field label="Role" hint={"Role can't be changed. Manage team members to assign roles."}>
+              <Field label="Role" hint={"Role can't be changed here. Manage team members to assign roles."}>
                 <div className="relative">
-                  <TextInput aria-label="Role" value={draft.role} readOnly />
+                  <TextInput aria-label="Role" value={draft.role} readOnly className="bg-grey-grey-100 text-text-disabled" />
                   <Lock size={16} className="absolute top-1/2 right-3 -translate-y-1/2 text-text-secondary" aria-hidden />
                 </div>
               </Field>
@@ -197,14 +191,10 @@ export function SettingsView() {
               </Button>
             </div>
           </section>
-          <section className="rounded-lg border border-error-default/40 bg-white p-5">
-            <h2 className="text-body-semibold text-error-default">Danger zone</h2>
-            <p className="mt-1 text-body-sm-regular text-text-secondary">Close this employer account. The results are not decided yet.</p>
-            <ul className="mt-3 list-disc space-y-1 pl-5 text-body-sm-regular text-text-secondary">
-              {ACCOUNT_CLOSURE.consequences.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+          <section className="rounded-lg border border-error-default bg-error-error-50 p-6">
+            <h2 className="text-body-semibold">Danger zone</h2>
+            <p className="mt-1 text-body-sm-regular text-text-secondary">Close your employer account.</p>
+            <p className="text-label-medium text-text-secondary">Consequences: {ACCOUNT_CLOSURE.note}</p>
             {closeNote ? <p className="mt-3 text-body-sm-regular text-error-default">{closeNote}</p> : null}
             <Button className="mt-16" variant="outline" onClick={() => { setCloseOpen(true); setCloseNote(""); }}>
               <span className="text-error-default">Close employer account</span>
@@ -219,7 +209,7 @@ export function SettingsView() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="text-body-semibold">Team members</h2>
-                <p className="text-body-sm-regular text-text-secondary">People who can use {draft.companyName}.</p>
+                <p className="text-body-sm-regular text-text-secondary">Invite people to help you manage jobs and applicants.</p>
               </div>
               <Button onClick={() => document.getElementById("invite-name")?.focus()}>+ Invite member</Button>
             </div>
@@ -245,7 +235,7 @@ export function SettingsView() {
                       <td className="py-3 text-text-secondary">{member.email}</td>
                       <td className="py-3">
                         <span className="inline-flex rounded-full bg-primary-primary-50 px-2 py-0.5 text-label-medium text-brand-primary">{member.role}</span>
-                        <p className="mt-1 text-label-regular text-text-secondary">{ROLES.find((role) => role.id === member.role)?.description}</p>
+                        <p className="mt-1 text-label-regular text-text-secondary">{TEAM_ACCESS[member.role]}</p>
                       </td>
                       <td className="py-3">
                         <span className={`inline-flex rounded-full px-2 py-0.5 text-label-medium ${member.status === "Active" ? "bg-success-success-50 text-success-success-700" : "bg-warning-warning-50 text-warning-warning-700"}`}>
@@ -296,8 +286,8 @@ export function SettingsView() {
               </Field>
               <Field label="Role">
                 <SelectInput value={invite.role} disabled={suspended} onChange={(event) => setInvite({ ...invite, role: event.target.value as TeamRole })}>
-                  {ROLES.filter((role) => role.id !== "Owner").map((role) => (
-                    <option key={role.id} value={role.id}>{role.id}</option>
+                  {ROLES.filter((role) => role !== "Owner").map((role) => (
+                    <option key={role} value={role}>{role}</option>
                   ))}
                 </SelectInput>
               </Field>
@@ -334,7 +324,7 @@ export function SettingsView() {
         <section className="mt-5 rounded-lg border border-border-default bg-white p-5">
           <h2 className="text-body-semibold">Notification preferences</h2>
           <p className="mt-1 text-label-regular text-text-tertiary">
-            TODO: channel availability is undecided ({policy.notifications.channels.join(", ")}). Toggles are saved on this device only.
+            TODO: channel availability is undecided (email, in-app, WhatsApp). Toggles are saved on this device only.
           </p>
           {prefStatus === "saving" ? <p className="mt-3 text-body-sm-regular text-text-secondary">Saving…</p> : null}
           {prefStatus === "saved" ? <p className="mt-3 text-body-sm-regular text-success-success-700">Your preferences are saved automatically.</p> : null}
@@ -402,10 +392,8 @@ export function SettingsView() {
         confirmLabel="Close account"
         body={
           <div>
-            <p>Confirm you want to close {draft.companyName}. These outcomes are not decided:</p>
-            <ul className="mt-2 list-disc pl-5">
-              {ACCOUNT_CLOSURE.consequences.map((item) => <li key={item}>{item}</li>)}
-            </ul>
+            <p>Confirm you want to close {draft.companyName}.</p>
+            <p className="mt-2">Consequences: {ACCOUNT_CLOSURE.note}</p>
           </div>
         }
         onCancel={() => setCloseOpen(false)}
@@ -438,7 +426,7 @@ export function SettingsView() {
         body={
           roleEdit ? (
             <SelectInput aria-label="Role" defaultValue={roleEdit.role} id="role-edit" onChange={(event) => setRoleEdit({ ...roleEdit, role: event.target.value as TeamRole })}>
-              {ROLES.filter((role) => role.id !== "Owner").map((role) => <option key={role.id}>{role.id}</option>)}
+              {ROLES.filter((role) => role !== "Owner").map((role) => <option key={role}>{role}</option>)}
             </SelectInput>
           ) : null
         }
@@ -465,21 +453,6 @@ function statusFrom(state: string, kind: "account" | "notifications"): SaveState
   return "idle";
 }
 
-function TabButton({ id, label, icon, active, onClick }: { id: string; label: string; icon: ReactNode; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      role="tab"
-      id={`tab-${id}`}
-      aria-selected={active}
-      onClick={onClick}
-      className={`inline-flex shrink-0 items-center gap-2 border-b-2 pb-2 text-body-sm-semibold ${active ? "border-brand-primary text-brand-primary" : "border-transparent text-text-secondary"}`}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
 function Verified() {
   return <span className="inline-flex h-6 items-center rounded-full bg-success-success-50 px-2 text-label-medium text-success-success-700">Verified</span>;
 }
@@ -495,7 +468,7 @@ function Toggle({ label, checked, disabled, onChange }: { label: string; checked
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative h-6 w-10 rounded-full ${checked ? "bg-brand-primary" : "bg-line"} disabled:opacity-50`}
+        className={`relative h-6 w-10 rounded-full ${checked ? "bg-brand-primary" : "bg-grey-grey-300"} disabled:opacity-50`}
       >
         <span className={`absolute top-1 h-16 w-16 rounded-full bg-white ${checked ? "left-5" : "left-1"}`} />
       </button>

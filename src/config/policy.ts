@@ -58,10 +58,18 @@ export interface PolicyConfig {
     expiryReminderDefault: string;
   };
   accountClosure: {
-    /** TODO: pending decision — do not invent outcomes. The dialog lists only these lines. */
-    consequences: readonly string[];
+    /** TODO: pending decision — what closing an employer account does. Shown as this note, not as invented outcomes. */
+    note: string;
     /** The mock API cannot close an account. */
     supportedByMockApi: false;
+  };
+  teamAccess: {
+    /** TODO: pending decision — per-role access copy for the Team members table. */
+    byRole: {
+      Owner: string;
+      "Hiring manager": string;
+      Recruiter: string;
+    };
   };
   referenceId: {
     /** TODO: pending decision — verification reference ID format. */
@@ -113,12 +121,15 @@ export const policy: PolicyConfig = {
     expiryReminderDefault: "3 days before expiry",
   },
   accountClosure: {
-    consequences: [
-      "TODO: pending decision — what happens to live jobs",
-      "TODO: pending decision — what happens to applicants",
-      "TODO: pending decision — whether the company page stays visible",
-    ],
+    note: "Pending decision",
     supportedByMockApi: false,
+  },
+  teamAccess: {
+    byRole: {
+      Owner: "All access",
+      "Hiring manager": "Post jobs, manage applicants",
+      Recruiter: "Manage applicants",
+    },
   },
   referenceId: {
     example: "AR-VER-2026-00481",
@@ -152,6 +163,7 @@ export const NOTIFICATION_CHANNELS = policy.notifications.channels;
 export const DAILY_SUMMARY_DEFAULT_TIME = policy.notifications.dailySummaryDefaultTime;
 export const EXPIRY_REMINDER_DEFAULT = policy.notifications.expiryReminderDefault;
 export const ACCOUNT_CLOSURE = policy.accountClosure;
+export const TEAM_ACCESS = policy.teamAccess.byRole;
 export const VERIFICATION_REFERENCE_ID = policy.referenceId.example;
 export const PLAN_JOB_POST_LIMIT = policy.plan.jobPostLimit;
 export const FREE_JOB_ALLOWANCE = policy.plan.freeJobAllowance;

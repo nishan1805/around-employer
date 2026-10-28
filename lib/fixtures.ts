@@ -14,7 +14,8 @@ const DESC =
 
 export const EMPLOYER = {
   companyName: "Raipur Builder",
-  email: "hr@raipurbuilder.in",
+  email: "hiring@raipurbuilder.in",
+  ownerName: "Rakesh Agrawal",
   avatarInitials: "RB",
   location: "Shankar Nagar, Raipur",
 };
@@ -42,9 +43,9 @@ export const COMPANY: CompanyProfile = {
 };
 
 export const SETTINGS: AccountSettings = {
-  name: "Raipur Builder",
+  name: "Rakesh Agrawal",
   role: "Owner",
-  email: "hr@raipurbuilder.in",
+  email: "hiring@raipurbuilder.in",
   phone: "+91 98XXX XXXXX",
   emailVerified: true,
   phoneVerified: true,
@@ -54,36 +55,44 @@ export const SETTINGS: AccountSettings = {
     dailySummary: { email: true, sendAt: DAILY_SUMMARY_DEFAULT_TIME },
     whatsapp: { enabled: false, phone: "", verified: false },
     expiryReminders: { email: true, inApp: true, remindMe: EXPIRY_REMINDER_DEFAULT },
-    productUpdates: { email: false, inApp: true },
-    billing: { email: true, inApp: true },
+    productUpdates: { email: false, inApp: false },
+    billing: { email: true, inApp: false },
   },
 };
 
 export const TEAM: TeamMember[] = [
   {
     id: "tm-owner",
-    name: "Raipur Builder",
-    email: "hr@raipurbuilder.in",
+    name: "Rakesh Agrawal",
+    email: "hiring@raipurbuilder.in",
     role: "Owner",
     status: "Active",
-    initials: "RB",
+    initials: "RA",
     you: true,
   },
   {
-    id: "tm-hiring",
-    name: "Hiring desk",
-    email: "hiring@raipurbuilder.in",
+    id: "tm-priya",
+    name: "Priya Verma",
+    email: "priya.verma@raipurbuilder.in",
     role: "Hiring manager",
     status: "Active",
-    initials: "HD",
+    initials: "PV",
   },
   {
-    id: "tm-recruiting",
-    name: "Recruiting desk",
-    email: "recruiting@raipurbuilder.in",
+    id: "tm-arjun",
+    name: "Arjun Sahu",
+    email: "arjun.sahu@raipurbuilder.in",
     role: "Recruiter",
+    status: "Active",
+    initials: "AS",
+  },
+  {
+    id: "tm-neha",
+    name: "Neha Tiwari",
+    email: "neha.tiwari@raipurbuilder.in",
+    role: "Hiring manager",
     status: "Pending",
-    initials: "RD",
+    initials: "NT",
   },
 ];
 

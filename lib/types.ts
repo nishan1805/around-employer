@@ -126,7 +126,7 @@ export interface AppNotification {
   tone: "applicant" | "approved" | "returned" | "expiring";
 }
 
-export type TeamRole = "Owner" | "Hiring manager" | "Recruiter" | "Viewer";
+export type TeamRole = "Owner" | "Hiring manager" | "Recruiter";
 export type TeamStatus = "Active" | "Pending";
 
 export interface TeamMember {
