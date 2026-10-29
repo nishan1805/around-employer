@@ -25,26 +25,36 @@ export function CandidateView({ id }: { id: string }) {
 
   if (state === "loading") {
     return (
-      <div>
+      <div className="flex flex-col gap-[20px]">
         <Link href="/applicants" className="inline-flex items-center gap-[8px] text-body-sm-medium text-text-secondary"><ChevronLeft size={16} /> Back to Applicants</Link>
-        <section className="mt-[16px] flex items-center gap-[16px] rounded-lg border border-border-default bg-white p-[24px]">
-          <SkeletonBlock className="size-[56px] shrink-0 rounded-full" />
+        <section className="flex items-center gap-[20px] rounded-lg border border-border-default bg-white p-[24px]">
+          <SkeletonBlock className="size-[56px] shrink-0 !rounded-full" />
           <div className="min-w-[0px] flex-1 space-y-[8px]">
-            <SkeletonBlock className="h-[24px] w-[180px]" />
-            <SkeletonBlock className="h-[16px] w-[320px]" />
+            <SkeletonBlock className="h-[24px] w-[200px] !rounded-[6px]" />
+            <SkeletonBlock className="h-[14px] w-[360px] max-w-full !rounded-[6px]" />
           </div>
-          <SkeletonBlock className="h-[44px] w-[140px]" />
+          <div className="flex shrink-0 gap-[12px]">
+            <SkeletonBlock className="h-[40px] w-[150px] !rounded-[8px]" />
+            <SkeletonBlock className="h-[40px] w-[170px] !rounded-[8px]" />
+          </div>
         </section>
-        <div className="mt-[16px] flex gap-[8px] border-b border-border-default pb-[8px]">
-          <SkeletonBlock className="h-[36px] w-[96px]" />
-          <SkeletonBlock className="h-[36px] w-[88px]" />
+        <div className="flex border-b border-border-default" role="tablist" aria-label="Candidate profile">
+          <span className="px-[16px] py-[12px] text-body-sm-semibold text-text-disabled">Overview</span>
+          <span className="px-[16px] py-[12px] text-body-sm-semibold text-text-disabled">Resume</span>
         </div>
-        <section className="mt-[16px] space-y-[12px] rounded-lg border border-border-default bg-white p-[20px]">
-          <SkeletonBlock className="h-[16px] w-[120px]" />
-          <SkeletonBlock className="h-[14px] w-full" />
-          <SkeletonBlock className="h-[14px] w-[80%]" />
-          <SkeletonBlock className="h-[14px] w-[64%]" />
-        </section>
+        <div className="grid items-start gap-[20px] lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="flex flex-col gap-[20px]">
+            <SkeletonCard height="h-[146px]" lines={["title", "full", "full"]} />
+            <SkeletonCard height="h-[242px]" lines={["title", "full", "full", "mid", "full", "full", "mid"]} />
+            <SkeletonCard height="h-[150px]" lines={["title", "full", "full"]} />
+            <SkeletonCard height="h-[122px]" lines={["title", "full", "full"]} />
+          </div>
+          <div className="flex flex-col gap-[20px]">
+            <SkeletonCard height="h-[205px]" lines={["title", "full", "full", "short", "full"]} />
+            <SkeletonCard height="h-[222px]" lines={["title", "full", "full", "short", "full", "full"]} />
+            <SkeletonCard height="h-[174px]" gap="gap-[12px]" lines={["title", "full", "full", "short"]} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -202,7 +212,7 @@ export function CandidateView({ id }: { id: string }) {
             <ResumeNotice
               image={state === "unsupported" ? "/figma/resume-unsupported.svg" : "/figma/resume-empty.svg"}
               title={state === "unsupported" ? "Can’t preview this file" : state === "resume-error" ? "Resume failed to load" : "No resume uploaded"}
-              body={state === "unsupported" ? "This file type isn’t supported in the viewer. Download the resume to open it." : state === "resume-error" ? "Check your connection and try again." : `${candidate.name} hasn’t added a resume to this application yet.`}
+              body={state === "unsupported" ? "This file type isn’t supported in the viewer. Download the resume to open it." : state === "resume-error" ? "Something went wrong while loading the resume. Please try again." : `${candidate.name} hasn’t added a resume to this application yet.`}
               action={state === "resume-error" ? <Button className="mt-[16px]" onClick={() => router.push(`/applicants/${candidate.id}?state=resume`)}>Retry</Button> : null}
             />
           ) : (
@@ -254,6 +264,24 @@ function ResumeNotice({ image, title, body, action }: { image: string; title: st
       <p className="mt-[4px] text-body-sm-regular text-text-secondary">{body}</p>
       {action}
     </div>
+  );
+}
+
+function SkeletonCard({ height, lines, gap = "gap-[16px]" }: { height: string; lines: Array<"title" | "full" | "mid" | "short">; gap?: string }) {
+  return (
+    <section className={`flex flex-col overflow-hidden rounded-lg border border-border-default bg-white p-[20px] ${height} ${gap}`}>
+      {lines.map((line, index) => (
+        <SkeletonBlock
+          key={index}
+          className={
+            line === "title" ? "h-[18px] w-[140px] !rounded-[6px]"
+            : line === "mid" ? "h-[14px] w-[430px] max-w-full !rounded-[6px]"
+            : line === "short" ? "h-[14px] w-[192px] max-w-full !rounded-[6px]"
+            : "h-[14px] w-full !rounded-[6px]"
+          }
+        />
+      ))}
+    </section>
   );
 }
 

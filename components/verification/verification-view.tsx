@@ -53,7 +53,7 @@ export function VerificationView() {
   const [method, setMethod] = useState<"email" | "id">(state.startsWith("v04-id") ? "id" : "email");
   const [emailVerified, setEmailVerified] = useState(state === "v04-verified");
   const [idFile, setIdFile] = useState(state === "v04-id-uploaded" ? "pan_card.pdf" : state === "v04-id-invalid" ? "pan_card.heic" : "");
-  const [idError, setIdError] = useState(state === "v04-id-invalid" ? "Use a PDF, JPG or PNG. The size limit is still a pending decision." : "");
+  const [idError, setIdError] = useState(state === "v04-id-invalid" ? "This file type isn't supported. Use JPG, PNG or PDF." : "");
   const [idConsent, setIdConsent] = useState(false);
   const [submitConsent, setSubmitConsent] = useState(state === "v05-failed");
   const [submitting, setSubmitting] = useState(state === "v05-submitting");
@@ -126,7 +126,7 @@ export function VerificationView() {
     if (!file) return;
     const okType = ["application/pdf", "image/jpeg", "image/png"].includes(file.type);
     if (!okType || file.size > DOCUMENT_MAX_BYTES) {
-      if (kind === "id") setIdError("Use a PDF, JPG or PNG. The size limit is still a pending decision.");
+      if (kind === "id") setIdError(okType ? "Use a PDF, JPG or PNG. The size limit is still a pending decision." : "This file type isn't supported. Use JPG, PNG or PDF.");
       else setDocState("failed");
       return;
     }
@@ -288,7 +288,8 @@ export function VerificationView() {
               <p className="ml-[24px] text-label-regular text-text-secondary">Used only to confirm you represent this business. Not shown to job seekers.</p>
               {method === "id" ? (
                 <div className="mt-[12px] space-y-[8px]">
-                  <ResumeUpload fileAction="Replace" nameTone={idError ? "error" : "default"} status={idError ? "failed" : idFile ? "uploaded" : "empty"} fileName={idFile} onFile={(file) => onFile(file, "id")} onCancel={() => setIdFile("")} />
+                  <ResumeUpload fileAction="Replace" nameTone={idError ? "error" : "default"} status={idError ? "failed" : idFile ? "uploaded" : "empty"} fileName={idFile} onFile={(file) => onFile(file, "id")} onCancel={() => { setIdFile(""); setIdError(""); }} />
+                  {idError ? <p className="text-label-regular text-error-default">{idError}</p> : null}
                   <label className="flex items-start gap-[8px] text-body-sm-regular">
                     <input type="checkbox" checked={idConsent} onChange={(event) => setIdConsent(event.target.checked)} />
                     I agree to AROUND using this ID only to verify me.

@@ -383,9 +383,9 @@ export function SettingsView() {
               <Button
                 className={`mt-[24px] shrink-0 ${inviteStatus === "saving" ? "bg-brand-primary text-white" : ""}`}
                 disabled={suspended || (inviteStatus !== "saving" && (Boolean(inviteErrors.email) || !invite.name.trim() || !invite.role))}
-                onClick={() => { void submitInvite(state === "team-invite-error"); }}
+                onClick={() => { void submitInvite(inviteStatus === "error" ? false : state === "team-invite-error"); }}
               >
-                {inviteStatus === "saving" ? <><Loader2 className="animate-spin" size={16} /> Sending…</> : "Send invite"}
+                {inviteStatus === "saving" ? <><Loader2 className="animate-spin" size={16} /> Sending…</> : inviteStatus === "error" ? "Retry" : "Send invite"}
               </Button>
             </div>
             {inviteStatus === "saved" && inviteToast ? (
