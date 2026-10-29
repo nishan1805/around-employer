@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const variants = {
   primary: "bg-brand-primary text-white hover:bg-primary-primary-600 disabled:bg-grey-grey-100 disabled:text-text-disabled disabled:opacity-100",
-  outline: "border border-border-default bg-white text-text-primary hover:bg-grey-grey-100",
+  outline: "border border-border-default bg-white text-text-primary hover:bg-grey-grey-100 disabled:bg-grey-grey-100 disabled:text-text-disabled disabled:opacity-100",
   ghost: "bg-transparent text-text-primary hover:bg-grey-grey-100",
   danger: "bg-error-default text-white hover:brightness-95",
   dark: "bg-grey-grey-900 text-white hover:bg-grey-grey-800",

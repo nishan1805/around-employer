@@ -378,7 +378,7 @@ const amitDetail: Applicant["detail"] = {
   skills: ["UI Design", "UX Research", "Figma", "User Flows", "Wireframing", "Prototyping", "HTML", "CSS", "JavaScript", "React", "Tailwind CSS"],
   experienceItems: [
     {
-      title: "UI/UX Designer",
+      title: "Site Engineer",
       org: "Nable Invent Solutions · Internship",
       dates: "Apr 2023 – Aug 2023 (5 months)",
       description: "Worked on web and mobile design projects, created wireframes, high-fidelity designs and collaborated with the development team.",
@@ -407,7 +407,7 @@ const amitDetail: Applicant["detail"] = {
     pages: [
       {
         heading: "Amit Sharma",
-        body: "UI/UX Designer\n+91 98765 43210 · amitsharma@email.com · Raipur, Chhattisgarh · behance.net/amitsharma\n\nPROFILE SUMMARY\nPassionate UI/UX designer with 2+ years of experience in creating user-centered digital products. Skilled in designing responsive web and mobile interfaces, building design systems and collaborating with development teams. Eager to contribute to meaningful products and grow as a designer.\n\nSKILLS\nUI Design, UX Research, Figma, User Flows, Wireframing, Prototyping, HTML, CSS, JavaScript, React, Tailwind CSS\n\nWORK EXPERIENCE\nUI/UX Designer — Nable Invent Solutions · Internship\nApr 2023 – Aug 2023 (5 months)\nWorked on web and mobile design projects, created wireframes, high-fidelity designs and collaborated with the development team.",
+        body: "Site Engineer\n+91 98765 43210 · amitsharma@email.com · Raipur, Chhattisgarh · behance.net/amitsharma\n\nPROFILE SUMMARY\nPassionate UI/UX designer with 2+ years of experience in creating user-centered digital products. Skilled in designing responsive web and mobile interfaces, building design systems and collaborating with development teams. Eager to contribute to meaningful products and grow as a designer.\n\nSKILLS\nUI Design, UX Research, Figma, User Flows, Wireframing, Prototyping, HTML, CSS, JavaScript, React, Tailwind CSS\n\nWORK EXPERIENCE\nUI/UX Designer — Nable Invent Solutions · Internship\nApr 2023 – Aug 2023 (5 months)\nWorked on web and mobile design projects, created wireframes, high-fidelity designs and collaborated with the development team.",
       },
       {
         heading: "Work experience",

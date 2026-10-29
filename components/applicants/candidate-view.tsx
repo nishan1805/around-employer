@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ApplicantBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ErrorState, SkeletonBlock } from "@/components/ui/feedback";
+import { SkeletonBlock } from "@/components/ui/feedback";
 import { usePortal } from "@/components/shell/use-portal";
 import { formatDate } from "@/lib/format";
 import type { Applicant, ApplicantStatus } from "@/lib/types";
@@ -24,15 +24,31 @@ export function CandidateView({ id }: { id: string }) {
   const [menu, setMenu] = useState(false);
 
   if (state === "loading") {
-    return <div className="space-y-[12px] "><SkeletonBlock className="h-[112px]" /><SkeletonBlock className="h-[80px]" /></div>;
+    return (
+      <div className="space-y-[16px]">
+        <SkeletonBlock className="h-[20px] w-[180px]" />
+        <SkeletonBlock className="h-[108px]" />
+        <div className="flex gap-[16px]"><SkeletonBlock className="h-[44px] w-[96px]" /><SkeletonBlock className="h-[44px] w-[88px]" /></div>
+        <div className="grid gap-[16px] lg:grid-cols-[minmax(0,1fr)_360px]">
+          <SkeletonBlock className="h-[280px]" />
+          <SkeletonBlock className="h-[180px]" />
+        </div>
+      </div>
+    );
   }
   if (state === "error" || !person) {
-    return <ErrorState title="Couldn't load this candidate" body="Check your connection and try again." onRetry={() => router.push(`/applicants/${id}`)} />;
+    return (
+      <div>
+        <Link href="/applicants" className="inline-flex items-center gap-[8px] text-body-sm-medium text-text-secondary"><ChevronLeft size={16} /> Back to Applicants</Link>
+        <h1 className="mt-[16px] text-display-small-semibold">Couldn&apos;t load this candidate</h1>
+        <p className="mt-[8px] text-body-sm-regular text-text-secondary">Check your connection and try again.</p>
+        <Button className="mt-[16px]" href="/applicants">Back to Applicants</Button>
+      </div>
+    );
   }
   const candidate = person;
   const detail = candidate.detail;
   const resume = detail?.resume ?? null;
-  const resumeBlocked = state === "no-resume" || state === "unsupported" || state === "resume-error" || !detail?.resume;
 
   function download() {
     const text = detail?.resume?.pages.map((item) => `${item.heading}\n${item.body}`).join("\n\n") ?? candidate.name;
@@ -61,7 +77,7 @@ export function CandidateView({ id }: { id: string }) {
           <Button aria-expanded={menu} onClick={() => setMenu((open) => !open)}>
             Change status <ChevronDown size={16} />
           </Button>
-          <Button variant="outline" onClick={download} disabled={resumeBlocked && state !== "overview"}>
+          <Button variant="outline" onClick={download} disabled={state === "no-resume" || !detail?.resume}>
             <Download size={16} /> Download resume
           </Button>
           {menu ? (
@@ -162,16 +178,17 @@ export function CandidateView({ id }: { id: string }) {
         </div>
       ) : (
         <section className="mt-[16px] rounded-lg border border-border-default bg-white p-[20px]">
-          {state === "unsupported" ? (
-            <p className="text-body-sm-regular">This file type can’t be previewed. Download it or ask the candidate for a PDF.</p>
-          ) : state === "resume-error" ? (
-            <ErrorState title="Couldn't load the resume" body="Check your connection and try again." onRetry={() => router.push(`/applicants/${candidate.id}?state=resume`)} />
-          ) : state === "no-resume" || !resume ? (
-            <p className="text-body-sm-regular text-text-secondary">No resume was uploaded with this application.</p>
+          <h2 className="text-body-semibold">Resume</h2>
+          <p className="mt-[4px] text-body-sm-regular text-text-secondary">View the candidate&apos;s submitted resume.</p>
+          {state === "unsupported" || state === "resume-error" || state === "no-resume" || !resume ? (
+            <ResumeNotice
+              image={state === "unsupported" ? "/figma/resume-unsupported.svg" : "/figma/resume-empty.svg"}
+              title={state === "unsupported" ? "Can’t preview this file" : state === "resume-error" ? "Couldn’t load the resume" : "No resume uploaded"}
+              body={state === "unsupported" ? "This file type isn’t supported in the viewer. Download the resume to open it." : state === "resume-error" ? "Check your connection and try again." : `${candidate.name} hasn’t added a resume to this application yet.`}
+              action={state === "resume-error" ? <Button className="mt-[16px]" onClick={() => router.push(`/applicants/${candidate.id}?state=resume`)}>Retry</Button> : null}
+            />
           ) : (
             <div>
-              <h2 className="text-subheading-semibold">Resume</h2>
-              <p className="mt-[4px] text-body-sm-regular text-text-secondary">View the candidate&apos;s submitted resume.</p>
               <div className="mt-[16px] flex overflow-hidden rounded-lg border border-border-default">
                 <aside className="flex w-[96px] shrink-0 flex-col gap-[8px] bg-grey-grey-50 p-[12px]">
                   {resume.pages.map((item, index) => (
@@ -206,6 +223,18 @@ export function CandidateView({ id }: { id: string }) {
           )}
         </section>
       )}
+    </div>
+  );
+}
+
+function ResumeNotice({ image, title, body, action }: { image: string; title: string; body: string; action?: ReactNode }) {
+  return (
+    <div className="mt-[16px] flex h-[420px] flex-col items-center justify-center rounded-md border border-dashed border-border-default bg-grey-grey-50 px-[24px] text-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={image} alt="" width={192} height={137} />
+      <p className="mt-[16px] text-body-semibold">{title}</p>
+      <p className="mt-[4px] text-body-sm-regular text-text-secondary">{body}</p>
+      {action}
     </div>
   );
 }
