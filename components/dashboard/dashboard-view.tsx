@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, CalendarCheck, RefreshCw, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, ArrowUp, Briefcase, CalendarCheck, ChevronDown, MoreVertical, RefreshCw, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -47,7 +47,7 @@ export function DashboardView() {
     state === "pending-review"
       ? [
           ...DASHBOARD_ACTIVE,
-          { id: "sales", title: "Sales Associate", employmentType: "Full-time" as const, location: "Raipur", views: 0, applicants: 0, status: "pending_review" as JobStatus },
+          { id: "site-supervisor", title: "Site Supervisor", employmentType: "Full-time" as const, location: "Shankar Nagar, Raipur", views: 0, applicants: 0, status: "pending_review" as JobStatus },
         ]
       : state === "returned"
         ? [
@@ -56,18 +56,18 @@ export function DashboardView() {
           ]
         : pending
           ? [
-              { id: "store-sales-associate", title: "Store Sales Associate", employmentType: "Full-time" as const, location: "Pandri, Raipur", views: 0, applicants: 0, status: "draft" as JobStatus },
-              { id: "cashier", title: "Cashier", employmentType: "Full-time" as const, location: "Raipur", views: 0, applicants: 0, status: "draft" as JobStatus },
+              { id: "site-supervisor", title: "Site Supervisor", employmentType: "Full-time" as const, location: "Shankar Nagar, Raipur", views: 0, applicants: 0, status: "draft" as JobStatus },
+              { id: "civil", title: "Civil Engineer", employmentType: "Full-time" as const, location: "Shankar Nagar, Raipur", views: 0, applicants: 0, status: "draft" as JobStatus },
             ]
           : DASHBOARD_ACTIVE;
 
   return (
     <div className="space-y-[16px] ">
       <div className="flex flex-wrap items-center justify-between gap-[12px]">
-        <h1 className="text-subheading-semibold">Dashboard</h1>
+        <h1 className="text-display-small-semibold">Dashboard</h1>
         <div className="flex items-center gap-[8px]">
           <span className="inline-flex h-[40px] items-center gap-[8px] rounded-md border border-border-default bg-white px-[12px] text-body-sm-regular">
-            <CalendarCheck size={16} /> Last 7 days
+            <CalendarCheck size={16} /> Last 7 days <ChevronDown size={16} />
           </span>
           <button aria-label="Refresh" className="flex h-[40px] w-[40px] items-center justify-center rounded-md border border-border-default bg-white">
             <RefreshCw size={16} />
@@ -97,7 +97,7 @@ export function DashboardView() {
           body={
             <>
               We are checking your business details. You can save job drafts meanwhile; publishing unlocks once verified. Review time{" "}
-              <PendingDecision value={VERIFICATION_SLA_LABEL} />.
+              <PendingDecision value={VERIFICATION_SLA_LABEL} />
             </>
           }
           action={
@@ -107,21 +107,27 @@ export function DashboardView() {
           }
         />
       ) : state === "suspended" ? null : (
-        <div className="flex items-center justify-between rounded-lg bg-success-success-50 px-[20px] py-[16px]">
-          <div>
-            <p className="text-body-semibold text-success-success-700">Company verified</p>
+        <div className="flex h-[88px] items-center gap-[16px] rounded-lg border border-success-success-100 bg-success-success-50 px-[24px]">
+          <span className="flex size-[40px] shrink-0 items-center justify-center rounded-full bg-success-default">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/figma/verified-check.svg" alt="" width={20} height={20} />
+          </span>
+          <div className="min-w-[0px] flex-1">
+            <p className="text-body-semibold text-text-primary">Company verified</p>
             <p className="text-body-sm-regular text-text-secondary">Your company shows a verified badge to job seekers on Around Jobs.</p>
           </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/figma/verified-illustration.svg" alt="" width={200} height={56} className="hidden shrink-0 sm:block" />
         </div>
       )}
 
       {state === "pending-review" ? (
         <Banner
           tone="info"
-          title='Job “Sales Associate” is pending review'
+          title='Job “Site Supervisor” is pending review'
           body={
             <>
-              We&apos;ll notify you when it goes live. Review time <PendingDecision value={JOB_REVIEW_SLA_LABEL} />.
+              We&apos;ll notify you when it goes live. Review time <PendingDecision value={JOB_REVIEW_SLA_LABEL} />
             </>
           }
         />
@@ -131,7 +137,7 @@ export function DashboardView() {
           tone="warning"
           title="Civil Engineer was returned for correction."
           body="Fix the flagged fields and resubmit it for review."
-          action={<Button href="/jobs/office-admin?state=returned" size="sm">Fix and resubmit</Button>}
+          action={<Button href="/jobs/safety-officer?state=returned" size="sm">Fix and resubmit</Button>}
         />
       ) : null}
       {state === "expiring" ? (
@@ -142,7 +148,7 @@ export function DashboardView() {
           action={
             <div className="flex gap-[8px]">
               <Button variant="outline" size="sm">Extend</Button>
-              <Button size="sm" href="/jobs/store-sales-associate">Renew job</Button>
+              <Button size="sm" href="/jobs/civil">Renew job</Button>
             </div>
           }
         />
@@ -153,7 +159,7 @@ export function DashboardView() {
           title="You have reached the job-post limit on your plan."
           body={
             <>
-              Included live posts <PendingDecision value={PLAN_JOB_POST_LIMIT} />. Upgrade to post more jobs.
+              Included live posts <PendingDecision value={PLAN_JOB_POST_LIMIT} /> Upgrade to post more jobs.
             </>
           }
           action={<Button variant="outline" size="sm" href="/billing">Upgrade plan</Button>}
@@ -173,7 +179,7 @@ export function DashboardView() {
       {pending ? (
         <section className="rounded-lg border border-border-default bg-white p-[20px]">
           <div className="mb-[12px] flex items-center justify-between">
-            <h2 className="text-body-semibold">Your drafts</h2>
+            <h2 className="text-subheading-semibold">Your drafts</h2>
             <Button href="/post-job" size="sm" variant="outline">New draft</Button>
           </div>
           {jobs.map((item) => (
@@ -189,30 +195,31 @@ export function DashboardView() {
         </section>
       ) : (
         <div className="grid grid-cols-1 gap-[16px] xl:grid-cols-2">
-          <section className="rounded-lg border border-border-default bg-white p-[16px]">
+          <section className="rounded-lg border border-border-default bg-white p-[24px]">
             <div className="mb-[12px] flex items-center justify-between">
-              <h2 className="text-body-semibold">
+              <h2 className="text-subheading-semibold">
                 Recent applicants{" "}
                 {state === "new-applicants" ? <span className="ml-[4px] rounded-full bg-primary-primary-50 px-[8px] py-[4px] text-label-medium text-brand-primary">2 new</span> : null}
               </h2>
-              <Link href={href("/applicants")} className="text-body-sm-semibold text-brand-primary">View all →</Link>
+              <Link href={href("/applicants")} className="inline-flex items-center gap-[4px] text-body-sm-semibold text-brand-primary">View all <ArrowRight size={16} /></Link>
             </div>
             {zeroMetrics ? (
               <EmptyState title="No applicants yet" body="Applicants will appear here once you post your first job." />
             ) : (
               <table className="w-full text-left text-body-sm-regular">
-                <thead className="text-label-medium text-text-secondary">
+                <thead className="bg-grey-grey-50 text-label-medium text-text-secondary">
                   <tr>
-                    <th className="py-[8px] font-medium">Candidate</th>
+                    <th className="px-[12px] py-[10px] font-medium">Candidate</th>
                     <th className="font-medium">Applied for</th>
                     <th className="font-medium">Applied on</th>
                     <th className="font-medium">Status</th>
+                    <th className="px-[8px]" />
                   </tr>
                 </thead>
                 <tbody>
                   {RECENT.map((person, index) => (
-                    <tr key={person.id} className={state === "new-applicants" && index < 2 ? "bg-primary-primary-50" : ""}>
-                      <td className="py-[8px]">
+                    <tr key={person.id} className={`border-t border-border-default ${state === "new-applicants" && index < 2 ? "bg-primary-primary-50" : ""}`}>
+                      <td className="py-[12px]">
                         <Link href={`/applicants/${person.id}`} className="flex items-center gap-[8px] font-medium">
                           <span className={`flex h-[32px] w-[32px] items-center justify-center rounded-full text-label-medium ${person.tone}`}>{person.initials}</span>
                           {person.name}
@@ -221,46 +228,55 @@ export function DashboardView() {
                       <td>{person.role}</td>
                       <td className="text-text-secondary">{formatRelative(person.when)}</td>
                       <td><ApplicantBadge status={person.status} /></td>
+                      <td className="text-right"><button aria-label={`Actions for ${person.name}`} className="inline-flex size-[24px] items-center justify-center text-text-secondary"><MoreVertical size={16} /></button></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             )}
           </section>
-          <section className="rounded-lg border border-border-default bg-white p-[16px]">
+          <section className="rounded-lg border border-border-default bg-white p-[24px]">
             <div className="mb-[12px] flex items-center justify-between">
-              <h2 className="text-body-semibold">Active jobs</h2>
-              <Link href={href("/jobs")} className="text-body-sm-semibold text-brand-primary">Manage →</Link>
+              <h2 className="text-subheading-semibold">Active jobs</h2>
+              <Link href={href("/jobs")} className="inline-flex items-center gap-[4px] text-body-sm-semibold text-brand-primary">Manage <ArrowRight size={16} /></Link>
             </div>
             {empty ? (
               <EmptyState title="No active jobs" body="Post your first job to start receiving applications from nearby candidates." action={<Button href="/post-job">Post a job</Button>} />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[520px] text-left text-body-sm-regular">
-                  <thead className="text-label-medium text-text-secondary">
-                    <tr>
-                      <th className="py-[8px] font-medium">Job title</th>
-                      <th className="font-medium">Type & Location</th>
-                      <th className="font-medium">Views</th>
-                      <th className="font-medium">Applicants</th>
-                      <th className="font-medium">Status</th>
+              <table className="w-full table-fixed text-left text-body-sm-regular">
+                <colgroup>
+                  <col className="w-[26%]" />
+                  <col />
+                  <col className="w-[52px]" />
+                  <col className="w-[72px]" />
+                  <col className="w-[88px]" />
+                  <col className="w-[32px]" />
+                </colgroup>
+                <thead className="bg-grey-grey-50 text-label-medium text-text-secondary">
+                  <tr>
+                    <th className="px-[12px] py-[10px] font-medium">Job title</th>
+                    <th className="px-[8px] py-[10px] font-medium">Type & Location</th>
+                    <th className="px-[4px] py-[10px] font-medium">Views</th>
+                    <th className="px-[4px] py-[10px] font-medium">Applicants</th>
+                    <th className="px-[4px] py-[10px] font-medium">Status</th>
+                    <th className="px-[4px] py-[10px]" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {jobs.map((item) => (
+                    <tr key={item.id} className="border-t border-border-default">
+                      <td className="truncate px-[12px] py-[12px] font-semibold">
+                        <Link href={`/jobs/${item.id}`}>{item.title}</Link>
+                      </td>
+                      <td className="truncate px-[8px] py-[12px] text-text-secondary">{item.employmentType} · {item.location}</td>
+                      <td className="px-[4px] py-[12px]">{item.views}</td>
+                      <td className="px-[4px] py-[12px]">{item.applicants}</td>
+                      <td className="px-[4px] py-[12px]"><JobBadge status={item.status} /></td>
+                      <td className="px-[4px] py-[12px] text-right"><button aria-label={`Actions for ${item.title}`} className="inline-flex size-[24px] items-center justify-center text-text-secondary"><MoreVertical size={16} /></button></td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {jobs.map((item) => (
-                      <tr key={item.id} className="border-t border-border-default">
-                        <td className="py-[12px] font-semibold">
-                          <Link href={`/jobs/${item.id === "civil" || item.id === "architect" || item.id === "sales" ? "store-sales-associate" : item.id}`}>{item.title}</Link>
-                        </td>
-                        <td className="text-text-secondary">{item.employmentType} · {item.location}</td>
-                        <td>{item.views}</td>
-                        <td>{item.applicants}</td>
-                        <td><JobBadge status={item.status} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             )}
           </section>
         </div>
@@ -272,14 +288,19 @@ export function DashboardView() {
 
 function Stat({ icon, tint, label, value, note, delta }: { icon: ReactNode; tint: string; label: string; value: string; note?: string; delta?: string }) {
   return (
-    <div className="flex gap-[12px] rounded-lg border border-border-default bg-white p-[16px]">
-      <div className={`flex h-[44px] w-[44px] items-center justify-center rounded-md ${tint}`}>{icon}</div>
-      <div>
+    <div className="flex h-[96px] items-center gap-[16px] rounded-lg border border-border-default bg-white px-[24px]">
+      <div className={`flex size-[48px] shrink-0 items-center justify-center rounded-md ${tint}`}>{icon}</div>
+      <div className="min-w-[0px] flex-1">
         <p className="text-label-medium text-text-secondary">{label}</p>
         <p className="text-display-small-semibold">{value}</p>
-        {delta ? <p className="text-label-medium text-success-success-700">{delta} <span className="font-normal text-text-tertiary">vs last week</span></p> : null}
         {note ? <p className="text-label-regular text-text-secondary">{note}</p> : null}
       </div>
+      {delta ? (
+        <p className="text-right text-label-medium text-success-success-700">
+          <span className="inline-flex items-center gap-[4px]"><ArrowUp size={14} /> {delta.replace(" new", "")}</span>
+          <span className="block font-normal text-text-tertiary">vs last week</span>
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -309,7 +330,7 @@ function StatusCard() {
         title="Verification pending"
         body={
           <>
-            Submitted 28 Oct 2026. Reference {SHOW_REFERENCE_ID ? VERIFICATION_REFERENCE_ID : null} <PendingDecision value={VERIFICATION_REFERENCE_ID} show={SHOW_REFERENCE_ID} />.
+            Submitted 28 Oct 2026. Reference {SHOW_REFERENCE_ID ? VERIFICATION_REFERENCE_ID : null} <PendingDecision value={VERIFICATION_REFERENCE_ID} show={SHOW_REFERENCE_ID} />
           </>
         }
       />

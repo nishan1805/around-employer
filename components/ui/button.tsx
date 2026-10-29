@@ -3,8 +3,8 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const variants = {
-  primary: "bg-brand-primary text-white hover:bg-primary-primary-600",
-  outline: "border border-border-default bg-white text-text-primary hover:bg-grey-grey-100",
+  primary: "bg-brand-primary text-white hover:bg-primary-primary-600 disabled:bg-grey-grey-100 disabled:text-text-disabled disabled:opacity-100",
+  outline: "border border-border-default bg-white text-text-primary hover:bg-grey-grey-100 disabled:bg-grey-grey-100 disabled:text-text-disabled disabled:opacity-100",
   ghost: "bg-transparent text-text-primary hover:bg-grey-grey-100",
   danger: "bg-error-default text-white hover:brightness-95",
   dark: "bg-grey-grey-900 text-white hover:bg-grey-grey-800",
@@ -30,7 +30,7 @@ export function Button({
   children: ReactNode;
 }) {
   const classes = cn(
-    "inline-flex items-center justify-center gap-[8px] rounded-sm text-body-sm-semibold whitespace-nowrap transition disabled:opacity-50",
+    "inline-flex items-center justify-center gap-[8px] rounded-sm text-body-sm-semibold whitespace-nowrap transition disabled:cursor-not-allowed",
     variants[variant],
     variant === "link" ? "h-auto" : sizes[size],
     className,

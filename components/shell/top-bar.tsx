@@ -52,7 +52,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
       <div className="relative">
         <button
           aria-label="Notifications"
-          className="relative flex size-[40px] items-center justify-center rounded-full border border-grey-grey-300"
+          className="relative flex size-[40px] items-center justify-center"
           onClick={() => {
             setNotesOpen((open) => !open);
             setAccountOpen(false);
@@ -63,7 +63,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
         </button>
         {notesOpen ? (
           <div className="absolute right-[0px] z-30 mt-[8px] w-[min(100vw-2rem,360px)] rounded-md border border-border-default bg-white shadow-lg">
-            <div className="flex items-center justify-between px-[4px] py-[12px]">
+            <div className="flex items-center justify-between px-[16px] py-[12px]">
               <p className="text-body-semibold">Notifications</p>
               <button className="text-label-medium text-brand-primary" onClick={markAllRead}>
                 Mark all as read
@@ -71,9 +71,9 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
             </div>
             <ul>
               {notifications.map((item) => (
-                <li key={item.id} className={`border-t border-border-default px-[4px] py-[12px] ${item.unread ? "bg-primary-primary-50" : ""}`}>
+                <li key={item.id} className={`border-t border-border-default px-[16px] py-[12px] ${item.unread ? "bg-primary-primary-50" : ""}`}>
                   <p className="text-body-sm-semibold">{item.title}</p>
-                  <p className="text-body-sm-regular text-text-secondary">{item.body}</p>
+                  {item.body ? <p className="text-body-sm-regular text-text-secondary">{item.body}</p> : null}
                   <p className="text-label-regular text-text-tertiary">{item.time}</p>
                 </li>
               ))}

@@ -21,7 +21,7 @@ export function EmptyState({
       <div className="mb-[16px] flex h-[112px] w-[112px] items-center justify-center rounded-full bg-primary-primary-50 text-brand-primary">
         <Icon size={40} strokeWidth={1.5} />
       </div>
-      <h3 className="text-body-semibold">{title}</h3>
+      <h3 className="text-subheading-semibold">{title}</h3>
       <p className="mt-[4px] max-w-sm text-body-sm-regular text-text-secondary">{body}</p>
       {action ? <div className="mt-[16px]">{action}</div> : null}
     </div>

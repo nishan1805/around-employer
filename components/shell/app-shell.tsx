@@ -10,7 +10,6 @@ import { usePortal } from "@/components/shell/use-portal";
 
 /** Centred content column. Lists and tables may grow to 1440; forms stay narrower. */
 function contentMax(pathname: string) {
-  if (pathname.startsWith("/post-job")) return "max-w-[768px]";
   if (pathname.startsWith("/settings")) return "max-w-[1040px]";
   if (pathname === "/jobs" || pathname === "/applicants" || /^\/jobs\/[^/]+\/applicants$/.test(pathname) || pathname === "/billing") {
     return "max-w-[1440px]";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, MoreHorizontal, Users } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Eye, MapPin, MoreHorizontal, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -59,9 +59,10 @@ export function JobDetailView({ id }: { id: string }) {
 
   return (
     <div className="space-y-[16px] ">
-      <p className="text-body-sm-regular text-text-secondary">
-        <Link href="/jobs" className="font-medium text-text-primary">‹ My Jobs</Link>
-        <span className="inline-block max-w-[72ch] truncate align-bottom"> · {job.title}</span>
+      <p className="flex items-center gap-[4px] text-body-sm-regular text-text-secondary">
+        <Link href="/jobs" className="inline-flex items-center gap-[4px] font-medium text-text-primary"><ChevronLeft size={16} /> My Jobs</Link>
+        <ChevronRight size={14} />
+        <span className="max-w-[72ch] truncate text-text-primary">{job.title}</span>
       </p>
       {status === "pending_review" ? (
         <Banner
@@ -85,16 +86,18 @@ export function JobDetailView({ id }: { id: string }) {
       <div className="flex flex-wrap items-start justify-between gap-[12px] rounded-lg border border-border-default bg-white p-[20px]">
         <div>
           <div className="flex flex-wrap items-center gap-[8px]">
-            <h1 className="text-subheading-semibold">{job.title}</h1>
+            <h1 className="text-display-small-semibold">{job.title}</h1>
             <JobBadge status={status} />
           </div>
-          <p className="mt-[4px] text-body-sm-regular text-text-secondary">
-            Job ID #{job.code} · {job.location} · {job.category} · {job.employmentType} ·{" "}
+          <p className="mt-[4px] flex flex-wrap items-center gap-[4px] text-body-sm-regular text-text-secondary">
+            <span>Job ID #{job.code}</span>
+            <MapPin size={14} />
+            <span>{job.location} · {job.category} · {job.employmentType} ·{" "}</span>
             {status === "pending_review" ? `Submitted on ${formatDate(job.submittedOn)}` : status === "returned" ? `Returned on ${formatDate(job.returnedOn)}` : `Posted on ${formatDate(job.postedOn)}`}
           </p>
         </div>
         <div className="flex flex-wrap gap-[8px]">
-          {status === "active" ? <Button href={`/jobs/${job.id}/applicants`}>View applicants</Button> : null}
+          {status === "active" ? <Button href={`/jobs/${job.id}/applicants`}>View applicants <ArrowRight size={16} /></Button> : null}
           {status === "pending_review" ? (
             <>
               <Button variant="outline" disabled>Edit job</Button>
@@ -131,7 +134,7 @@ export function JobDetailView({ id }: { id: string }) {
 
       {status === "returned" && job.returnReasons ? (
         <section className="rounded-lg border border-border-default bg-white p-[20px]">
-          <h2 className="text-body-semibold">Reviewer note</h2>
+          <h2 className="text-subheading-semibold">Reviewer note</h2>
           <p className="mt-[4px] text-body-sm-regular text-text-secondary">Fix these fields and resubmit. Your job goes back to review after you resubmit.</p>
           <ul className="mt-[12px] space-y-[8px] text-body-sm-regular">
             {job.returnReasons.map((reason) => (
@@ -144,16 +147,17 @@ export function JobDetailView({ id }: { id: string }) {
         </section>
       ) : null}
 
-      <div className="grid gap-[12px] sm:grid-cols-2">
-        <div className="flex items-center gap-[12px] rounded-lg border border-border-default bg-white p-[16px]">
-          <span className="flex h-[44px] w-[44px] items-center justify-center rounded-md bg-primary-primary-50 text-brand-primary"><Eye size={18} /></span>
+      <div className="flex items-center gap-[32px] rounded-lg border border-border-default bg-white px-[24px] py-[24px]">
+        <div className="flex items-center gap-[16px]">
+          <span className="flex size-[48px] items-center justify-center rounded-md bg-primary-primary-50 text-brand-primary"><Eye size={20} /></span>
           <div>
             <p className="text-label-medium text-text-secondary">Views</p>
             <p className="text-display-small-semibold">{job.views}</p>
           </div>
         </div>
-        <div className="flex items-center gap-[12px] rounded-lg border border-border-default bg-white p-[16px]">
-          <span className="flex h-[44px] w-[44px] items-center justify-center rounded-md bg-primary-primary-50 text-brand-primary"><Users size={18} /></span>
+        <span className="h-[48px] w-px bg-border-default" aria-hidden />
+        <div className="flex items-center gap-[16px]">
+          <span className="flex size-[48px] items-center justify-center rounded-md bg-primary-primary-50 text-brand-primary"><Users size={20} /></span>
           <div>
             <p className="text-label-medium text-text-secondary">Applicants</p>
             <p className="text-display-small-semibold">{job.applicants}</p>
@@ -161,11 +165,12 @@ export function JobDetailView({ id }: { id: string }) {
         </div>
       </div>
 
-      <div className="grid gap-[16px] lg:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
-        <section className="rounded-lg border border-border-default bg-white p-[20px]">
-          <h2 className="text-body-semibold">Job Description</h2>
+      <div className="grid items-start gap-[16px] lg:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
+        <section className="h-fit rounded-lg border border-border-default bg-white p-[20px]">
+          <h2 className="text-subheading-semibold">Job Description</h2>
           <p className="mt-[12px] max-w-[72ch] text-body-sm-regular text-text-secondary">{job.description}</p>
-          <h3 className="mt-[20px] text-body-sm-semibold">Skills</h3>
+          <div className="my-[16px] border-t border-border-default" />
+          <h3 className="text-body-semibold">Skills</h3>
           <div className="mt-[8px] flex flex-wrap gap-[8px]">
             {job.skills.map((skill) => (
               <span key={skill} className="rounded-full border border-border-default px-[12px] py-[4px] text-label-medium">{skill}</span>
@@ -174,14 +179,14 @@ export function JobDetailView({ id }: { id: string }) {
         </section>
         <div className="space-y-[16px]">
           <section className="rounded-lg border border-border-default bg-white p-[20px]">
-            <h2 className="text-body-semibold">Job Details</h2>
+            <h2 className="text-subheading-semibold">Job Details</h2>
             <Detail label="Number of openings" value={String(job.openings)} />
             <Detail label="Work arrangement" value={job.workArrangement} />
             <Detail label="Experience" value={job.experience} />
             <Detail label="Education" value={job.education} />
           </section>
           <section className="rounded-lg border border-border-default bg-white p-[20px]">
-            <h2 className="text-body-semibold">Compensation</h2>
+            <h2 className="text-subheading-semibold">Compensation</h2>
             <Detail label="Salary type" value={job.salaryType} />
             <Detail label="Monthly salary" value={formatInr(job.monthlySalary)} />
           </section>
@@ -193,7 +198,7 @@ export function JobDetailView({ id }: { id: string }) {
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-[16px] border-b border-border-default py-[12px] text-body-sm-regular last:border-0">
+    <div className="grid grid-cols-2 gap-[16px] border-b border-border-default py-[12px] text-body-sm-regular last:border-0">
       <span className="text-text-secondary">{label}</span>
       <span className="font-medium">{value}</span>
     </div>

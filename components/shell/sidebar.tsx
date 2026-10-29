@@ -8,9 +8,9 @@ import {
   FilePlus2,
   LayoutGrid,
   LogOut,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Settings,
+  ChevronsLeft,
+  ChevronsRight,
+  SlidersHorizontal,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,7 +28,7 @@ const MAIN = [
 ];
 
 const FOOTER = [
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/settings", label: "Settings", icon: SlidersHorizontal },
   { href: "/help", label: "Help & Support", icon: CircleHelp },
 ];
 
@@ -66,7 +66,7 @@ export function Sidebar({
           </Link>
         )}
         <button aria-label={compact ? "Expand sidebar" : "Collapse sidebar"} onClick={onToggle} className="text-text-secondary">
-          {compact ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          {compact ? <ChevronsRight size={18} /> : <ChevronsLeft size={18} />}
         </button>
       </div>
       <nav className="flex flex-1 flex-col px-[12px]">

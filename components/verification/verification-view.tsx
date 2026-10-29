@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -20,11 +20,8 @@ import {
   OTP_MAX_ATTEMPTS,
   OTP_MAX_RESENDS,
   OTP_RESEND_COOLDOWN_SECONDS,
-  SHOW_REFERENCE_ID,
-  VERIFICATION_REFERENCE_ID,
-  VERIFICATION_SLA_LABEL,
 } from "@/src/config/policy";
-import { DOCUMENT_OPTIONS } from "@/lib/fixtures";
+import { COMPANY, DOCUMENT_OPTIONS } from "@/lib/fixtures";
 import type { DocumentKind } from "@/lib/types";
 
 type OtpPhase = "idle" | "partial" | "verifying" | "incorrect" | "expired" | "rate" | "locked" | "network" | "verified";
@@ -38,27 +35,27 @@ export function VerificationView() {
   const [contact, setContact] = useState(EMPLOYER.ownerName);
   const [link, setLink] = useState(state === "v01-manual" ? "" : "maps.app.goo.gl/raipur-builder");
   const [lookup, setLookup] = useState(lookupFromState(state));
-  const [address, setAddress] = useState(state === "v01-manual" ? "" : "Shankar Nagar, Raipur, Chhattisgarh");
-  const [category, setCategory] = useState(state === "v01-manual" ? "" : "Construction");
+  const [address, setAddress] = useState(state === "v01-failed" ? "" : COMPANY.workplaceLocation);
+  const [category, setCategory] = useState(state === "v01-failed" ? "" : COMPANY.industry);
   const [website, setWebsite] = useState("");
-  const [email, setEmail] = useState(EMPLOYER.email);
+  const [email, setEmail] = useState(state.startsWith("v04") || state.startsWith("v05") ? EMPLOYER.email : "");
   const [phone, setPhone] = useState("9876543210");
   const [editingPhone, setEditingPhone] = useState(false);
-  const [code, setCode] = useState(state === "v02-partial" || state === "v04-partial" ? "482" : "");
+  const [code, setCode] = useState(state.endsWith("verifying") || state.endsWith("expired") || state.endsWith("incorrect") ? OTP_DEMO_CODE : state.endsWith("partial") ? "482" : "");
   const [otp, setOtp] = useState<OtpPhase>(otpFromState(state));
   const [cooldown, setCooldown] = useState(state.startsWith("v02") || state.startsWith("v04") ? OTP_RESEND_COOLDOWN_SECONDS : 0);
   const [attempts, setAttempts] = useState(0);
   const [resends, setResends] = useState(0);
-  const [docType, setDocType] = useState<DocumentKind | "">(state === "v03-other" ? "other" : state.startsWith("v03") && state !== "v03" ? "gst" : "");
+  const [docType, setDocType] = useState<DocumentKind | "">(state === "v03-other" ? "other" : "gst");
   const [docOpen, setDocOpen] = useState(state === "v03-types");
   const [docState, setDocState] = useState(docFromState(state));
-  const [docName, setDocName] = useState(state === "v03-uploaded" ? "gst_certificate.pdf" : "");
+  const [docName, setDocName] = useState(state === "v03-uploaded" || state === "v03-failed" || state.startsWith("v05") ? "gst_certificate.pdf" : "");
   const [method, setMethod] = useState<"email" | "id">(state.startsWith("v04-id") ? "id" : "email");
   const [emailVerified, setEmailVerified] = useState(state === "v04-verified");
-  const [idFile, setIdFile] = useState(state === "v04-id-uploaded" ? "pan_card.pdf" : "");
-  const [idError, setIdError] = useState(state === "v04-id-invalid" ? "Use a PDF, JPG or PNG. The size limit is still a pending decision." : "");
+  const [idFile, setIdFile] = useState(state === "v04-id-uploaded" ? "pan_card.pdf" : state === "v04-id-invalid" ? "pan_card.heic" : "");
+  const [idError, setIdError] = useState(state === "v04-id-invalid" ? "This file type isn't supported. Use JPG, PNG or PDF." : "");
   const [idConsent, setIdConsent] = useState(false);
-  const [submitConsent, setSubmitConsent] = useState(false);
+  const [submitConsent, setSubmitConsent] = useState(state === "v05-failed");
   const [submitting, setSubmitting] = useState(state === "v05-submitting");
   const [submitError, setSubmitError] = useState(state === "v05-failed");
   const [lockedEdits, setLockedEdits] = useState(state === "v05-submitting");
@@ -88,8 +85,8 @@ export function VerificationView() {
         return;
       }
       setLookup("found");
-      setAddress("Shankar Nagar, Raipur, Chhattisgarh");
-      setCategory("Construction");
+      setAddress(COMPANY.workplaceLocation);
+      setCategory(COMPANY.industry);
     }, 700);
   }
 
@@ -129,7 +126,7 @@ export function VerificationView() {
     if (!file) return;
     const okType = ["application/pdf", "image/jpeg", "image/png"].includes(file.type);
     if (!okType || file.size > DOCUMENT_MAX_BYTES) {
-      if (kind === "id") setIdError("Use a PDF, JPG or PNG. The size limit is still a pending decision.");
+      if (kind === "id") setIdError(okType ? "Use a PDF, JPG or PNG. The size limit is still a pending decision." : "This file type isn't supported. Use JPG, PNG or PDF.");
       else setDocState("failed");
       return;
     }
@@ -166,8 +163,8 @@ export function VerificationView() {
   if (state === "v00") return <Result title="Your progress is saved" heading="You can finish this later" body="Step 3 of 5 · Company proof — not finished. Nothing has been submitted." action="Resume" onClose={() => router.push("/verification?state=v03")} />;
 
   return (
-    <div className="fixed inset-[0px] z-30 flex items-start justify-center overflow-y-auto bg-black/40 p-[16px]">
-      <div className="my-[24px] w-full max-w-[560px] rounded-md bg-white p-[24px]">
+    <div className="fixed inset-[0px] z-30 flex items-center justify-center overflow-y-auto bg-black/40 p-[16px]">
+      <div className="my-auto w-full max-w-[560px] rounded-md bg-white p-[24px]">
         <div className="flex items-center gap-[12px]">
           <h1 className="flex-1 text-subheading-semibold">{titleFor(step)}</h1>
           <button aria-label="Close" onClick={() => router.push("/verification?state=v00")}><X size={20} /></button>
@@ -181,12 +178,17 @@ export function VerificationView() {
           <div className="mt-[16px] space-y-[12px]">
             <Field label="Company name" required><TextInput value={companyName} onChange={(event) => setCompanyName(event.target.value)} /></Field>
             <Field label="Contact person name" required><TextInput value={contact} onChange={(event) => setContact(event.target.value)} /></Field>
-            <Field label="Google Business Profile link (optional)" hint="We’ll fill in your address and category. You can edit them, or enter them yourself.">
-              <TextInput value={link} onChange={(event) => setLink(event.target.value)} onBlur={lookupBusiness} placeholder="maps.app.goo.gl/…" />
+            <Field label="Google Business Profile link (optional)" hint="Paste your Google Business Profile link. We'll fill in your address and category, and you can edit them.">
+              <TextInput value={link} onChange={(event) => setLink(event.target.value)} onBlur={lookupBusiness} placeholder="https://maps.app.goo.gl/…" />
             </Field>
             {lookup === "loading" ? <p className="rounded-sm bg-grey-grey-100 px-[12px] py-[12px] text-label-medium">Looking up your business on Google…</p> : null}
             {lookup === "found" ? <p className="rounded-sm bg-success-success-50 px-[12px] py-[12px] text-label-medium text-success-success-700">✓ Found on Google — check and edit if needed</p> : null}
-            {lookup === "failed" ? <p className="rounded-sm bg-error-error-50 px-[12px] py-[12px] text-label-regular text-error-default">We couldn’t reach Google. Try the lookup again or enter the details yourself.</p> : null}
+            {lookup === "failed" ? (
+              <div className="flex flex-col gap-[8px] rounded-sm bg-error-error-50 px-[12px] py-[12px] text-label-regular text-error-default sm:flex-row sm:items-center">
+                <p className="flex-1">We couldn’t reach Google. Try the lookup again or enter the details yourself.</p>
+                <Button size="sm" variant="outline" onClick={lookupBusiness}>Try lookup again</Button>
+              </div>
+            ) : null}
             {lookup === "none" ? <p className="rounded-sm bg-warning-warning-50 px-[12px] py-[12px] text-label-regular text-warning-warning-700">No listing found. Enter your address and category manually.</p> : null}
             {lookup === "invalid" ? <p className="rounded-sm bg-error-error-50 px-[12px] py-[12px] text-label-regular text-error-default">That link doesn’t look valid.</p> : null}
             <Field label="Business address" required><TextInput value={address} onChange={(event) => setAddress(event.target.value)} /></Field>
@@ -210,12 +212,12 @@ export function VerificationView() {
               <Button variant="outline" className="shrink-0" onClick={() => setEditingPhone(true)}>Change number</Button>
             </div>
             <p className="text-label-medium text-text-secondary">Enter the 6-digit code sent to {maskedPhone}</p>
-            <OtpBoxes value={code} onChange={setCode} disabled={otp === "locked" || otp === "verifying"} />
+            <OtpBoxes value={code} onChange={setCode} disabled={otp === "locked" || otp === "verifying"} invalid={otp === "expired" || otp === "incorrect"} focusFirst />
             <OtpMessage phase={otp} cooldown={cooldown} onResend={resend} />
             <div className="grid grid-cols-2 gap-[8px]">
               <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
-              <Button disabled={code.length < OTP_LENGTH || otp === "locked" || otp === "verifying"} onClick={() => { verifyCode("phone"); if (code === OTP_DEMO_CODE) window.setTimeout(() => setStep(3), 700); }}>
-                {otp === "verifying" ? "Verifying…" : "Verify"}
+              <Button className={otp === "verifying" ? "disabled:bg-brand-primary disabled:text-white" : undefined} disabled={code.length < OTP_LENGTH || otp === "locked" || otp === "verifying" || otp === "incorrect"} onClick={() => { verifyCode("phone"); if (code === OTP_DEMO_CODE) window.setTimeout(() => setStep(3), 700); }}>
+                {otp === "verifying" ? <><Loader2 className="animate-spin" size={16} /> Verifying…</> : "Verify"}
               </Button>
             </div>
           </div>
@@ -223,11 +225,12 @@ export function VerificationView() {
 
         {step === 3 ? (
           <div className="mt-[16px] space-y-[12px]">
-            <Field label="Document type" required hint={<>{DOCUMENT_ACCEPT_LABEL}. Size limit <PendingDecision value={DOCUMENT_MAX_BYTES} />.</>}>
+            <Field label="Company document type" required hint="One document is enough to start the review. You can add more later from Company Profile.">
               <button type="button" className="flex h-[44px] w-full items-center justify-between rounded-sm border border-border-default px-[12px] text-left" onClick={() => setDocOpen((open) => !open)}>
-                {DOCUMENT_OPTIONS.find((item) => item.id === docType)?.label || "Choose a document"}
+                {DOCUMENT_OPTIONS.find((item) => item.id === docType)?.label || "GST certificate"}
               </button>
             </Field>
+            <p className="text-label-regular text-text-secondary">{DOCUMENT_ACCEPT_LABEL}. Size limit <PendingDecision value={DOCUMENT_MAX_BYTES} /></p>
             {docOpen ? (
               <div className="rounded-sm border border-border-default py-[4px]">
                 {DOCUMENT_OPTIONS.map((item) => (
@@ -238,7 +241,21 @@ export function VerificationView() {
               </div>
             ) : null}
             {docType === "other" ? <p className="text-label-regular text-warning-warning-700">Other documents are sent for manual review.</p> : null}
-            <ResumeUpload status={docState as "empty" | "uploading" | "uploaded" | "failed" | "cancelled"} fileName={docName} onFile={(file) => onFile(file, "company")} onCancel={() => { setDocState("cancelled"); setDocName(""); }} />
+            {docState === "uploaded" || docState === "failed" ? (
+              <ResumeUpload
+                status={docState}
+                fileName={docName || "gst_certificate.pdf"}
+                meta={docState === "uploaded" ? "240 KB · Uploaded" : "Upload failed — the file is larger than the size limit. Choose a smaller file."}
+                onFile={(file) => onFile(file, "company")}
+                onCancel={() => { setDocState("cancelled"); setDocName(""); }}
+              />
+            ) : (
+              <div className="rounded-md border border-dashed border-border-default p-[16px] text-center">
+                <p className="text-body-sm-semibold">Upload your GST certificate</p>
+                <p className="mt-[4px] text-label-regular text-text-secondary">PDF, JPG or PNG</p>
+                <div className="mt-[12px]"><ResumeUpload status={docState as "empty" | "uploading" | "cancelled"} fileName={docName} onFile={(file) => onFile(file, "company")} onCancel={() => { setDocState("cancelled"); setDocName(""); }} /></div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-[8px]">
               <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
               <Button disabled={docState !== "uploaded" || !docType} onClick={() => setStep(4)}>Continue</Button>
@@ -249,37 +266,52 @@ export function VerificationView() {
         {step === 4 ? (
           <div className="mt-[16px] space-y-[12px]">
             <p className="text-body-sm-regular">Choose one way to show you’re authorised to hire for this business.</p>
-            <label className={`block rounded-md border p-[16px] ${method === "email" ? "border-brand-primary" : "border-border-default"}`}>
+            <label className={`block rounded-md border-2 p-[16px] ${method === "email" ? "border-grey-grey-900" : "border-border-default"}`}>
               <input type="radio" className="mr-[8px]" checked={method === "email"} onChange={() => setMethod("email")} />
               <span className="text-body-sm-semibold">Verify with work email</span>
               <p className="ml-[24px] text-label-regular text-text-secondary">Recommended · we email a 6-digit code to your company address</p>
               {method === "email" ? (
                 <div className="mt-[12px] space-y-[8px]">
-                  <TextInput value={email} onChange={(event) => setEmail(event.target.value)} />
-                  <OtpBoxes value={code} onChange={setCode} />
-                  <OtpMessage phase={emailVerified ? "verified" : otp} cooldown={cooldown} onResend={resend} />
-                  <Button disabled={emailVerified || code.length < OTP_LENGTH} onClick={() => verifyCode("email")}>{emailVerified ? "Email verified" : "Verify email"}</Button>
+                  <Field label="Work email"><TextInput value={email} onChange={(event) => setEmail(event.target.value)} /></Field>
+                  {emailVerified ? <p className="rounded-sm bg-success-success-50 px-[12px] py-[12px] text-body-sm-regular text-success-success-700">Work email verified. {email}</p> : (
+                    <>
+                      <OtpBoxes value={code} onChange={setCode} disabled={otp === "locked" || otp === "verifying"} invalid={otp === "expired" || otp === "incorrect"} focusFirst={state.startsWith("v04")} />
+                      <OtpMessage phase={otp} cooldown={cooldown} onResend={resend} />
+                    </>
+                  )}
                 </div>
               ) : null}
             </label>
-            <label className={`block rounded-md border p-[16px] ${method === "id" ? "border-brand-primary" : "border-border-default"}`}>
+            <label className={`block rounded-md border-2 p-[16px] ${method === "id" ? "border-grey-grey-900" : "border-border-default"}`}>
               <input type="radio" className="mr-[8px]" checked={method === "id"} onChange={() => setMethod("id")} />
               <span className="text-body-sm-semibold">Upload PAN or Aadhaar</span>
               <p className="ml-[24px] text-label-regular text-text-secondary">Used only to confirm you represent this business. Not shown to job seekers.</p>
               {method === "id" ? (
                 <div className="mt-[12px] space-y-[8px]">
-                  <ResumeUpload status={idFile ? "uploaded" : idError ? "failed" : "empty"} fileName={idFile} onFile={(file) => onFile(file, "id")} onCancel={() => setIdFile("")} />
+                  <ResumeUpload fileAction="Replace" nameTone={idError ? "error" : "default"} status={idError ? "failed" : idFile ? "uploaded" : "empty"} fileName={idFile} onFile={(file) => onFile(file, "id")} onCancel={() => { setIdFile(""); setIdError(""); }} />
                   {idError ? <p className="text-label-regular text-error-default">{idError}</p> : null}
                   <label className="flex items-start gap-[8px] text-body-sm-regular">
                     <input type="checkbox" checked={idConsent} onChange={(event) => setIdConsent(event.target.checked)} />
-                    I consent to Around using this ID only to confirm I represent this business.
+                    I agree to AROUND using this ID only to verify me.
                   </label>
                 </div>
               ) : null}
             </label>
             <div className="grid grid-cols-2 gap-[8px]">
               <Button variant="outline" onClick={() => setStep(3)}>Back</Button>
-              <Button disabled={method === "email" ? !emailVerified : !idFile || !idConsent} onClick={() => setStep(5)}>Continue</Button>
+              <Button
+                className={otp === "verifying" ? "disabled:bg-brand-primary disabled:text-white" : undefined}
+                disabled={otp === "verifying" || (method === "email" ? (!emailVerified && code.length < OTP_LENGTH) : !idFile || !idConsent)}
+                onClick={() => {
+                  if (method === "email" && !emailVerified) {
+                    verifyCode("email");
+                    return;
+                  }
+                  setStep(5);
+                }}
+              >
+                {otp === "verifying" ? <><Loader2 className="animate-spin" size={16} /> Verifying…</> : "Continue"}
+              </Button>
             </div>
           </div>
         ) : null}
@@ -289,22 +321,22 @@ export function VerificationView() {
             <Summary label="Company" value={companyName} onEdit={() => !lockedEdits && setStep(1)} />
             <Summary label="Contact" value={`${contact} · +91 ${phone.slice(0, 2)}XXX XXXXX ✓`} onEdit={() => !lockedEdits && setStep(2)} />
             <Summary label="Address" value={address} onEdit={() => !lockedEdits && setStep(1)} />
-            <Summary label="Company proof" value={`${DOCUMENT_OPTIONS.find((item) => item.id === docType)?.label ?? "Document"} · ${docName}`} onEdit={() => !lockedEdits && setStep(3)} />
+            <Summary label="Company proof" value={`GST certificate · ${docName || "gst_certificate.pdf"}`} onEdit={() => !lockedEdits && setStep(3)} />
             <Summary label="Representative" value={method === "email" ? `Work email · ${email} ✓` : `ID upload · ${idFile}`} onEdit={() => !lockedEdits && setStep(4)} />
             <label className="flex items-start gap-[8px] text-body-sm-regular">
               <input type="checkbox" checked={submitConsent} disabled={lockedEdits} onChange={(event) => setSubmitConsent(event.target.checked)} />
-              I confirm these details are true and I’m authorised to hire for this business. I agree to the Employer Terms.
+              I confirm these details are true and I’m authorised to hire for this business. I agree to the Employer Terms and Privacy Policy.
             </label>
-            {submitError ? <p className="text-body-sm-regular text-error-default">Couldn’t submit. Check your connection and try again. Your entries are kept.</p> : null}
+            {submitError ? (
+              <p className="flex items-start gap-[8px] rounded-sm bg-error-error-50 px-[12px] py-[12px] text-body-sm-regular text-error-default">
+                <AlertCircle size={16} className="mt-[2px] shrink-0" />
+                Couldn’t submit. Check your connection and try again. Your entries are kept.
+              </p>
+            ) : null}
             <div className="grid grid-cols-2 gap-[8px]">
               <Button variant="outline" disabled={lockedEdits} onClick={() => setStep(4)}>Back</Button>
-              <Button disabled={!submitConsent || submitting} onClick={submit}>{submitting ? "Submitting…" : "Submit"}</Button>
+              <Button disabled={!submitConsent || submitting} onClick={submit}>{submitting ? "Submitting…" : submitError ? "Try again" : "Submit for verification"}</Button>
             </div>
-            <p className="text-label-regular text-text-tertiary">
-              Review time <PendingDecision value={VERIFICATION_SLA_LABEL} />. Reference{" "}
-              {SHOW_REFERENCE_ID ? `${VERIFICATION_REFERENCE_ID} ` : null}
-              <PendingDecision value={VERIFICATION_REFERENCE_ID} show={SHOW_REFERENCE_ID} /> is assigned after a successful submit.
-            </p>
           </div>
         ) : null}
       </div>
@@ -312,7 +344,7 @@ export function VerificationView() {
   );
 }
 
-function OtpBoxes({ value, onChange, disabled }: { value: string; onChange: (value: string) => void; disabled?: boolean }) {
+function OtpBoxes({ value, onChange, disabled, focusFirst, invalid }: { value: string; onChange: (value: string) => void; disabled?: boolean; focusFirst?: boolean; invalid?: boolean }) {
   return (
     <div className="flex gap-[8px]">
       {Array.from({ length: OTP_LENGTH }).map((_, index) => (
@@ -332,7 +364,7 @@ function OtpBoxes({ value, onChange, disabled }: { value: string; onChange: (val
             const sibling = event.target.nextElementSibling as HTMLInputElement | null;
             if (digit && sibling) sibling.focus();
           }}
-          className="h-[56px] w-[48px] rounded-sm border border-border-default text-center text-subheading-semibold"
+          className={`h-[56px] w-[48px] rounded-sm border text-center text-subheading-semibold disabled:bg-grey-grey-100 ${invalid ? "border-error-default" : focusFirst && index === 0 ? "border-brand-primary" : "border-border-default"}`}
         />
       ))}
     </div>
@@ -341,10 +373,24 @@ function OtpBoxes({ value, onChange, disabled }: { value: string; onChange: (val
 
 function OtpMessage({ phase, cooldown, onResend }: { phase: OtpPhase; cooldown: number; onResend: () => void }) {
   if (phase === "verifying") return <p className="text-label-regular text-text-secondary">Verifying…</p>;
-  if (phase === "incorrect") return <p className="text-label-regular text-error-default">That code is incorrect. Attempts <PendingDecision value={OTP_MAX_ATTEMPTS} />.</p>;
-  if (phase === "expired") return <p className="text-label-regular text-error-default">This code has expired. Lifetime <PendingDecision value={OTP_EXPIRY_SECONDS} />. Request a new one.</p>;
+  if (phase === "incorrect") {
+    return (
+      <div className="space-y-[8px]">
+        <p className="text-label-regular text-error-default">Incorrect code. Check the SMS and try again.</p>
+        {cooldown > 0 ? <p className="text-label-regular text-text-secondary">Resend code in 0:{String(cooldown).padStart(2, "0")}</p> : <button className="text-label-semibold text-brand-primary" onClick={onResend}>Resend code</button>}
+      </div>
+    );
+  }
+  if (phase === "expired") {
+    return (
+      <div className="space-y-[8px]">
+        <p className="text-label-regular text-error-default">This code has expired. Lifetime <PendingDecision value={OTP_EXPIRY_SECONDS} />.</p>
+        {cooldown > 0 ? <p className="text-label-regular text-text-secondary">Resend code in 0:{String(cooldown).padStart(2, "0")}</p> : <button className="text-label-semibold text-brand-primary" onClick={onResend}>Resend code</button>}
+      </div>
+    );
+  }
   if (phase === "rate") return <p className="text-label-regular text-error-default">Too many resend requests. Try again later. Resend limit <PendingDecision value={OTP_MAX_RESENDS} />.</p>;
-  if (phase === "locked") return <p className="text-label-regular text-error-default">Too many attempts. Lockout <PendingDecision value={OTP_LOCKOUT_SECONDS} />.</p>;
+  if (phase === "locked") return <p className="rounded-sm bg-error-error-50 px-[12px] py-[12px] text-body-sm-regular text-error-default">Too many attempts. The code boxes are locked. Lockout <PendingDecision value={OTP_LOCKOUT_SECONDS} />.</p>;
   if (phase === "network") return <p className="text-label-regular text-error-default">Couldn’t reach the verification service. Check your connection and try again.</p>;
   if (phase === "verified") return <p className="text-label-medium text-success-success-700">Code verified.</p>;
   return cooldown > 0 ? (

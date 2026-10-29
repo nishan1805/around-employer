@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, CreditCard, Info, Lock, Megaphone, MoreVertical, Sun, UserPlus, X } from "lucide-react";
+import { Calendar, Clock, FileText, Info, Loader2, Lock, Mail, Megaphone, MessageCircle, MoreVertical, Phone, X } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
@@ -66,10 +66,16 @@ export function SettingsView() {
   const [menuFor, setMenuFor] = useState<string | null>(state === "team-menu" ? "tm-priya" : state === "team-pending-menu" ? "tm-neha" : null);
   const [confirm, setConfirm] = useState<{ id: string; kind: "remove" | "cancel" } | null>(state === "team-remove-confirm" ? { id: "tm-priya", kind: "remove" } : null);
   const [roleEdit, setRoleEdit] = useState<TeamMember | null>(null);
-  const [invite, setInvite] = useState<{ name: string; email: string; role: TeamRole | "" }>({ name: "", email: "", role: "" });
-  const [inviteErrors, setInviteErrors] = useState<Record<string, string>>(
-    state === "team-invite-invalid" ? { name: "Enter a name.", email: "Enter a valid email." } : {},
+  const inviteDemo = state === "team-invite-invalid" || state === "team-invite-submitting" || state === "team-invite-error";
+  const [invite, setInvite] = useState<{ name: string; email: string; role: TeamRole | "" }>(
+    inviteDemo
+      ? { name: "Rohit Dewangan", email: state === "team-invite-invalid" ? "rohit.dewangan@raipurbuilder" : "rohit.dewangan@raipurbuilder.in", role: "Recruiter" }
+      : { name: "", email: "", role: "" },
   );
+  const [inviteErrors, setInviteErrors] = useState<Record<string, string>>(
+    state === "team-invite-invalid" ? { email: "Enter a valid email address, like name@raipurbuilder.in." } : {},
+  );
+  const [inviteToast, setInviteToast] = useState(state === "team-invite-success" ? "Rohit Dewangan" : "");
   const [inviteStatus, setInviteStatus] = useState<SaveState>(
     state === "team-invite-submitting" ? "saving" : state === "team-invite-success" ? "saved" : state === "team-invite-error" ? "error" : "idle",
   );
@@ -86,14 +92,17 @@ export function SettingsView() {
       if (cancel) return;
       setSavedAccount(loaded.account);
       setDraft(loaded.account);
-      setTeam(loaded.team);
+      const nextTeam = state === "team-invite-success" && !loaded.team.some((member) => member.email === "rohit.dewangan@raipurbuilder.in")
+        ? [...loaded.team, { id: "tm-rohit", name: "Rohit Dewangan", email: "rohit.dewangan@raipurbuilder.in", role: "Recruiter" as const, status: "Pending" as const, initials: "RD" }]
+        : loaded.team;
+      setTeam(nextTeam);
       setPrefs(loaded.prefs);
       setSettings(loaded.account);
     });
     return () => {
       cancel = true;
     };
-  }, [setSettings]);
+  }, [setSettings, state]);
 
   const dirty = useMemo(() => {
     if (!draft || !savedAccount) return state === "account-dirty";
@@ -104,6 +113,28 @@ export function SettingsView() {
       draft.phone !== savedAccount.phone
     );
   }, [draft, savedAccount, state]);
+
+  async function submitInvite(fail: boolean) {
+    if (inviteStatus === "saving") return;
+    const errors: Record<string, string> = {};
+    if (!invite.name.trim()) errors.name = "Enter a name.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(invite.email)) errors.email = "Enter a valid email address, like name@raipurbuilder.in.";
+    if (!invite.role) errors.role = "Select a role.";
+    setInviteErrors(errors);
+    if (Object.keys(errors).length || !invite.role) return;
+    const role = invite.role;
+    setInviteStatus("saving");
+    try {
+      const member = await sendInvite({ name: invite.name, email: invite.email, role, fail });
+      setTeam((current) => (current.some((item) => item.email === member.email) ? current : [...current, member]));
+      setInviteToast(invite.name.trim());
+      setInvite({ name: "", email: "", role: "" });
+      setInviteErrors({});
+      setInviteStatus("saved");
+    } catch {
+      setInviteStatus("error");
+    }
+  }
 
   async function onSaveAccount() {
     if (!draft) return;
@@ -215,9 +246,9 @@ export function SettingsView() {
           </section>
           <section className="flex flex-col gap-[16px] rounded-lg border border-error-default bg-error-error-50 p-[24px] sm:flex-row sm:items-center">
             <div className="min-w-[0px] flex-1">
-              <h2 className="text-body-semibold">Danger zone</h2>
+              <h2 className="text-subheading-semibold">Danger zone</h2>
               <p className="mt-[4px] text-body-sm-regular text-text-secondary">Close your employer account.</p>
-              <p className="text-label-medium text-text-secondary">Consequences: {ACCOUNT_CLOSURE.note} <PendingTag /></p>
+              <p className="mt-[8px] text-label-medium text-text-secondary">Consequences: <PendingTag /></p>
               {closeNote ? <p className="mt-[8px] text-body-sm-regular text-error-default">{closeNote}</p> : null}
             </div>
             <Button variant="danger" onClick={() => { setCloseOpen(true); setCloseNote(""); }}>Close employer account</Button>
@@ -264,7 +295,7 @@ export function SettingsView() {
                     <tr key={member.id} className="border-t border-border-default">
                       <td className="py-[12px] whitespace-nowrap">
                         <span className="flex items-center gap-[8px] whitespace-nowrap">
-                          <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-primary-primary-50 text-label-semibold text-brand-primary">{member.initials}</span>
+                          <span className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full text-label-semibold ${avatarTone(member.id)}`}>{member.initials}</span>
                           <span className="whitespace-nowrap font-medium">{member.name}</span>
                           {member.you ? <span className="shrink-0 whitespace-nowrap rounded-full bg-grey-grey-100 px-[8px] py-[4px] text-label-medium text-text-secondary">You</span> : null}
                         </span>
@@ -318,20 +349,30 @@ export function SettingsView() {
           <section className="rounded-lg border border-border-default bg-white p-[24px]">
             <h2 className="text-subheading-semibold">Invite a new member</h2>
             <p className="mt-[4px] text-body-sm-regular text-text-secondary">They&apos;ll get an email with a link to join your team.</p>
+            {inviteStatus === "error" ? (
+              <div className="mt-[16px]">
+                <Banner
+                  tone="danger"
+                  title="Couldn't send the invite"
+                  body="Check your connection and try again. The details you entered are kept."
+                  action={<Button size="sm" onClick={() => { void submitInvite(false); }}>Retry</Button>}
+                />
+              </div>
+            ) : null}
             <div className="mt-[16px] flex min-w-[0px] items-start gap-[16px]">
               <div className="min-w-[0px] flex-1">
                 <Field label="Name" error={inviteErrors.name}>
-                  <TextInput id="invite-name" placeholder="Enter full name" value={invite.name} disabled={suspended} onChange={(event) => setInvite({ ...invite, name: event.target.value })} />
+                  <TextInput id="invite-name" className={inviteErrors.name ? "border-error-default" : undefined} placeholder="Enter full name" value={invite.name} disabled={suspended || inviteStatus === "saving"} onChange={(event) => setInvite({ ...invite, name: event.target.value })} />
                 </Field>
               </div>
               <div className="min-w-[0px] flex-1">
                 <Field label="Email address" error={inviteErrors.email}>
-                  <TextInput type="email" placeholder="Enter email address" value={invite.email} disabled={suspended} onChange={(event) => setInvite({ ...invite, email: event.target.value })} />
+                  <TextInput type="email" className={inviteErrors.email ? "border-error-default" : undefined} placeholder="Enter email address" value={invite.email} disabled={suspended || inviteStatus === "saving"} onChange={(event) => setInvite({ ...invite, email: event.target.value })} />
                 </Field>
               </div>
               <div className="min-w-[0px] flex-1">
                 <Field label="Role" error={inviteErrors.role}>
-                  <SelectInput aria-label="Invite role" value={invite.role} disabled={suspended} onChange={(event) => setInvite({ ...invite, role: event.target.value as TeamRole | "" })}>
+                  <SelectInput aria-invalid={Boolean(inviteErrors.role)} aria-label="Invite role" value={invite.role} disabled={suspended || inviteStatus === "saving"} onChange={(event) => setInvite({ ...invite, role: event.target.value as TeamRole | "" })}>
                     <option value="">Select role</option>
                     {ROLES.filter((role) => role !== "Owner").map((role) => (
                       <option key={role} value={role}>{role}</option>
@@ -340,32 +381,19 @@ export function SettingsView() {
                 </Field>
               </div>
               <Button
-                className="mt-[24px] shrink-0"
-                disabled={suspended || inviteStatus === "saving"}
-                onClick={async () => {
-                  const errors: Record<string, string> = {};
-                  if (!invite.name.trim()) errors.name = "Enter a name.";
-                  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(invite.email)) errors.email = "Enter a valid email.";
-                  if (!invite.role) errors.role = "Select a role.";
-                  setInviteErrors(errors);
-                  if (Object.keys(errors).length || !invite.role) return;
-                  const role = invite.role;
-                  setInviteStatus("saving");
-                  try {
-                    await sendInvite({ name: invite.name, email: invite.email, role, fail: state === "team-invite-error" });
-                    setTeam(await loadSettings().then((loaded) => loaded.team));
-                    setInvite({ name: "", email: "", role: "" });
-                    setInviteStatus("saved");
-                  } catch {
-                    setInviteStatus("error");
-                  }
-                }}
+                className={`mt-[24px] shrink-0 ${inviteStatus === "saving" ? "bg-brand-primary text-white" : ""}`}
+                disabled={suspended || (inviteStatus !== "saving" && (Boolean(inviteErrors.email) || !invite.name.trim() || !invite.role))}
+                onClick={() => { void submitInvite(inviteStatus === "error" ? false : state === "team-invite-error"); }}
               >
-                {inviteStatus === "saving" ? "Sending…" : "Send invite"}
+                {inviteStatus === "saving" ? <><Loader2 className="animate-spin" size={16} /> Sending…</> : inviteStatus === "error" ? "Retry" : "Send invite"}
               </Button>
             </div>
-            {inviteStatus === "saved" ? <p className="mt-[12px] text-body-sm-regular text-success-success-700">Invite saved as pending.</p> : null}
-            {inviteStatus === "error" ? <p className="mt-[12px] text-body-sm-regular text-error-default">Could not send the invite. Try again.</p> : null}
+            {inviteStatus === "saved" && inviteToast ? (
+              <div className="fixed top-[88px] right-[24px] z-40 w-[320px] rounded-md border border-border-default bg-white p-[16px] shadow-lg">
+                <p className="text-body-sm-semibold">Invite sent</p>
+                <p className="mt-[4px] text-body-sm-regular text-text-secondary">{inviteToast} is now a pending invite.</p>
+              </div>
+            ) : null}
           </section>
         </div>
       ) : null}
@@ -375,52 +403,65 @@ export function SettingsView() {
           <h2 className="text-subheading-semibold">Notification preferences</h2>
           <p className="mt-[4px] text-body-sm-regular text-text-secondary">Choose how you want to receive updates. You can change these anytime.</p>
           <PrefStatus status={prefStatus} onRetry={() => persistPrefs(prefs, false)} />
-          <div className="mt-[4px] space-y-[12px]">
-            <PrefRow icon={<UserPlus size={16} />} title="New applicant" description="Get an email and in-app notification for every new application.">
-              <ChannelToggle row="New applicant" channel="Email" checked={prefs.newApplicant.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, newApplicant: { ...prefs.newApplicant, email } }, state === "notifications-error")} />
-              <ChannelToggle row="New applicant" channel="In-app" checked={prefs.newApplicant.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, newApplicant: { ...prefs.newApplicant, inApp } })} />
+          <div className="mt-[16px] divide-y divide-border-default overflow-hidden rounded-lg border border-border-default">
+            <PrefRow icon={<Mail size={16} />} iconClass="bg-primary-primary-50 text-brand-primary" title="New applicant" description="Get an email and in-app notification for every new application.">
+              <ChannelToggle icon={<Mail size={14} />} row="New applicant" channel="Email" checked={prefs.newApplicant.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, newApplicant: { ...prefs.newApplicant, email } }, state === "notifications-error")} />
+              <span className="mx-[4px] hidden h-[20px] w-px bg-border-default sm:inline-block" aria-hidden />
+              <ChannelToggle icon={<Phone size={14} />} row="New applicant" channel="In-app" checked={prefs.newApplicant.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, newApplicant: { ...prefs.newApplicant, inApp } })} />
             </PrefRow>
-            <PrefRow icon={<Sun size={16} />} title="Daily summary" description="Receive one email each morning with new applicants and job performance.">
-              <ChannelToggle row="Daily summary" channel="Email" checked={prefs.dailySummary.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, dailySummary: { ...prefs.dailySummary, email } })} />
-              <label className="text-body-sm-regular text-text-secondary">
+            <PrefRow icon={<Calendar size={16} />} iconClass="bg-primary-primary-50 text-brand-primary" title="Daily summary" description="Receive one email each morning with new applicants and job performance.">
+              <ChannelToggle icon={<Mail size={14} />} row="Daily summary" channel="Email" checked={prefs.dailySummary.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, dailySummary: { ...prefs.dailySummary, email } })} />
+              <span className="inline-flex items-center gap-[8px] text-body-sm-regular text-text-secondary">
                 Send at
-                <span className="mt-[4px] flex items-center gap-[8px]">
-                  <SelectInput className="w-[144px]" aria-label="Daily summary send time" value={prefs.dailySummary.sendAt} disabled={suspended} onChange={(event) => persistPrefs({ ...prefs, dailySummary: { ...prefs.dailySummary, sendAt: event.target.value } })}>
-                    {SEND_TIMES.map((time) => <option key={time}>{time}</option>)}
-                  </SelectInput>
-                  <PendingTag />
-                </span>
-              </label>
+                <SelectInput className="w-[144px]" aria-label="Daily summary send time" value={prefs.dailySummary.sendAt} disabled={suspended} onChange={(event) => persistPrefs({ ...prefs, dailySummary: { ...prefs.dailySummary, sendAt: event.target.value } })}>
+                  {SEND_TIMES.map((time) => <option key={time}>{time}</option>)}
+                </SelectInput>
+                <PendingTag />
+              </span>
             </PrefRow>
             <PrefRow
-              icon={<Megaphone size={16} />}
+              icon={<MessageCircle size={16} />}
+              iconClass="bg-success-success-50 text-success-success-700"
               title="WhatsApp alerts"
               description="Get important updates on your business WhatsApp number."
-              note={<p className="mt-[4px] rounded-sm bg-info-info-50 px-[12px] py-[12px] text-body-sm-regular text-text-primary">Add and verify your WhatsApp number to enable alerts. You&apos;ll receive a verification code.</p>}
+              note={
+                <p className="mt-[12px] flex items-start gap-[8px] rounded-sm bg-info-info-50 px-[12px] py-[12px] text-body-sm-regular text-text-primary">
+                  <Info size={16} className="mt-[2px] shrink-0 text-information-default" aria-hidden />
+                  Add and verify your WhatsApp number to enable alerts. You&apos;ll receive a verification code.
+                </p>
+              }
             >
-              <ChannelToggle row="WhatsApp alerts" channel="WhatsApp" checked={prefs.whatsapp.verified && prefs.whatsapp.enabled} disabled={suspended || !prefs.whatsapp.verified} onChange={(enabled) => persistPrefs({ ...prefs, whatsapp: { ...prefs.whatsapp, enabled } })} />
+              <ChannelToggle icon={<MessageCircle size={14} />} row="WhatsApp alerts" channel="WhatsApp" checked={prefs.whatsapp.verified && prefs.whatsapp.enabled} disabled={suspended || !prefs.whatsapp.verified} onChange={(enabled) => persistPrefs({ ...prefs, whatsapp: { ...prefs.whatsapp, enabled } })} />
               <Button variant="outline" size="sm" disabled={suspended} onClick={() => { setOtp("whatsapp"); setOtpError(state === "whatsapp-failed"); }}>Add number</Button>
             </PrefRow>
-            <PrefRow icon={<Clock size={16} />} title="Job expiry reminders" description="Get notified before your jobs expire so you can renew them on time.">
-              <ChannelToggle row="Job expiry reminders" channel="Email" checked={prefs.expiryReminders.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, email } })} />
-              <ChannelToggle row="Job expiry reminders" channel="In-app" checked={prefs.expiryReminders.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, inApp } })} />
-              <label className="text-body-sm-regular text-text-secondary">
-                Remind me
-                <span className="mt-[4px] flex items-center gap-[8px]">
+            <PrefRow
+              icon={<Clock size={16} />}
+              iconClass="bg-primary-primary-50 text-brand-primary"
+              title="Job expiry reminders"
+              description="Get notified before your jobs expire so you can renew them on time."
+              extra={
+                <div className="mt-[12px] flex w-full basis-full flex-wrap items-center gap-[8px] border-t border-border-default pt-[12px] text-body-sm-regular text-text-secondary">
+                  Remind me
                   <SelectInput className="w-[192px]" aria-label="Job expiry reminder" value={prefs.expiryReminders.remindMe} disabled={suspended} onChange={(event) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, remindMe: event.target.value } })}>
                     {REMIND_OPTIONS.map((option) => <option key={option}>{option}</option>)}
                   </SelectInput>
                   <PendingTag />
-                </span>
-              </label>
+                </div>
+              }
+            >
+              <ChannelToggle icon={<Mail size={14} />} row="Job expiry reminders" channel="Email" checked={prefs.expiryReminders.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, email } })} />
+              <span className="mx-[4px] hidden h-[20px] w-px bg-border-default sm:inline-block" aria-hidden />
+              <ChannelToggle icon={<Phone size={14} />} row="Job expiry reminders" channel="In-app" checked={prefs.expiryReminders.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, expiryReminders: { ...prefs.expiryReminders, inApp } })} />
             </PrefRow>
-            <PrefRow icon={<Megaphone size={16} />} title="Product updates" description="Receive important updates about new features, tips and announcements.">
-              <ChannelToggle row="Product updates" channel="Email" checked={prefs.productUpdates.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, productUpdates: { ...prefs.productUpdates, email } })} />
-              <ChannelToggle row="Product updates" channel="In-app" checked={prefs.productUpdates.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, productUpdates: { ...prefs.productUpdates, inApp } })} />
+            <PrefRow icon={<Megaphone size={16} />} iconClass="bg-features-features-50 text-features-features-700" title="Product updates" description="Receive important updates about new features, tips and announcements.">
+              <ChannelToggle icon={<Mail size={14} />} row="Product updates" channel="Email" checked={prefs.productUpdates.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, productUpdates: { ...prefs.productUpdates, email } })} />
+              <span className="mx-[4px] hidden h-[20px] w-px bg-border-default sm:inline-block" aria-hidden />
+              <ChannelToggle icon={<Phone size={14} />} row="Product updates" channel="In-app" checked={prefs.productUpdates.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, productUpdates: { ...prefs.productUpdates, inApp } })} />
             </PrefRow>
-            <PrefRow icon={<CreditCard size={16} />} title="Billing and payments" description="Get notified about invoices, payment confirmations and billing updates.">
-              <ChannelToggle row="Billing and payments" channel="Email" checked={prefs.billing.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, billing: { ...prefs.billing, email } })} />
-              <ChannelToggle row="Billing and payments" channel="In-app" checked={prefs.billing.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, billing: { ...prefs.billing, inApp } })} />
+            <PrefRow icon={<FileText size={16} />} iconClass="bg-secondary-secondary-50 text-secondary-secondary-700" title="Billing and payments" description="Get notified about invoices, payment confirmations and billing updates.">
+              <ChannelToggle icon={<Mail size={14} />} row="Billing and payments" channel="Email" checked={prefs.billing.email} disabled={suspended} onChange={(email) => persistPrefs({ ...prefs, billing: { ...prefs.billing, email } })} />
+              <span className="mx-[4px] hidden h-[20px] w-px bg-border-default sm:inline-block" aria-hidden />
+              <ChannelToggle icon={<Phone size={14} />} row="Billing and payments" channel="In-app" checked={prefs.billing.inApp} disabled={suspended} onChange={(inApp) => persistPrefs({ ...prefs, billing: { ...prefs.billing, inApp } })} />
             </PrefRow>
           </div>
         </section>
@@ -451,7 +492,7 @@ export function SettingsView() {
         body={
           <div>
             <p>Confirm you want to close {draft.companyName}.</p>
-            <p className="mt-[8px]">Consequences: {ACCOUNT_CLOSURE.note} <PendingTag /></p>
+            <p className="mt-[8px]">Consequences: <PendingTag /></p>
           </div>
         }
         onCancel={() => setCloseOpen(false)}
@@ -527,13 +568,22 @@ function roleTone(role: TeamRole) {
   return "bg-primary-primary-50 text-primary-primary-700";
 }
 
+function avatarTone(id: string) {
+  if (id === "tm-priya") return "bg-success-success-50 text-success-success-700";
+  if (id === "tm-arjun") return "bg-warning-warning-50 text-warning-warning-700";
+  if (id === "tm-neha") return "bg-features-features-50 text-features-features-700";
+  return "bg-primary-primary-50 text-brand-primary";
+}
+
 function ChannelToggle({
+  icon,
   row,
   channel,
   checked,
   disabled,
   onChange,
 }: {
+  icon?: ReactNode;
   row: string;
   channel: string;
   checked: boolean;
@@ -542,6 +592,7 @@ function ChannelToggle({
 }) {
   return (
     <span className="inline-flex items-center gap-[8px] text-body-sm-regular text-text-secondary">
+      {icon}
       {channel}
       <Toggle label={`${row} · ${channel}`} checked={checked} disabled={disabled} onChange={onChange} />
     </span>
@@ -580,27 +631,32 @@ function PrefStatus({ status, onRetry }: { status: SaveState; onRetry: () => voi
 
 function PrefRow({
   icon,
+  iconClass,
   title,
   description,
   note,
+  extra,
   children,
 }: {
   icon: ReactNode;
+  iconClass: string;
   title: string;
   description: string;
   note?: ReactNode;
+  extra?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-md border border-border-default px-[16px] py-[16px]">
+    <div className="px-[16px] py-[16px]">
       <div className="flex flex-col gap-[16px] lg:flex-row lg:items-center">
-        <span className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full bg-primary-primary-50 text-brand-primary">{icon}</span>
+        <span className={cn("flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full", iconClass)}>{icon}</span>
         <div className="min-w-[0px] flex-1">
           <p className="text-body-sm-semibold">{title}</p>
           <p className="text-body-sm-regular text-text-secondary">{description}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-[4px]">{children}</div>
+        <div className="flex flex-wrap items-center gap-[8px]">{children}</div>
       </div>
+      {extra}
       {note}
     </div>
   );
