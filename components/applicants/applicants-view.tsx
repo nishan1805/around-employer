@@ -164,7 +164,7 @@ export function ApplicantsView({ jobId }: { jobId?: string }) {
           )}
         </table>
       </div>
-      {state === "loading" || state === "error" ? null : <div className="mt-[16px] flex items-center justify-between text-body-sm-regular text-text-secondary">
+      {state === "loading" || state === "error" || rows.length === 0 ? null : <div className="mt-[16px] flex items-center justify-between text-body-sm-regular text-text-secondary">
         <p>Showing {rows.length ? (page - 1) * pageSize + 1 : 0} to {Math.min(page * pageSize, rows.length)} of {rows.length}</p>
         <div className="flex items-center gap-[8px]">
           <button aria-label="Previous page" disabled={page === 1} className="inline-flex size-[40px] items-center justify-center rounded-full border border-border-default disabled:opacity-40" onClick={() => setPage((value) => Math.max(1, value - 1))}><ChevronLeft size={16} /></button>

@@ -11,6 +11,8 @@ export function ResumeUpload({
   onFile,
   onCancel,
   fileAction = "Remove",
+  meta,
+  nameTone = "default",
 }: {
   status: UploadStatus;
   fileName?: string;
@@ -19,6 +21,8 @@ export function ResumeUpload({
   onFile: (file?: File) => void;
   onCancel?: () => void;
   fileAction?: "Remove" | "Replace";
+  meta?: string;
+  nameTone?: "default" | "error";
 }) {
   if (status === "uploading") {
     return (
@@ -33,7 +37,10 @@ export function ResumeUpload({
     return (
       <div className="flex items-center gap-[12px] rounded-sm border border-border-default px-[12px] py-[12px] text-body-sm-regular">
         <FileText size={18} className="shrink-0 text-text-secondary" />
-        <span className="min-w-[0px] flex-1 truncate">{fileName}</span>
+        <span className="min-w-[0px] flex-1">
+          <span className="block truncate">{fileName}</span>
+          {meta ? <span className="block text-label-regular text-text-secondary">{meta}</span> : null}
+        </span>
         {fileAction === "Replace" ? (
           <label className="cursor-pointer text-body-sm-semibold text-brand-primary">
             Replace
@@ -47,11 +54,14 @@ export function ResumeUpload({
   }
   if (status === "failed") {
     return (
-      <div className="flex items-center gap-[12px] rounded-sm border border-error-default bg-error-error-50 px-[12px] py-[12px] text-body-sm-regular text-error-default">
-        <FileText size={18} className="shrink-0" />
-        <span className="min-w-[0px] flex-1 truncate">{fileName || "Upload failed"}</span>
-        <label className="cursor-pointer font-semibold">
-          Retry
+      <div className="flex items-center gap-[12px] rounded-sm border border-error-default bg-error-error-50 px-[12px] py-[12px] text-body-sm-regular">
+        <span className="flex size-[40px] shrink-0 items-center justify-center rounded-md bg-error-error-100 text-error-default"><FileText size={18} /></span>
+        <span className="min-w-[0px] flex-1">
+          <span className={`block truncate font-semibold ${nameTone === "error" ? "text-error-default" : "text-text-primary"}`}>{fileName || "Upload failed"}</span>
+          {meta ? <span className="block text-label-medium text-error-default">{meta}</span> : null}
+        </span>
+        <label className="cursor-pointer font-semibold text-brand-primary">
+          {fileAction === "Replace" ? "Replace" : "Retry"}
           <input type="file" className="hidden" accept={accept} onChange={(event) => onFile(event.target.files?.[0])} />
         </label>
       </div>

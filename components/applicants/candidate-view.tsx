@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Briefcase, Calendar, ChevronDown, ChevronLeft, ChevronRight, Clock, Download, Expand, Globe, Maximize2, Minus, Phone, Plus } from "lucide-react";
+import { AlertCircle, ArrowRight, Briefcase, Calendar, ChevronDown, ChevronLeft, ChevronRight, Clock, Download, Expand, Globe, Maximize2, Minus, Phone, Plus } from "lucide-react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -25,24 +25,42 @@ export function CandidateView({ id }: { id: string }) {
 
   if (state === "loading") {
     return (
-      <div className="space-y-[16px]">
-        <SkeletonBlock className="h-[20px] w-[180px]" />
-        <SkeletonBlock className="h-[108px]" />
-        <div className="flex gap-[16px]"><SkeletonBlock className="h-[44px] w-[96px]" /><SkeletonBlock className="h-[44px] w-[88px]" /></div>
-        <div className="grid gap-[16px] lg:grid-cols-[minmax(0,1fr)_360px]">
-          <SkeletonBlock className="h-[280px]" />
-          <SkeletonBlock className="h-[180px]" />
+      <div>
+        <Link href="/applicants" className="inline-flex items-center gap-[8px] text-body-sm-medium text-text-secondary"><ChevronLeft size={16} /> Back to Applicants</Link>
+        <section className="mt-[16px] flex items-center gap-[16px] rounded-lg border border-border-default bg-white p-[24px]">
+          <SkeletonBlock className="size-[56px] shrink-0 rounded-full" />
+          <div className="min-w-[0px] flex-1 space-y-[8px]">
+            <SkeletonBlock className="h-[24px] w-[180px]" />
+            <SkeletonBlock className="h-[16px] w-[320px]" />
+          </div>
+          <SkeletonBlock className="h-[44px] w-[140px]" />
+        </section>
+        <div className="mt-[16px] flex gap-[8px] border-b border-border-default pb-[8px]">
+          <SkeletonBlock className="h-[36px] w-[96px]" />
+          <SkeletonBlock className="h-[36px] w-[88px]" />
         </div>
+        <section className="mt-[16px] space-y-[12px] rounded-lg border border-border-default bg-white p-[20px]">
+          <SkeletonBlock className="h-[16px] w-[120px]" />
+          <SkeletonBlock className="h-[14px] w-full" />
+          <SkeletonBlock className="h-[14px] w-[80%]" />
+          <SkeletonBlock className="h-[14px] w-[64%]" />
+        </section>
       </div>
     );
   }
   if (state === "error" || !person) {
     return (
-      <div>
+      <div className="flex min-h-[640px] flex-col">
         <Link href="/applicants" className="inline-flex items-center gap-[8px] text-body-sm-medium text-text-secondary"><ChevronLeft size={16} /> Back to Applicants</Link>
-        <h1 className="mt-[16px] text-display-small-semibold">Couldn&apos;t load this candidate</h1>
-        <p className="mt-[8px] text-body-sm-regular text-text-secondary">Check your connection and try again.</p>
-        <Button className="mt-[16px]" href="/applicants">Back to Applicants</Button>
+        <div className="flex flex-1 flex-col items-center justify-center px-[24px] text-center">
+          <span className="flex size-[56px] items-center justify-center rounded-full bg-grey-grey-100 text-text-secondary"><AlertCircle size={20} /></span>
+          <h1 className="mt-[16px] text-subheading-semibold">Couldn&apos;t load profile</h1>
+          <p className="mt-[8px] max-w-[420px] text-body-sm-regular text-text-secondary">We couldn&apos;t load this candidate&apos;s profile. Please try again.</p>
+          <div className="mt-[16px] flex gap-[12px]">
+            <Button variant="outline" href="/applicants">Back to Applicants</Button>
+            <Button onClick={() => router.push(`/applicants/${id}`)}>Retry</Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -183,7 +201,7 @@ export function CandidateView({ id }: { id: string }) {
           {state === "unsupported" || state === "resume-error" || state === "no-resume" || !resume ? (
             <ResumeNotice
               image={state === "unsupported" ? "/figma/resume-unsupported.svg" : "/figma/resume-empty.svg"}
-              title={state === "unsupported" ? "Can’t preview this file" : state === "resume-error" ? "Couldn’t load the resume" : "No resume uploaded"}
+              title={state === "unsupported" ? "Can’t preview this file" : state === "resume-error" ? "Resume failed to load" : "No resume uploaded"}
               body={state === "unsupported" ? "This file type isn’t supported in the viewer. Download the resume to open it." : state === "resume-error" ? "Check your connection and try again." : `${candidate.name} hasn’t added a resume to this application yet.`}
               action={state === "resume-error" ? <Button className="mt-[16px]" onClick={() => router.push(`/applicants/${candidate.id}?state=resume`)}>Retry</Button> : null}
             />

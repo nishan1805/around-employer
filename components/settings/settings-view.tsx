@@ -66,7 +66,7 @@ export function SettingsView() {
   const [menuFor, setMenuFor] = useState<string | null>(state === "team-menu" ? "tm-priya" : state === "team-pending-menu" ? "tm-neha" : null);
   const [confirm, setConfirm] = useState<{ id: string; kind: "remove" | "cancel" } | null>(state === "team-remove-confirm" ? { id: "tm-priya", kind: "remove" } : null);
   const [roleEdit, setRoleEdit] = useState<TeamMember | null>(null);
-  const inviteDemo = state === "team-invite-invalid" || state === "team-invite-submitting" || state === "team-invite-success" || state === "team-invite-error";
+  const inviteDemo = state === "team-invite-invalid" || state === "team-invite-submitting" || state === "team-invite-error";
   const [invite, setInvite] = useState<{ name: string; email: string; role: TeamRole | "" }>(
     inviteDemo
       ? { name: "Rohit Dewangan", email: state === "team-invite-invalid" ? "rohit.dewangan@raipurbuilder" : "rohit.dewangan@raipurbuilder.in", role: "Recruiter" }
@@ -75,6 +75,7 @@ export function SettingsView() {
   const [inviteErrors, setInviteErrors] = useState<Record<string, string>>(
     state === "team-invite-invalid" ? { email: "Enter a valid email address, like name@raipurbuilder.in." } : {},
   );
+  const [inviteToast, setInviteToast] = useState(state === "team-invite-success" ? "Rohit Dewangan" : "");
   const [inviteStatus, setInviteStatus] = useState<SaveState>(
     state === "team-invite-submitting" ? "saving" : state === "team-invite-success" ? "saved" : state === "team-invite-error" ? "error" : "idle",
   );
@@ -126,6 +127,9 @@ export function SettingsView() {
     try {
       const member = await sendInvite({ name: invite.name, email: invite.email, role, fail });
       setTeam((current) => (current.some((item) => item.email === member.email) ? current : [...current, member]));
+      setInviteToast(invite.name.trim());
+      setInvite({ name: "", email: "", role: "" });
+      setInviteErrors({});
       setInviteStatus("saved");
     } catch {
       setInviteStatus("error");
@@ -345,20 +349,30 @@ export function SettingsView() {
           <section className="rounded-lg border border-border-default bg-white p-[24px]">
             <h2 className="text-subheading-semibold">Invite a new member</h2>
             <p className="mt-[4px] text-body-sm-regular text-text-secondary">They&apos;ll get an email with a link to join your team.</p>
+            {inviteStatus === "error" ? (
+              <div className="mt-[16px]">
+                <Banner
+                  tone="danger"
+                  title="Couldn't send the invite"
+                  body="Check your connection and try again. The details you entered are kept."
+                  action={<Button size="sm" onClick={() => { void submitInvite(false); }}>Retry</Button>}
+                />
+              </div>
+            ) : null}
             <div className="mt-[16px] flex min-w-[0px] items-start gap-[16px]">
               <div className="min-w-[0px] flex-1">
                 <Field label="Name" error={inviteErrors.name}>
-                  <TextInput id="invite-name" className={inviteErrors.name ? "border-error-default" : undefined} placeholder="Enter full name" value={invite.name} disabled={suspended} onChange={(event) => setInvite({ ...invite, name: event.target.value })} />
+                  <TextInput id="invite-name" className={inviteErrors.name ? "border-error-default" : undefined} placeholder="Enter full name" value={invite.name} disabled={suspended || inviteStatus === "saving"} onChange={(event) => setInvite({ ...invite, name: event.target.value })} />
                 </Field>
               </div>
               <div className="min-w-[0px] flex-1">
                 <Field label="Email address" error={inviteErrors.email}>
-                  <TextInput type="email" className={inviteErrors.email ? "border-error-default" : undefined} placeholder="Enter email address" value={invite.email} disabled={suspended} onChange={(event) => setInvite({ ...invite, email: event.target.value })} />
+                  <TextInput type="email" className={inviteErrors.email ? "border-error-default" : undefined} placeholder="Enter email address" value={invite.email} disabled={suspended || inviteStatus === "saving"} onChange={(event) => setInvite({ ...invite, email: event.target.value })} />
                 </Field>
               </div>
               <div className="min-w-[0px] flex-1">
                 <Field label="Role" error={inviteErrors.role}>
-                  <SelectInput aria-invalid={Boolean(inviteErrors.role)} aria-label="Invite role" value={invite.role} disabled={suspended} onChange={(event) => setInvite({ ...invite, role: event.target.value as TeamRole | "" })}>
+                  <SelectInput aria-invalid={Boolean(inviteErrors.role)} aria-label="Invite role" value={invite.role} disabled={suspended || inviteStatus === "saving"} onChange={(event) => setInvite({ ...invite, role: event.target.value as TeamRole | "" })}>
                     <option value="">Select role</option>
                     {ROLES.filter((role) => role !== "Owner").map((role) => (
                       <option key={role} value={role}>{role}</option>
@@ -374,20 +388,10 @@ export function SettingsView() {
                 {inviteStatus === "saving" ? <><Loader2 className="animate-spin" size={16} /> Sending…</> : "Send invite"}
               </Button>
             </div>
-            {inviteStatus === "error" ? (
-              <div className="mt-[16px]">
-                <Banner
-                  tone="danger"
-                  title="Couldn't send the invite"
-                  body="Check your connection and try again. The details you entered are kept."
-                  action={<Button size="sm" onClick={() => { void submitInvite(false); }}>Retry</Button>}
-                />
-              </div>
-            ) : null}
-            {inviteStatus === "saved" ? (
-              <div className="fixed right-[24px] bottom-[24px] z-40 w-[320px] rounded-md border border-border-default bg-white p-[16px] shadow-lg">
+            {inviteStatus === "saved" && inviteToast ? (
+              <div className="fixed top-[88px] right-[24px] z-40 w-[320px] rounded-md border border-border-default bg-white p-[16px] shadow-lg">
                 <p className="text-body-sm-semibold">Invite sent</p>
-                <p className="mt-[4px] text-body-sm-regular text-text-secondary">{invite.name || "The new member"} is now a pending invite.</p>
+                <p className="mt-[4px] text-body-sm-regular text-text-secondary">{inviteToast} is now a pending invite.</p>
               </div>
             ) : null}
           </section>
