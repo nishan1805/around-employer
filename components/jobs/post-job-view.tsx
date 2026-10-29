@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Calendar, Check, FileText, Info, List, Minus, Pencil, Plus, Sparkles } from "lucide-react";
+import { AlertCircle, Calendar, Check, ChevronLeft, ChevronRight, FileText, Info, List, Minus, Pencil, Plus, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,7 @@ const AI_DRAFT: Draft = {
   description:
     "Raipur Builder is hiring a Site Supervisor in Shankar Nagar, Raipur. The role covers site coordination, drawings and day-to-day construction work.",
   skills: "AutoCAD, Site supervision, Safety",
+  experience: "1 year – 3 years",
   salary: "25000",
   age: "18",
   ageMax: "35",
@@ -163,8 +164,8 @@ export function PostJobView() {
         <div>
           <h1 className="text-display-small-semibold">Post a job</h1>
           <p className="mt-[4px] text-body-regular text-text-secondary">Choose the method that works best for you. You can review and edit all details before publishing.</p>
-          <div className="mt-[24px] grid gap-[24px] md:grid-cols-2">
-            <button type="button" onClick={() => setMethod("ai")} className={`rounded-md border p-[24px] text-left ${method === "ai" ? "border-[1.5px] border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
+          <div className="mt-[24px] flex flex-wrap items-start justify-start gap-[16px]">
+            <button type="button" onClick={() => setMethod("ai")} className={`w-[312px] rounded-md border p-[24px] text-left ${method === "ai" ? "border-[1.5px] border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
               <span className="flex items-start gap-[12px]">
                 <span className="flex size-[48px] items-center justify-center rounded-sm bg-white text-brand-primary"><Sparkles size={24} /></span>
                 <span className="flex-1" />
@@ -176,7 +177,7 @@ export function PostJobView() {
               <p className="mt-[16px] text-subheading-semibold">Create with AI</p>
               <p className="mt-[8px] text-body-sm-regular text-text-secondary">Paste an existing job description from WhatsApp, a poster or an old ad. We&apos;ll extract the key details for you.</p>
             </button>
-            <button type="button" onClick={() => setMethod("manual")} className={`rounded-md border p-[24px] text-left ${method === "manual" ? "border-[1.5px] border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
+            <button type="button" onClick={() => setMethod("manual")} className={`w-[312px] rounded-md border p-[24px] text-left ${method === "manual" ? "border-[1.5px] border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
               <span className="flex items-start gap-[12px]">
                 <span className="flex size-[48px] items-center justify-center rounded-sm bg-warning-warning-50 text-warning-warning-700"><Pencil size={24} /></span>
                 <span className="flex-1" />
@@ -245,7 +246,7 @@ export function PostJobView() {
                     <span className={`flex size-[28px] items-center justify-center rounded-full text-label-medium ${index <= stepIndex ? "bg-brand-primary text-white" : "bg-grey-grey-100 text-text-secondary"}`}>{index + 1}</span>
                     {index < 2 ? <span className="my-[4px] w-px flex-1 bg-border-default" /> : null}
                   </span>
-                  <span className={`pb-[16px] ${index === stepIndex ? "" : ""}`}>
+                  <span className={`mb-[8px] min-w-[0px] flex-1 rounded-md px-[8px] py-[4px] ${index === stepIndex ? "bg-primary-primary-50" : ""}`}>
                     <span className={`block text-body-sm-semibold ${index === stepIndex ? "text-brand-primary" : "text-text-primary"}`}>{title}</span>
                     <span className="block text-label-regular text-text-secondary">{body}</span>
                   </span>
@@ -270,7 +271,7 @@ export function PostJobView() {
                       {CATEGORIES.map((item) => <option key={item}>{item}</option>)}
                     </SelectInput>
                   </Field>
-                  <Field label="Number of openings">
+                  <Field label="Number of openings" required>
                     <span className="flex h-[44px] overflow-hidden rounded-sm border border-border-default">
                       <span className="flex flex-1 items-center px-[12px]">{draft.openings || "1"}</span>
                       <button type="button" aria-label="Decrease openings" className="flex w-[44px] items-center justify-center border-l border-border-default" onClick={() => patch("openings", String(Math.max(1, Number(draft.openings || 1) - 1)))}><Minus size={16} /></button>
@@ -289,9 +290,9 @@ export function PostJobView() {
                     <p className="mb-[8px] text-label-medium text-text-secondary">Employment type <span className="text-error-default">*</span></p>
                     <div className="grid grid-cols-2 gap-[8px]">
                       {(["Full-time", "Part-time", "Contract", "Internship"] as EmploymentType[]).map((item) => (
-                        <button key={item} type="button" onClick={() => patch("employmentType", item)} className={`flex h-[44px] items-center gap-[8px] rounded-sm border px-[12px] text-body-sm-regular ${draft.employmentType === item ? "border-brand-primary bg-primary-primary-50 text-brand-primary" : "border-border-default"}`}>
-                          <span className={`flex size-[16px] items-center justify-center rounded-full border ${draft.employmentType === item ? "border-brand-primary bg-brand-primary" : "border-border-strong"}`}>{draft.employmentType === item ? <span className="size-[6px] rounded-full bg-white" /> : null}</span>
-                          {item}
+                        <button key={item} type="button" onClick={() => patch("employmentType", item)} className={`flex h-[44px] items-center justify-between gap-[8px] rounded-sm border px-[12px] text-body-sm-regular ${draft.employmentType === item ? "border-brand-primary bg-primary-primary-50 text-brand-primary" : "border-border-default"}`}>
+                          <span>{item}</span>
+                          <span className={`flex size-[16px] shrink-0 items-center justify-center rounded-full border ${draft.employmentType === item ? "border-brand-primary bg-brand-primary" : "border-border-strong"}`}>{draft.employmentType === item ? <span className="size-[6px] rounded-full bg-white" /> : null}</span>
                         </button>
                       ))}
                     </div>
@@ -301,9 +302,9 @@ export function PostJobView() {
                     <p className="mb-[8px] text-label-medium text-text-secondary">Work arrangement <span className="text-error-default">*</span></p>
                     <div className="grid grid-cols-3 gap-[8px]">
                       {(["On-site", "Remote", "Hybrid"] as WorkArrangement[]).map((item) => (
-                        <button key={item} type="button" onClick={() => patch("workArrangement", item)} className={`flex h-[44px] items-center gap-[8px] rounded-sm border px-[8px] text-body-sm-regular ${draft.workArrangement === item ? "border-brand-primary bg-primary-primary-50 text-brand-primary" : "border-border-default"}`}>
+                        <button key={item} type="button" onClick={() => patch("workArrangement", item)} className={`flex h-[44px] items-center justify-between gap-[8px] rounded-sm border px-[8px] text-body-sm-regular ${draft.workArrangement === item ? "border-brand-primary bg-primary-primary-50 text-brand-primary" : "border-border-default"}`}>
+                          <span>{item}</span>
                           <span className={`flex size-[16px] shrink-0 items-center justify-center rounded-full border ${draft.workArrangement === item ? "border-brand-primary bg-brand-primary" : "border-border-strong"}`}>{draft.workArrangement === item ? <span className="size-[6px] rounded-full bg-white" /> : null}</span>
-                          {item}
                         </button>
                       ))}
                     </div>
@@ -332,12 +333,12 @@ export function PostJobView() {
                     {errors.experience ? <p className="mt-[4px] text-label-medium text-error-default">{errors.experience}</p> : null}
                   </div>
                   <div>
-                    <p className="mb-[8px] text-label-medium text-text-secondary">Application deadline <span className="text-text-tertiary">Optional</span></p>
+                    <p className="mb-[8px] text-label-medium text-text-secondary">Application deadline <span className="text-text-tertiary">(optional)</span></p>
                     <DateField value={draft.deadline} onChange={(value) => patch("deadline", value)} />
                   </div>
                 </div>
                 <div>
-                  <p className="mb-[8px] text-label-medium text-text-secondary">Skills <span className="text-text-tertiary">Optional</span></p>
+                  <p className="mb-[8px] text-label-medium text-text-secondary">Skills <span className="text-text-tertiary">(optional)</span></p>
                   <TextInput placeholder="Add a skill and press Enter" value={skillDraft} onChange={(event) => setSkillDraft(event.target.value)} onKeyDown={(event) => {
                     if (event.key !== "Enter") return;
                     event.preventDefault();
@@ -377,14 +378,14 @@ export function PostJobView() {
                     </div>
                   </Field>
                   <Field label={draft.salaryType === "Salary range" ? "Minimum monthly salary" : "Monthly salary"} required error={errors.salary}>
-                    <TextInput value={draft.salary} onChange={(event) => patch("salary", event.target.value)} />
+                    <TextInput inputMode="numeric" value={salaryText(draft.salary)} onChange={(event) => patch("salary", digitsOnly(event.target.value))} />
                   </Field>
                   {draft.salaryType === "Salary range" ? (
-                    <Field label="Maximum monthly salary" error={errors.salaryMax}><TextInput value={draft.salaryMax} onChange={(event) => patch("salaryMax", event.target.value)} /></Field>
+                    <Field label="Maximum monthly salary" error={errors.salaryMax}><TextInput inputMode="numeric" value={salaryText(draft.salaryMax)} onChange={(event) => patch("salaryMax", digitsOnly(event.target.value))} /></Field>
                   ) : null}
                 </div>
                 <div>
-                  <p className="text-label-medium text-text-secondary">Benefits <span className="text-text-tertiary">Optional</span></p>
+                  <p className="text-label-medium text-text-secondary">Benefits <span className="text-text-tertiary">(optional)</span></p>
                   <div className="mt-[8px] flex flex-wrap gap-[8px]">
                     {BENEFITS.map((benefit) => {
                       const on = draft.benefits.includes(benefit);
@@ -399,7 +400,7 @@ export function PostJobView() {
                 <div className="grid gap-[16px] md:grid-cols-2">
                   <Field label="Education requirement"><TextInput value={draft.education} onChange={(event) => patch("education", event.target.value)} /></Field>
                   <div>
-                    <p className="mb-[8px] text-label-medium text-text-secondary">Preferred start date</p>
+                    <p className="mb-[8px] text-label-medium text-text-secondary">Preferred start date <span className="text-text-tertiary">(optional)</span></p>
                     <DateField value={draft.startDate} onChange={(value) => patch("startDate", value)} />
                   </div>
                   <Field label="Gender preference"><TextInput value={draft.gender} onChange={(event) => patch("gender", event.target.value)} /></Field>
@@ -480,13 +481,63 @@ export function PostJobView() {
   );
 }
 
+function digitsOnly(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function salaryText(digits: string) {
+  if (!digits) return "";
+  return formatInr(Number(digits));
+}
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 function DateField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const parsed = value ? new Date(`${value}T00:00:00`) : null;
+  const [open, setOpen] = useState(false);
+  const [cursor, setCursor] = useState(parsed ?? new Date(2026, 9, 1));
+  const year = cursor.getFullYear();
+  const month = cursor.getMonth();
+  const lead = new Date(year, month, 1).getDay();
+  const count = new Date(year, month + 1, 0).getDate();
+  const label = parsed ? `${parsed.getDate()} ${SHORT_MONTHS[parsed.getMonth()]} ${parsed.getFullYear()}` : "Select date";
   return (
-    <label className="relative flex h-[44px] items-center gap-[8px] rounded-sm border border-border-default px-[12px] text-body-sm-regular">
-      <span className={value ? "flex-1 text-text-primary" : "flex-1 text-text-tertiary"}>{value || "Select date"}</span>
-      <Calendar size={16} className="text-text-tertiary" />
-      <input className="absolute inset-[0px] cursor-pointer opacity-0" type="date" aria-label="Select date" value={value} onChange={(event) => onChange(event.target.value)} />
-    </label>
+    <div className="relative">
+      <button type="button" aria-expanded={open} onClick={() => setOpen((current) => !current)} className="flex h-[44px] w-full items-center gap-[8px] rounded-sm border border-border-default px-[12px] text-left text-body-sm-regular">
+        <span className={value ? "flex-1 text-text-primary" : "flex-1 text-text-tertiary"}>{label}</span>
+        <Calendar size={16} className="text-text-tertiary" />
+      </button>
+      {open ? (
+        <div className="absolute top-[48px] z-30 w-[280px] rounded-md border border-border-default bg-white p-[12px] shadow-lg">
+          <div className="mb-[8px] flex items-center justify-between">
+            <button type="button" aria-label="Previous month" onClick={() => setCursor(new Date(year, month - 1, 1))}><ChevronLeft size={16} /></button>
+            <span className="text-body-sm-semibold">{MONTHS[month]} {year}</span>
+            <button type="button" aria-label="Next month" onClick={() => setCursor(new Date(year, month + 1, 1))}><ChevronRight size={16} /></button>
+          </div>
+          <div className="grid grid-cols-7 text-center text-label-regular text-text-tertiary">
+            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => <span key={day}>{day}</span>)}
+          </div>
+          <div className="mt-[4px] grid grid-cols-7">
+            {Array.from({ length: lead }).map((_, index) => <span key={`pad-${index}`} />)}
+            {Array.from({ length: count }).map((_, index) => {
+              const day = index + 1;
+              const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  className={`mx-auto flex size-[32px] items-center justify-center rounded-full text-body-sm-regular ${iso === value ? "bg-brand-primary text-white" : "hover:bg-grey-grey-100"}`}
+                  onClick={() => { onChange(iso); setOpen(false); }}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
 

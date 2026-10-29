@@ -218,7 +218,7 @@ export function DashboardView() {
                 </thead>
                 <tbody>
                   {RECENT.map((person, index) => (
-                    <tr key={person.id} className={state === "new-applicants" && index < 2 ? "bg-primary-primary-50" : ""}>
+                    <tr key={person.id} className={`border-t border-border-default ${state === "new-applicants" && index < 2 ? "bg-primary-primary-50" : ""}`}>
                       <td className="py-[12px]">
                         <Link href={`/applicants/${person.id}`} className="flex items-center gap-[8px] font-medium">
                           <span className={`flex h-[32px] w-[32px] items-center justify-center rounded-full text-label-medium ${person.tone}`}>{person.initials}</span>
@@ -243,34 +243,40 @@ export function DashboardView() {
             {empty ? (
               <EmptyState title="No active jobs" body="Post your first job to start receiving applications from nearby candidates." action={<Button href="/post-job">Post a job</Button>} />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[520px] text-left text-body-sm-regular">
-                  <thead className="bg-grey-grey-50 text-label-medium text-text-secondary">
-                    <tr>
-                      <th className="px-[12px] py-[10px] font-medium">Job title</th>
-                      <th className="font-medium">Type & Location</th>
-                      <th className="font-medium">Views</th>
-                      <th className="font-medium">Applicants</th>
-                      <th className="font-medium">Status</th>
-                      <th />
+              <table className="w-full table-fixed text-left text-body-sm-regular">
+                <colgroup>
+                  <col className="w-[26%]" />
+                  <col />
+                  <col className="w-[52px]" />
+                  <col className="w-[72px]" />
+                  <col className="w-[88px]" />
+                  <col className="w-[32px]" />
+                </colgroup>
+                <thead className="bg-grey-grey-50 text-label-medium text-text-secondary">
+                  <tr>
+                    <th className="px-[12px] py-[10px] font-medium">Job title</th>
+                    <th className="px-[8px] py-[10px] font-medium">Type & Location</th>
+                    <th className="px-[4px] py-[10px] font-medium">Views</th>
+                    <th className="px-[4px] py-[10px] font-medium">Applicants</th>
+                    <th className="px-[4px] py-[10px] font-medium">Status</th>
+                    <th className="px-[4px] py-[10px]" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {jobs.map((item) => (
+                    <tr key={item.id} className="border-t border-border-default">
+                      <td className="truncate px-[12px] py-[12px] font-semibold">
+                        <Link href={`/jobs/${item.id}`}>{item.title}</Link>
+                      </td>
+                      <td className="truncate px-[8px] py-[12px] text-text-secondary">{item.employmentType} · {item.location}</td>
+                      <td className="px-[4px] py-[12px]">{item.views}</td>
+                      <td className="px-[4px] py-[12px]">{item.applicants}</td>
+                      <td className="px-[4px] py-[12px]"><JobBadge status={item.status} /></td>
+                      <td className="px-[4px] py-[12px] text-right"><button aria-label={`Actions for ${item.title}`} className="inline-flex size-[24px] items-center justify-center text-text-secondary"><MoreVertical size={16} /></button></td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {jobs.map((item) => (
-                      <tr key={item.id} className="border-t border-border-default">
-                        <td className="py-[12px] font-semibold">
-                          <Link href={`/jobs/${item.id}`}>{item.title}</Link>
-                        </td>
-                        <td className="text-text-secondary">{item.employmentType} · {item.location}</td>
-                        <td>{item.views}</td>
-                        <td>{item.applicants}</td>
-                        <td><JobBadge status={item.status} /></td>
-                        <td className="text-right"><button aria-label={`Actions for ${item.title}`} className="inline-flex size-[24px] items-center justify-center text-text-secondary"><MoreVertical size={16} /></button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             )}
           </section>
         </div>

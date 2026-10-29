@@ -440,7 +440,7 @@ const named: Applicant[] = [
     email: "amit.sharma@email.com",
     avatarTone: "blue",
     highlightNew: true,
-    notes: [{ id: "note-1", author: "You", at: "2026-10-27", text: "Strong portfolio. Ask about retail dashboards." }],
+    notes: [{ id: "note-1", author: "You", at: "2026-10-27", text: "Strong portfolio. Ask about site drawings." }],
     detail: amitDetail,
   }),
   applicant({
