@@ -6,11 +6,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { JobBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { AnchoredMenu } from "@/components/ui/anchored-menu";
 import { Banner, ErrorState, SkeletonBlock } from "@/components/ui/feedback";
 import { usePortal } from "@/components/shell/use-portal";
 import { formatDate, formatInr } from "@/lib/format";
 import { PendingDecision } from "@/components/ui/pending-decision";
 import { JOB_REVIEW_SLA_LABEL } from "@/src/config/policy";
+import { actionsForStatus, type JobActionId } from "@/lib/job-actions";
 import { canSubmitJobForReview } from "@/lib/status";
 import type { Job, JobStatus } from "@/lib/types";
 
@@ -27,8 +30,10 @@ const STATE_STATUS: Record<string, JobStatus> = {
 
 export function JobDetailView({ id }: { id: string }) {
   const router = useRouter();
-  const { jobs, state, patchJob, duplicateJob, account, verification } = usePortal();
+  const { jobs, state, patchJob, removeJob, duplicateJob, account, verification } = usePortal();
   const [menu, setMenu] = useState(state === "actions");
+  const [menuAnchor, setMenuAnchor] = useState<HTMLButtonElement | null>(null);
+  const [confirm, setConfirm] = useState<"pause" | "resume" | "close" | "delete" | null>(null);
   const found = jobs.find((item) => item.id === id) ?? jobs[0];
   if (state === "loading") {
     return (
@@ -56,6 +61,19 @@ export function JobDetailView({ id }: { id: string }) {
           ]
         : found.returnReasons,
   };
+
+  function onAction(action: JobActionId) {
+    setMenu(false);
+    if (action === "edit") {
+      router.push(`/post-job?state=details&job=${job.id}`);
+      return;
+    }
+    if (action === "duplicate") {
+      duplicateJob(job.id);
+      return;
+    }
+    setConfirm(action);
+  }
 
   return (
     <div className="space-y-[16px] ">
@@ -98,12 +116,6 @@ export function JobDetailView({ id }: { id: string }) {
         </div>
         <div className="flex flex-wrap gap-[8px]">
           {status === "active" ? <Button href={`/jobs/${job.id}/applicants`}>View applicants <ArrowRight size={16} /></Button> : null}
-          {status === "pending_review" ? (
-            <>
-              <Button variant="outline" disabled>Edit job</Button>
-              <Button variant="outline" disabled>Pause job</Button>
-            </>
-          ) : null}
           {status === "returned" || status === "draft" ? (
             <Button
               href={canSubmitJobForReview(account, verification) ? `/post-job?state=review&job=${job.id}` : "/post-job?state=gate"}
@@ -111,24 +123,26 @@ export function JobDetailView({ id }: { id: string }) {
               {status === "returned" ? "Fix and resubmit" : "Submit for review"}
             </Button>
           ) : null}
-          {status === "paused" ? <Button onClick={() => patchJob(job.id, { status: "active" })}>Resume job</Button> : null}
-          {status === "expired" ? <Button onClick={() => patchJob(job.id, { status: "active" })}>Renew job</Button> : null}
-          {status === "active" ? (
-            <div className="relative">
-              <button aria-label="More actions" className="flex h-[44px] w-[44px] items-center justify-center rounded-sm border border-border-default" onClick={() => setMenu((open) => !open)}>
-                <MoreHorizontal size={18} />
+          <button
+            ref={setMenuAnchor}
+            aria-label="Job actions"
+            aria-expanded={menu}
+            className="flex h-[44px] w-[44px] items-center justify-center rounded-sm border border-border-default bg-white"
+            onClick={() => setMenu((open) => !open)}
+          >
+            <MoreHorizontal size={18} />
+          </button>
+          <AnchoredMenu open={menu} anchor={menuAnchor} onClose={() => setMenu(false)} className="w-[176px] rounded-md border border-border-default bg-white py-[4px] shadow-lg">
+            {actionsForStatus(status).map((item) => (
+              <button
+                key={item.id}
+                className={`block w-full px-[12px] py-[8px] text-left text-body-sm-regular hover:bg-grey-grey-100 ${item.danger ? "text-error-default" : ""}`}
+                onClick={() => onAction(item.id)}
+              >
+                {item.label}
               </button>
-              {menu ? (
-                <div className="absolute right-[0px] z-20 mt-[8px] w-[176px] rounded-md border border-border-default bg-white py-[4px] shadow-lg">
-                  <Link className="block px-[12px] py-[8px] text-body-sm-regular" href={`/jobs/${job.id}/applicants`}>View applicants</Link>
-                  <Link className="block px-[12px] py-[8px] text-body-sm-regular" href={`/post-job?state=details&job=${job.id}`}>Edit job</Link>
-                  <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular" onClick={() => patchJob(job.id, { status: "paused" })}>Pause</button>
-                  <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular" onClick={() => duplicateJob(job.id)}>Duplicate</button>
-                  <button className="block w-full px-[12px] py-[8px] text-left text-body-sm-regular text-error-default" onClick={() => patchJob(job.id, { status: "closed" })}>Close job</button>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+            ))}
+          </AnchoredMenu>
         </div>
       </div>
 
@@ -192,6 +206,23 @@ export function JobDetailView({ id }: { id: string }) {
           </section>
         </div>
       </div>
+      <ConfirmDialog
+        open={Boolean(confirm)}
+        title={confirm === "pause" ? "Pause this job?" : confirm === "resume" ? "Resume this job?" : confirm === "close" ? "Close this job?" : "Delete this job?"}
+        body={confirm === "pause" ? "Candidates will not be able to apply until you resume it." : confirm === "resume" ? "The job will be visible to job seekers again." : confirm === "close" ? "The job will no longer be visible. This does not refund a credit." : "This removes the listing from your account in this demo."}
+        confirmLabel={confirm === "pause" ? "Pause Job" : confirm === "resume" ? "Resume Job" : confirm === "close" ? "Close Job" : "Delete"}
+        tone={confirm === "delete" || confirm === "close" ? "danger" : "primary"}
+        onCancel={() => setConfirm(null)}
+        onConfirm={() => {
+          if (!confirm) return;
+          if (confirm === "delete") removeJob(job.id);
+          if (confirm === "pause") patchJob(job.id, { status: "paused" });
+          if (confirm === "resume") patchJob(job.id, { status: "active" });
+          if (confirm === "close") patchJob(job.id, { status: "closed" });
+          setConfirm(null);
+          setMenu(false);
+        }}
+      />
     </div>
   );
 }

@@ -1,16 +1,17 @@
 "use client";
 
-import { ChevronDown, MoreVertical } from "lucide-react";
+import { ChevronDown, MoreVertical, Search } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { JobBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { AnchoredMenu } from "@/components/ui/anchored-menu";
 import { EmptyState } from "@/components/ui/feedback";
 import { usePortal } from "@/components/shell/use-portal";
 import { formatDate } from "@/lib/format";
-import { JOB_STATUS_LABEL, canSubmitJobForReview } from "@/lib/status";
+import { actionsForStatus, type JobActionId } from "@/lib/job-actions";
 import type { Job, JobStatus } from "@/lib/types";
 
 const TABS: { id: "all" | JobStatus; label: string }[] = [
@@ -24,42 +25,86 @@ const TABS: { id: "all" | JobStatus; label: string }[] = [
   { id: "closed", label: "Closed" },
 ];
 
+type ConfirmAction = "pause" | "resume" | "close" | "delete";
+
 export function JobsView() {
   const router = useRouter();
-  const { jobs, state, patchJob, removeJob, duplicateJob, account, verification } = usePortal();
+  const { jobs, state, patchJob, removeJob, duplicateJob } = usePortal();
   const [tab, setTab] = useState<"all" | JobStatus>(state === "returned" ? "returned" : "all");
+  const [query, setQuery] = useState("");
   const [clearedEmpty, setClearedEmpty] = useState(false);
-  const [category, setCategory] = useState("All categories");
-  const [employment, setEmployment] = useState("All types");
+  const [location, setLocation] = useState("Location");
+  const [category, setCategory] = useState("Job category");
+  const [employment, setEmployment] = useState("Employment type");
   const [page, setPage] = useState(1);
-  const [menuFor, setMenuFor] = useState<string | null>(state === "actions" ? "front-desk" : state === "returned" ? null : null);
-  const [confirm, setConfirm] = useState<{ id: string; action: "pause" | "resume" | "close" | "delete" | "renew" } | null>(null);
+  const [menuFor, setMenuFor] = useState<string | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const [confirm, setConfirm] = useState<{ id: string; action: ConfirmAction } | null>(null);
   const pageSize = 10;
 
   const source = useMemo(() => (state === "empty" ? [] : jobs), [jobs, state]);
   const counts = useMemo(() => {
-    const base = { all: source.length } as Record<string, number>;
+    const base: Record<string, number> = { all: source.length };
     for (const item of source) base[item.status] = (base[item.status] ?? 0) + 1;
     return base;
   }, [source]);
 
+  const locations = useMemo(() => Array.from(new Set(source.map((job) => job.location))).sort(), [source]);
+  const categories = useMemo(() => Array.from(new Set(source.map((job) => job.category))).sort(), [source]);
+
   const filtered = state === "no-results" && !clearedEmpty ? [] : source.filter((job) => {
     if (tab !== "all" && job.status !== tab) return false;
-    if (category !== "All categories" && job.category !== category) return false;
-    if (employment !== "All types" && job.employmentType !== employment) return false;
-    return true;
+    if (location !== "Location" && job.location !== location) return false;
+    if (category !== "Job category" && job.category !== category) return false;
+    if (employment !== "Employment type" && job.employmentType !== employment) return false;
+    const needle = query.trim().toLowerCase();
+    if (!needle) return true;
+    return [job.title, job.code, job.location, job.category, job.employmentType].some((value) => value.toLowerCase().includes(needle));
   });
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
-  const openMenu = state === "returned" ? rows.find((job) => job.title === "Safety Officer")?.id ?? menuFor : menuFor
+  const openJob = rows.find((job) => job.id === menuFor) ?? source.find((job) => job.id === menuFor) ?? null;
+  const lastRowId = rows[rows.length - 1]?.id ?? null;
+
+  useEffect(() => {
+    if (state !== "actions" || !lastRowId) return;
+    const button = document.querySelector<HTMLButtonElement>(`[data-job-menu="${lastRowId}"]`);
+    if (!button) return;
+    setMenuFor(lastRowId);
+    setMenuAnchor(button);
+  }, [state, lastRowId]);
 
   function runConfirm() {
     if (!confirm) return;
     if (confirm.action === "delete") removeJob(confirm.id);
     if (confirm.action === "pause") patchJob(confirm.id, { status: "paused" });
-    if (confirm.action === "resume" || confirm.action === "renew") patchJob(confirm.id, { status: "active" });
+    if (confirm.action === "resume") patchJob(confirm.id, { status: "active" });
     if (confirm.action === "close") patchJob(confirm.id, { status: "closed" });
     setConfirm(null);
+    setMenuFor(null);
+  }
+
+  function onAction(job: Job, action: JobActionId) {
+    if (action === "edit") {
+      router.push(`/post-job?state=details&job=${job.id}`);
+      return;
+    }
+    if (action === "duplicate") {
+      duplicateJob(job.id);
+      setMenuFor(null);
+      return;
+    }
+    setMenuFor(null);
+    setConfirm({ id: job.id, action });
+  }
+
+  function clearFilters() {
+    setClearedEmpty(true);
+    setQuery("");
+    setLocation("Location");
+    setCategory("Job category");
+    setEmployment("Employment type");
+    setPage(1);
   }
 
   return (
@@ -76,24 +121,40 @@ export function JobsView() {
           {counts.returned} jobs were returned for correction. Review the reason on each job, fix it and resubmit.
         </p>
       ) : null}
-      <div className="mt-[16px] flex flex-wrap gap-x-[16px] gap-y-[8px] border-b border-border-default">
+      <div className="mt-[16px] flex flex-wrap gap-[8px]">
         {TABS.map((item) => (
           <button
             key={item.id}
             onClick={() => {
               setTab(item.id);
               setPage(1);
+              setMenuFor(null);
             }}
-            className={`shrink-0 border-b-2 pb-[8px] text-body-sm-regular ${tab === item.id ? "border-brand-primary font-semibold text-brand-primary" : "border-transparent text-text-secondary"}`}
+            className={`inline-flex h-[40px] items-center gap-[8px] rounded-full border px-[12px] text-body-sm-regular ${tab === item.id ? "border-brand-primary bg-primary-primary-50 text-brand-primary" : "border-border-default bg-white text-text-secondary"}`}
           >
-            {item.label} <span className="text-label-regular">{counts[item.id] ?? 0}</span>
+            {item.label}
+            <span className="rounded-full bg-grey-grey-100 px-[8px] text-label-medium text-text-primary">{counts[item.id] ?? 0}</span>
           </button>
         ))}
       </div>
-      <div className="mt-[16px] flex flex-wrap gap-[8px]">
-        <FilterSelect label="Job category" value={category} options={["All categories", ...Array.from(new Set(source.map((job) => job.category)))]} onChange={setCategory} />
-        <FilterSelect label="Employment type" value={employment} options={["All types", "Full-time", "Part-time", "Contract", "Internship"]} onChange={setEmployment} />
-        <FilterSelect label="More filters" value="More filters" options={["More filters", "Active only"]} onChange={() => undefined} />
+      <div className="mt-[16px] flex flex-wrap items-center gap-[8px]">
+        <label className="flex h-[40px] min-w-[240px] flex-1 items-center gap-[8px] rounded-md border border-border-default bg-white px-[12px]">
+          <Search size={16} className="text-text-tertiary" />
+          <input
+            aria-label="Search jobs"
+            value={query}
+            placeholder="Search jobs"
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(1);
+            }}
+            className="w-full bg-transparent text-body-sm-regular outline-none placeholder:text-text-tertiary"
+          />
+        </label>
+        <FilterSelect label="Location" value={location} options={["Location", ...locations]} onChange={(value) => { setLocation(value); setPage(1); }} />
+        <FilterSelect label="Job category" value={category} options={["Job category", ...categories]} onChange={(value) => { setCategory(value); setPage(1); }} />
+        <FilterSelect label="Employment type" value={employment} options={["Employment type", "Full-time", "Part-time", "Contract", "Internship"]} onChange={(value) => { setEmployment(value); setPage(1); }} />
+        <FilterSelect label="More filters" value="More filters" options={["More filters"]} onChange={() => undefined} />
       </div>
       <div className="mt-[16px] overflow-hidden rounded-lg border border-border-default bg-white">
         {source.length === 0 ? (
@@ -103,55 +164,70 @@ export function JobsView() {
             icon="search"
             title="No jobs match your search"
             body="Try a different keyword or remove a filter."
-            action={
-              <Button
-                variant="outline"
-                onClick={() => setClearedEmpty(true)}
-              >
-                Clear filters
-              </Button>
-            }
+            action={<Button variant="outline" onClick={clearFilters}>Clear filters</Button>}
           />
         ) : (
-            <table className="w-full text-left text-body-sm-regular">
-              <thead className="bg-background-secondary text-label-medium text-text-secondary">
-                <tr>
-                  {["Job", "Location", "Category", "Employment Type", "Status", "Views", "Applicants", "Posted On", ""].map((label) => (
-                    <th key={label} className={`px-[16px] py-[12px] font-medium ${label === "Job" ? "" : "whitespace-nowrap"}`}>{label}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((job) => (
-                  <tr key={job.id} className="border-t border-border-default">
-                    <td className="px-[16px] py-[12px] break-words">
-                      <Link href={`/jobs/${job.id}`} className="font-semibold text-brand-primary">{job.title}</Link>
-                      {job.listReason && job.status === "returned" ? (
-                        <p className="text-label-regular text-error-default">
-                          {job.listReason}{" "}
-                          <Link href={`/jobs/${job.id}?state=returned`} className="font-medium">Fix and resubmit →</Link>
-                        </p>
-                      ) : null}
-                    </td>
-                    <td className="px-[16px] py-[12px] whitespace-nowrap text-text-secondary">{job.location}</td>
-                    <td className="px-[16px] py-[12px] whitespace-nowrap">{job.category}</td>
-                    <td className="px-[16px] py-[12px] whitespace-nowrap">{job.employmentType}</td>
-                    <td className="px-[16px] py-[12px] whitespace-nowrap"><JobBadge status={job.status} /></td>
-                    <td className="px-[16px] py-[12px] whitespace-nowrap">{job.views}</td>
-                    <td className="px-[16px] py-[12px] whitespace-nowrap">{job.applicants}</td>
-                    <td className="px-[16px] py-[12px] whitespace-nowrap">{formatDate(job.postedOn)}</td>
-                    <td className="relative px-[16px] py-[12px]">
-                      <button aria-label="Job actions" className="inline-flex h-[32px] w-[32px] items-center justify-center rounded-sm border border-border-default" onClick={() => setMenuFor(openMenu === job.id ? null : job.id)}>
-                        <MoreVertical size={16} />
-                      </button>
-                      {openMenu === job.id ? <JobMenu job={job} canSubmit={canSubmitJobForReview(account, verification)} onClose={() => setMenuFor(null)} onConfirm={(action) => setConfirm({ id: job.id, action })} onDuplicate={() => { duplicateJob(job.id); setMenuFor(null); }} /> : null}
-                    </td>
-                  </tr>
+          <table className="w-full text-left text-body-sm-regular">
+            <thead className="bg-background-secondary text-label-medium text-text-secondary">
+              <tr>
+                {["Job", "Location", "Category", "Employment Type", "Status", "Views", "Applicants", "Posted On", ""].map((label) => (
+                  <th key={label} className={`px-[16px] py-[12px] font-medium ${label === "Job" ? "" : "whitespace-nowrap"}`}>{label}</th>
                 ))}
-              </tbody>
-            </table>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((job) => (
+                <tr key={job.id} className="border-t border-border-default">
+                  <td className="px-[16px] py-[12px] break-words">
+                    <Link href={`/jobs/${job.id}`} className="font-semibold text-brand-primary">{job.title}</Link>
+                    {job.listReason && job.status === "returned" ? (
+                      <p className="text-label-regular text-error-default">
+                        {job.listReason}{" "}
+                        <Link href={`/jobs/${job.id}?state=returned`} className="font-medium">Fix and resubmit →</Link>
+                      </p>
+                    ) : null}
+                  </td>
+                  <td className="px-[16px] py-[12px] whitespace-nowrap text-text-secondary">{job.location}</td>
+                  <td className="px-[16px] py-[12px] whitespace-nowrap">{job.category}</td>
+                  <td className="px-[16px] py-[12px] whitespace-nowrap">{job.employmentType}</td>
+                  <td className="px-[16px] py-[12px] whitespace-nowrap"><JobBadge status={job.status} /></td>
+                  <td className="px-[16px] py-[12px] whitespace-nowrap">{job.views}</td>
+                  <td className="px-[16px] py-[12px] whitespace-nowrap">{job.applicants}</td>
+                  <td className="px-[16px] py-[12px] whitespace-nowrap">{formatDate(job.postedOn)}</td>
+                  <td className="px-[16px] py-[12px]">
+                    <button
+                      data-job-menu={job.id}
+                      aria-label="Job actions"
+                      aria-expanded={menuFor === job.id}
+                      className="inline-flex h-[32px] w-[32px] items-center justify-center rounded-sm border border-border-default"
+                      onClick={(event) => {
+                        const next = menuFor === job.id ? null : job.id;
+                        setMenuFor(next);
+                        setMenuAnchor(next ? event.currentTarget : null);
+                      }}
+                    >
+                      <MoreVertical size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
+      {openJob ? (
+        <AnchoredMenu open={Boolean(menuFor)} anchor={menuAnchor} onClose={() => setMenuFor(null)} className="w-[176px] rounded-md border border-border-default bg-white py-[4px] text-left shadow-lg">
+          {actionsForStatus(openJob.status).map((item) => (
+            <button
+              key={item.id}
+              className={`block w-full px-[12px] py-[8px] text-left text-body-sm-regular hover:bg-grey-grey-100 ${item.danger ? "text-error-default" : ""}`}
+              onClick={() => onAction(openJob, item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </AnchoredMenu>
+      ) : null}
       {filtered.length > 0 ? (
         <div className="mt-[16px] flex flex-wrap items-center justify-between gap-[12px] text-body-sm-regular text-text-secondary">
           <p>Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, filtered.length)} of {filtered.length} jobs</p>
@@ -169,50 +245,12 @@ export function JobsView() {
         open={Boolean(confirm)}
         title={confirm ? confirmTitle(confirm.action) : ""}
         body={confirm ? confirmBody(confirm.action) : ""}
+        confirmLabel={confirm ? confirmLabel(confirm.action) : "Confirm"}
         tone={confirm?.action === "delete" || confirm?.action === "close" ? "danger" : "primary"}
         onCancel={() => setConfirm(null)}
         onConfirm={runConfirm}
       />
-      <p className="sr-only">{JOB_STATUS_LABEL.active}</p>
       <button className="hidden" onClick={() => router.refresh()} />
-    </div>
-  );
-}
-
-function JobMenu({
-  job,
-  canSubmit,
-  onClose,
-  onConfirm,
-  onDuplicate,
-}: {
-  job: Job;
-  canSubmit: boolean;
-  onClose: () => void;
-  onConfirm: (action: "pause" | "resume" | "close" | "delete" | "renew") => void;
-  onDuplicate: () => void;
-}) {
-  const items: { label: string; href?: string; danger?: boolean; onClick?: () => void }[] = [
-    { label: "Resume job", onClick: () => onConfirm(job.status === "expired" ? "renew" : "resume") },
-    { label: "Edit job", href: `/jobs/${job.id}` },
-    { label: "Close job", onClick: () => onConfirm("close") },
-    { label: "Duplicate job", onClick: onDuplicate },
-    { label: "Delete job", danger: true, onClick: () => onConfirm("delete") },
-  ];
-  void canSubmit;
-  return (
-    <div className="absolute right-[16px] z-20 w-[176px] rounded-md border border-border-default bg-white py-[4px] text-left shadow-lg">
-      {items.map((item) =>
-        item.href ? (
-          <Link key={item.label} href={item.href} className="block px-[12px] py-[8px] text-body-sm-regular hover:bg-grey-grey-100" onClick={onClose}>
-            {item.label}
-          </Link>
-        ) : (
-          <button key={item.label} className={`block w-full px-[12px] py-[8px] text-left text-body-sm-regular hover:bg-grey-grey-100 ${item.danger ? "text-error-default" : ""}`} onClick={item.onClick}>
-            {item.label}
-          </button>
-        ),
-      )}
     </div>
   );
 }
@@ -229,18 +267,23 @@ function FilterSelect({ label, value, options, onChange }: { label: string; valu
   );
 }
 
-function confirmTitle(action: string) {
+function confirmTitle(action: ConfirmAction) {
   if (action === "pause") return "Pause this job?";
   if (action === "resume") return "Resume this job?";
-  if (action === "renew") return "Renew this job?";
   if (action === "close") return "Close this job?";
   return "Delete this job?";
 }
 
-function confirmBody(action: string) {
+function confirmLabel(action: ConfirmAction) {
+  if (action === "pause") return "Pause Job";
+  if (action === "resume") return "Resume Job";
+  if (action === "close") return "Close Job";
+  return "Delete";
+}
+
+function confirmBody(action: ConfirmAction) {
   if (action === "pause") return "Candidates will not be able to apply until you resume it.";
   if (action === "resume") return "The job will be visible to job seekers again.";
-  if (action === "renew") return "Renewing keeps the listing open for new applicants.";
   if (action === "close") return "The job will no longer be visible. This does not refund a credit.";
   return "This removes the listing from your account in this demo.";
 }
