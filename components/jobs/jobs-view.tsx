@@ -143,7 +143,7 @@ export function JobsView() {
           <input
             aria-label="Search jobs"
             value={query}
-            placeholder="Search jobs"
+            placeholder="Search by job title, location, or keyword…"
             onChange={(event) => {
               setQuery(event.target.value);
               setPage(1);
@@ -170,7 +170,7 @@ export function JobsView() {
           <table className="w-full text-left text-body-sm-regular">
             <thead className="bg-background-secondary text-label-medium text-text-secondary">
               <tr>
-                {["Job", "Location", "Category", "Employment Type", "Status", "Views", "Applicants", "Posted On", ""].map((label) => (
+                {["Job", "Location", "Category", "Employment Type", "Status", "Views", "Applicants", "Posted On", "Actions"].map((label) => (
                   <th key={label} className={`px-[16px] py-[12px] font-medium ${label === "Job" ? "" : "whitespace-nowrap"}`}>{label}</th>
                 ))}
               </tr>
