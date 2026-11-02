@@ -1,8 +1,8 @@
 "use client";
 
 import { AlertCircle, Calendar, Check, ChevronLeft, ChevronRight, FileText, Info, List, Minus, Pencil, Plus, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -13,7 +13,8 @@ import { BENEFITS, CATEGORIES, LOCATIONS } from "@/lib/fixtures";
 import { formatInr } from "@/lib/format";
 import { canSubmitJobForReview, submitBlockReason } from "@/lib/status";
 import { uid } from "@/lib/utils";
-import type { EmploymentType, Job, SalaryType, WorkArrangement } from "@/lib/types";
+import { JOB_REVIEW_WINDOW } from "@/src/config/policy";
+import type { EmploymentType, Job, JobStatus, SalaryType, WorkArrangement } from "@/lib/types";
 
 interface Draft {
   title: string;
@@ -69,8 +70,12 @@ const AI_DRAFT: Draft = {
   location: "Shankar Nagar, Raipur",
   employmentType: "Full-time",
   workArrangement: "On-site",
-  description:
-    "Raipur Builder is hiring a Site Supervisor in Shankar Nagar, Raipur. The role covers site coordination, drawings and day-to-day construction work.",
+  description: [
+    "Raipur Builder is hiring a Site Supervisor in Shankar Nagar, Raipur.",
+    "The role covers site coordination, drawings and day-to-day construction work across Raipur and Bhilai.",
+    "You will guide the site team, check work against drawings, and keep the site safe through the working day.",
+    "Hours are 9:00 AM – 6:00 PM. This is an on-site construction role.",
+  ].join("\n\n"),
   skills: "AutoCAD, Site supervision, Safety",
   experience: "1 year – 3 years",
   salary: "25000",
@@ -82,20 +87,73 @@ const AI_DRAFT: Draft = {
 
 export function PostJobView() {
   const router = useRouter();
+  const search = useSearchParams();
   const { state, account, verification, upsertJob, jobs } = usePortal();
+  const linked = jobs.find((item) => item.id === search.get("job"));
   const [phase, setPhase] = useState(initialPhase(state));
   const [method, setMethod] = useState<"ai" | "manual">("ai");
   const [skillDraft, setSkillDraft] = useState("");
   const [paste, setPaste] = useState("Site Supervisor in Shankar Nagar, Raipur. Full-time, on-site. Coordinate site work, drawings and the construction team. Salary ₹25,000.");
-  const [draft, setDraft] = useState<Draft>(state === "details-ai" || state === "review" || state === "confirm" || state === "pay" ? AI_DRAFT : EMPTY);
+  const [draft, setDraft] = useState<Draft>(linked ? draftFromJob(linked) : state === "details-ai" || state === "review" || state === "confirm" || state === "pay" ? AI_DRAFT : EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>(state === "details-invalid" ? { title: "Job title is required", description: "Add a description" } : {});
-  const [saved, setSaved] = useState("");
+  const [saveNote, setSaveNote] = useState<"idle" | "saving" | "saved">(linked ? "saved" : "idle");
   const [confirm, setConfirm] = useState(state === "confirm");
+  const jobIdRef = useRef<string | null>(linked?.id ?? null);
+  const originStatusRef = useRef<JobStatus | null>(linked?.status ?? null);
+  const dirtyRef = useRef(false);
+  const submittedRef = useRef(false);
+  const jobsRef = useRef(jobs);
+  jobsRef.current = jobs;
   const blocked = state === "gate" || !canSubmitJobForReview(account, verification);
   const reason = submitBlockReason(account, verification);
 
   function patch<K extends keyof Draft>(key: K, value: Draft[K]) {
+    dirtyRef.current = true;
     setDraft((current) => ({ ...current, [key]: value }));
+  }
+
+  function buildJob(status: JobStatus): Job {
+    const existing = jobIdRef.current ? jobsRef.current.find((item) => item.id === jobIdRef.current) : undefined;
+    const id = existing?.id ?? jobIdRef.current ?? uid("job");
+    jobIdRef.current = id;
+    if (!originStatusRef.current) originStatusRef.current = "draft";
+    const code = existing?.code ?? `AR-${String(jobsRef.current.length + 1).padStart(3, "0")}`;
+    return {
+      ...(existing ?? {
+        views: 0,
+        applicants: 0,
+        postedOn: new Date().toISOString().slice(0, 10),
+      }),
+      id,
+      code,
+      title: draft.title || "Untitled draft",
+      location: draft.location,
+      category: draft.category || "Construction",
+      employmentType: draft.employmentType || "Full-time",
+      workArrangement: draft.workArrangement || "On-site",
+      status,
+      submittedOn: status === "pending_review" ? new Date().toISOString().slice(0, 10) : existing?.submittedOn ?? null,
+      description: draft.description,
+      skills: draft.skills.split(",").map((item) => item.trim()).filter(Boolean),
+      openings: Number(draft.openings) || 1,
+      experience: draft.experience,
+      education: draft.education,
+      salaryType: draft.salaryType,
+      monthlySalary: Number(draft.salary) || 0,
+      salaryMax: draft.salaryMax ? Number(draft.salaryMax) : undefined,
+      benefits: draft.benefits,
+      genderPreference: draft.gender,
+      minimumAge: [draft.age, draft.ageMax].filter(Boolean).join(" – "),
+      startDate: draft.startDate,
+      deadline: draft.deadline,
+    };
+  }
+
+  function persistDraft() {
+    if (submittedRef.current) return;
+    const origin = originStatusRef.current;
+    const status = !origin || origin === "draft" ? "draft" : origin;
+    upsertJob(buildJob(status));
   }
 
   function validateDetails() {
@@ -119,42 +177,35 @@ export function PostJobView() {
     return Object.keys(next).length === 0;
   }
 
-  function toJob(status: Job["status"]): Job {
-    return {
-      id: uid("job"),
-      code: `AR-${String(jobs.length + 1).padStart(3, "0")}`,
-      title: draft.title || "Untitled draft",
-      location: draft.location,
-      category: draft.category || "Construction",
-      employmentType: draft.employmentType || "Full-time",
-      workArrangement: draft.workArrangement || "On-site",
-      status,
-      views: 0,
-      applicants: 0,
-      postedOn: new Date().toISOString().slice(0, 10),
-      submittedOn: status === "pending_review" ? new Date().toISOString().slice(0, 10) : null,
-      description: draft.description,
-      skills: draft.skills.split(",").map((item) => item.trim()).filter(Boolean),
-      openings: Number(draft.openings) || 1,
-      experience: draft.experience,
-      education: draft.education,
-      salaryType: draft.salaryType,
-      monthlySalary: Number(draft.salary) || 0,
-      salaryMax: draft.salaryMax ? Number(draft.salaryMax) : undefined,
-      benefits: draft.benefits,
-      genderPreference: draft.gender,
-      minimumAge: [draft.age, draft.ageMax].filter(Boolean).join(" – "),
-      startDate: draft.startDate,
-      deadline: draft.deadline,
-    };
-  }
-
   function saveDraft() {
-    upsertJob(toJob("draft"));
-    setSaved("Draft saved on this device. It is not submitted for review.");
+    setSaveNote("saving");
+    persistDraft();
+    dirtyRef.current = false;
+    setSaveNote("saved");
   }
 
   const stepIndex = phase === "details" ? 0 : phase === "pay" ? 1 : phase === "review" ? 2 : -1;
+  const persistRef = useRef(persistDraft);
+  persistRef.current = persistDraft;
+
+  useEffect(() => {
+    if (!dirtyRef.current || stepIndex < 0) return;
+    setSaveNote("saving");
+    const timer = window.setTimeout(() => {
+      persistRef.current();
+      dirtyRef.current = false;
+      setSaveNote("saved");
+    }, 3000);
+    return () => window.clearTimeout(timer);
+  }, [draft, stepIndex]);
+
+  useEffect(() => {
+    if (stepIndex < 0 || !dirtyRef.current) return;
+    setSaveNote("saving");
+    persistRef.current();
+    dirtyRef.current = false;
+    setSaveNote("saved");
+  }, [phase, stepIndex]);
   const chars = paste.length;
 
   return (
@@ -164,8 +215,8 @@ export function PostJobView() {
         <div>
           <h1 className="text-display-small-semibold">Post a job</h1>
           <p className="mt-[4px] text-body-regular text-text-secondary">Choose the method that works best for you. You can review and edit all details before publishing.</p>
-          <div className="mt-[24px] flex flex-wrap items-start justify-start gap-[16px]">
-            <button type="button" onClick={() => setMethod("ai")} className={`w-[312px] rounded-md border p-[24px] text-left ${method === "ai" ? "border-[1.5px] border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
+          <div className="mt-[24px] grid w-full max-w-[640px] grid-cols-2 items-stretch gap-[16px]">
+            <button type="button" onClick={() => setMethod("ai")} className={`flex h-full flex-col rounded-md border-2 p-[24px] text-left ${method === "ai" ? "border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
               <span className="flex items-start gap-[12px]">
                 <span className="flex size-[48px] items-center justify-center rounded-sm bg-white text-brand-primary"><Sparkles size={24} /></span>
                 <span className="flex-1" />
@@ -175,16 +226,16 @@ export function PostJobView() {
                 </span>
               </span>
               <p className="mt-[16px] text-subheading-semibold">Create with AI</p>
-              <p className="mt-[8px] text-body-sm-regular text-text-secondary">Paste an existing job description from WhatsApp, a poster or an old ad. We&apos;ll extract the key details for you.</p>
+              <p className="mt-[8px] flex-1 text-body-sm-regular text-text-secondary">Paste an existing job description from WhatsApp, a poster or an old ad. We&apos;ll extract the key details for you.</p>
             </button>
-            <button type="button" onClick={() => setMethod("manual")} className={`w-[312px] rounded-md border p-[24px] text-left ${method === "manual" ? "border-[1.5px] border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
+            <button type="button" onClick={() => setMethod("manual")} className={`flex h-full flex-col rounded-md border-2 p-[24px] text-left ${method === "manual" ? "border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
               <span className="flex items-start gap-[12px]">
                 <span className="flex size-[48px] items-center justify-center rounded-sm bg-warning-warning-50 text-warning-warning-700"><Pencil size={24} /></span>
                 <span className="flex-1" />
                 <span className={`flex size-[20px] items-center justify-center rounded-full border ${method === "manual" ? "border-brand-primary bg-brand-primary" : "border-border-strong"}`}>{method === "manual" ? <span className="size-[8px] rounded-full bg-white" /> : null}</span>
               </span>
               <p className="mt-[16px] text-subheading-semibold">Create manually</p>
-              <p className="mt-[8px] text-body-sm-regular text-text-secondary">Enter the job details yourself using a guided form, step by step.</p>
+              <p className="mt-[8px] flex-1 text-body-sm-regular text-text-secondary">Enter the job details yourself using a guided form, step by step.</p>
             </button>
           </div>
           <Button className="mt-[16px]" onClick={() => setPhase(method === "ai" ? "paste" : "details")}>Continue</Button>
@@ -240,18 +291,24 @@ export function PostJobView() {
                 ["Job Details", "Basic job information and description"],
                 ["Pay & Requirements", "Compensation and additional candidate requirements"],
                 ["Review & Publish", "Final review and publication"],
-              ].map(([title, body], index) => (
-                <li key={title} className="flex gap-[12px]">
-                  <span className="flex flex-col items-center self-stretch">
-                    <span className={`flex size-[28px] items-center justify-center rounded-full text-label-medium ${index <= stepIndex ? "bg-brand-primary text-white" : "bg-grey-grey-100 text-text-secondary"}`}>{index + 1}</span>
-                    {index < 2 ? <span className="my-[4px] w-px flex-1 bg-border-default" /> : null}
-                  </span>
-                  <span className={`mb-[8px] min-w-[0px] flex-1 rounded-md px-[8px] py-[4px] ${index === stepIndex ? "bg-primary-primary-50" : ""}`}>
-                    <span className={`block text-body-sm-semibold ${index === stepIndex ? "text-brand-primary" : "text-text-primary"}`}>{title}</span>
-                    <span className="block text-label-regular text-text-secondary">{body}</span>
-                  </span>
-                </li>
-              ))}
+              ].map(([title, body], index, steps) => {
+                const current = index === stepIndex;
+                const complete = index < stepIndex;
+                return (
+                  <li key={title} className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-[12px]">
+                    <span className="flex flex-col items-center">
+                      <span className={`flex size-[28px] shrink-0 items-center justify-center rounded-full text-label-medium ${complete || current ? "bg-brand-primary text-white" : "bg-grey-grey-100 text-text-secondary"}`}>
+                        {complete ? <Check size={14} /> : index + 1}
+                      </span>
+                      {index < steps.length - 1 ? <span className="mt-[4px] mb-[4px] w-px flex-1 bg-border-default" /> : null}
+                    </span>
+                    <span className={`mb-[12px] min-h-[64px] min-w-[0px] rounded-md px-[8px] py-[4px] ${current ? "bg-primary-primary-50" : ""}`}>
+                      <span className={`block text-body-sm-semibold ${current ? "text-brand-primary" : "text-text-primary"}`}>{title}</span>
+                      <span className="block text-label-regular text-text-secondary">{body}</span>
+                    </span>
+                  </li>
+                );
+              })}
             </ol>
           </aside>
           <section className="rounded-lg border border-border-default bg-white p-[20px]">
@@ -311,7 +368,7 @@ export function PostJobView() {
                     {errors.workArrangement ? <p className="mt-[4px] text-label-medium text-error-default">{errors.workArrangement}</p> : null}
                   </div>
                 </div>
-                <div className="grid gap-[16px] md:grid-cols-2">
+                <div className="grid items-start gap-[16px] md:grid-cols-2">
                   <div>
                     <p className="mb-[8px] text-label-medium text-text-secondary">Experience required <span className="text-error-default">*</span></p>
                     <div className="grid grid-cols-2 gap-[8px]">
@@ -334,6 +391,7 @@ export function PostJobView() {
                   </div>
                   <div>
                     <p className="mb-[8px] text-label-medium text-text-secondary">Application deadline <span className="text-text-tertiary">(optional)</span></p>
+                    <span className="mb-[4px] block text-label-regular text-transparent select-none" aria-hidden>Date</span>
                     <DateField value={draft.deadline} onChange={(value) => patch("deadline", value)} />
                   </div>
                 </div>
@@ -427,17 +485,22 @@ export function PostJobView() {
                     action={<Button href="/verification" size="sm">Continue verification</Button>}
                   />
                 ) : null}
-                <ReviewCard title="Job details" onEdit={() => setPhase("details")} rows={[
-                  ["Job title", draft.title || "—"],
-                  ["Job category", draft.category || "—"],
-                  ["Openings", draft.openings],
-                  ["Location", draft.location],
-                  ["Employment type", draft.employmentType],
-                  ["Work arrangement", draft.workArrangement],
-                  ["Experience", draft.experience],
-                  ["Description", draft.description || "—"],
-                  ["Skills", draft.skills || "—"],
-                ]} />
+                <ReviewCard
+                  title="Job details"
+                  onEdit={() => setPhase("details")}
+                  description={draft.description}
+                  rows={[
+                    ["Job title", draft.title || "—"],
+                    ["Job category", draft.category || "—"],
+                    ["Openings", draft.openings || "—"],
+                    ["Location", draft.location || "—"],
+                    ["Employment type", draft.employmentType || "—"],
+                    ["Work arrangement", draft.workArrangement || "—"],
+                    ["Experience", draft.experience || "—"],
+                    ["Application deadline", draft.deadline || "—"],
+                    ["Skills", draft.skills || "—"],
+                  ]}
+                />
                 <ReviewCard title="Pay & requirements" onEdit={() => setPhase("pay")} rows={[
                   ["Salary type", draft.salaryType],
                   ["Monthly salary", draft.salary ? formatInr(Number(draft.salary)) : "—"],
@@ -449,8 +512,12 @@ export function PostJobView() {
                 ]} />
               </div>
             ) : null}
-            {saved ? <p className="mt-[12px] text-body-sm-regular text-success-success-700">{saved}</p> : null}
-            <div className="sticky bottom-[0px] mt-[24px] flex flex-wrap justify-end gap-[8px] bg-white py-[12px]">
+            <div className="sticky bottom-[0px] mt-[24px] flex flex-wrap items-center justify-end gap-[8px] bg-white py-[12px]">
+              <p className="mr-auto flex items-center gap-[8px] text-label-regular text-text-secondary">
+                <FileText size={16} /> You can save as draft anytime.
+                {saveNote === "saving" ? <span>Saving…</span> : null}
+                {saveNote === "saved" ? <span className="text-success-success-700">Saved</span> : null}
+              </p>
               <Button variant="outline" onClick={saveDraft}>Save draft</Button>
               <Button variant="outline" onClick={() => setPhase(phase === "details" ? "choose" : phase === "pay" ? "details" : "pay")}>Back</Button>
               <div className="flex gap-[8px]">
@@ -469,11 +536,18 @@ export function PostJobView() {
       <ConfirmDialog
         open={confirm}
         title="Submit for review?"
-        body={`${draft.title || "This job"} will move to pending review. Editing pauses until the review finishes.`}
+        body={
+          <div className="space-y-[8px]">
+            <p>{draft.title || "This job"} will move to pending review. Editing pauses until the review finishes.</p>
+            <p>Your job will be reviewed within {JOB_REVIEW_WINDOW}.</p>
+          </div>
+        }
         confirmLabel="Submit for review"
         onCancel={() => setConfirm(false)}
         onConfirm={() => {
-          upsertJob(toJob("pending_review"));
+          submittedRef.current = true;
+          dirtyRef.current = false;
+          upsertJob(buildJob("pending_review"));
           router.push("/jobs");
         }}
       />
@@ -611,23 +685,78 @@ function Processing({ failed, hold, onDone, onManual }: { failed: boolean; hold?
   );
 }
 
-function ReviewCard({ title, rows, onEdit }: { title: string; rows: [string, string][]; onEdit: () => void }) {
+function ReviewCard({ title, rows, onEdit, description }: { title: string; rows: [string, string][]; onEdit: () => void; description?: string }) {
   return (
     <section className="rounded-md border border-border-default">
       <div className="flex items-center justify-between border-b border-border-default px-[16px] py-[12px]">
         <h2 className="text-subheading-semibold">{title}</h2>
         <button className="text-body-sm-semibold text-brand-primary" onClick={onEdit}>Edit</button>
       </div>
-      <dl className="grid gap-[8px] p-[16px] sm:grid-cols-2">
+      <dl className="grid gap-x-[24px] gap-y-[12px] p-[16px] sm:grid-cols-2">
         {rows.map(([label, value]) => (
-          <div key={label}>
+          <div key={label} className="min-w-[0px]">
             <dt className="text-label-regular text-text-secondary">{label}</dt>
-            <dd className="text-body-sm-regular">{value}</dd>
+            <dd className="text-body-sm-regular break-words">{value}</dd>
           </div>
         ))}
       </dl>
+      {description !== undefined ? (
+        <div className="border-t border-border-default px-[16px] py-[16px]">
+          <DescriptionPreview text={description || "—"} />
+        </div>
+      ) : null}
     </section>
   );
+}
+
+function DescriptionPreview({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [overflows, setOverflows] = useState(false);
+
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (!node || expanded) return;
+    setOverflows(node.scrollHeight > node.clientHeight + 1);
+  }, [text, expanded]);
+
+  return (
+    <div>
+      <p className="text-label-regular text-text-secondary">Description</p>
+      <p ref={ref} className={`mt-[4px] whitespace-pre-line text-body-sm-regular ${expanded ? "" : "line-clamp-3"}`}>{text}</p>
+      {overflows ? (
+        <button type="button" className="mt-[4px] text-body-sm-semibold text-brand-primary" onClick={() => setExpanded((value) => !value)}>
+          {expanded ? "Show less" : "Show more"}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function draftFromJob(job: Job): Draft {
+  const ages = (job.minimumAge ?? "").split("–").map((item) => item.trim());
+  return {
+    title: job.title,
+    category: job.category,
+    openings: String(job.openings),
+    location: job.location,
+    employmentType: job.employmentType,
+    workArrangement: job.workArrangement,
+    experience: job.experience,
+    deadline: job.deadline ?? "",
+    description: job.description,
+    skills: job.skills.join(", "),
+    salaryType: job.salaryType,
+    salary: job.monthlySalary ? String(job.monthlySalary) : "",
+    salaryMax: job.salaryMax ? String(job.salaryMax) : "",
+    benefits: job.benefits,
+    education: job.education,
+    startDate: job.startDate ?? "",
+    gender: job.genderPreference ?? "No preference",
+    age: ages[0] ?? "",
+    ageMax: ages[1] ?? "",
+    extra: "",
+  };
 }
 
 function initialPhase(state: string): "choose" | "paste" | "processing" | "failed" | "details" | "pay" | "review" {

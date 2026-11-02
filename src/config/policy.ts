@@ -23,6 +23,8 @@ export interface PolicyConfig {
     verificationSlaLabel: string;
     /** TODO: pending decision — per-job review-time copy. */
     jobReviewSlaLabel: string;
+    /** Window shown on the submit-for-review confirmation. Change this value to update the line. */
+    jobReviewWindow: string;
   };
   otp: {
     /** TODO: pending decision — shared by phone OTP and work-email OTP. */
@@ -100,6 +102,7 @@ export const policy: PolicyConfig = {
   review: {
     verificationSlaLabel: "usually 1–2 working days",
     jobReviewSlaLabel: "usually within 24 hours",
+    jobReviewWindow: "48–72 hours",
   },
   otp: {
     length: 6,
@@ -152,6 +155,7 @@ export const DOCUMENT_MAX_BYTES = policy.documents.maxBytes;
 export const LOGO_MAX_BYTES = policy.logo.maxBytes;
 export const VERIFICATION_SLA_LABEL = policy.review.verificationSlaLabel;
 export const JOB_REVIEW_SLA_LABEL = policy.review.jobReviewSlaLabel;
+export const JOB_REVIEW_WINDOW = policy.review.jobReviewWindow;
 export const OTP_LENGTH = policy.otp.length;
 export const OTP_RESEND_COOLDOWN_SECONDS = policy.otp.resendCooldownSeconds;
 export const OTP_MAX_ATTEMPTS = policy.otp.maxAttempts;
