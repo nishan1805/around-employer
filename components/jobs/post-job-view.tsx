@@ -13,7 +13,6 @@ import { BENEFITS, CATEGORIES, LOCATIONS } from "@/lib/fixtures";
 import { formatInr } from "@/lib/format";
 import { canSubmitJobForReview, submitBlockReason } from "@/lib/status";
 import { uid } from "@/lib/utils";
-import { JOB_REVIEW_WINDOW } from "@/src/config/policy";
 import type { EmploymentType, Job, JobStatus, SalaryType, WorkArrangement } from "@/lib/types";
 
 interface Draft {
@@ -215,20 +214,20 @@ export function PostJobView() {
         <div>
           <h1 className="text-display-small-semibold">Post a job</h1>
           <p className="mt-[4px] text-body-regular text-text-secondary">Choose the method that works best for you. You can review and edit all details before publishing.</p>
-          <div className="mt-[24px] grid w-full max-w-[640px] grid-cols-2 items-stretch gap-[16px]">
-            <button type="button" onClick={() => setMethod("ai")} className={`flex h-full flex-col rounded-md border-2 p-[24px] text-left ${method === "ai" ? "border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
+          <div className="mt-[24px] grid w-full max-w-[904px] items-stretch gap-[24px] sm:grid-cols-2">
+            <button type="button" onClick={() => setMethod("ai")} aria-pressed={method === "ai"} className={`flex min-h-[187px] flex-col rounded-[12px] border p-[24px] text-left ${method === "ai" ? "border-brand-primary bg-primary-primary-50 ring-[0.5px] ring-inset ring-brand-primary" : "border-border-default bg-white"}`}>
               <span className="flex items-start gap-[12px]">
                 <span className="flex size-[48px] items-center justify-center rounded-sm bg-white text-brand-primary"><Sparkles size={24} /></span>
                 <span className="flex-1" />
                 <span className="inline-flex items-center gap-[12px]">
-                  <span className="rounded-full bg-white px-[8px] py-[4px] text-label-medium text-brand-primary">Recommended</span>
+                  <span className={`rounded-full px-[8px] py-[4px] text-label-medium text-brand-primary ${method === "ai" ? "bg-white" : "bg-primary-primary-50"}`}>Recommended</span>
                   <span className={`flex size-[20px] items-center justify-center rounded-full border ${method === "ai" ? "border-brand-primary bg-brand-primary" : "border-border-strong"}`}>{method === "ai" ? <span className="size-[8px] rounded-full bg-white" /> : null}</span>
                 </span>
               </span>
               <p className="mt-[16px] text-subheading-semibold">Create with AI</p>
               <p className="mt-[8px] flex-1 text-body-sm-regular text-text-secondary">Paste an existing job description from WhatsApp, a poster or an old ad. We&apos;ll extract the key details for you.</p>
             </button>
-            <button type="button" onClick={() => setMethod("manual")} className={`flex h-full flex-col rounded-md border-2 p-[24px] text-left ${method === "manual" ? "border-brand-primary bg-primary-primary-50" : "border-border-default bg-white"}`}>
+            <button type="button" onClick={() => setMethod("manual")} aria-pressed={method === "manual"} className={`flex min-h-[187px] flex-col rounded-[12px] border p-[24px] text-left ${method === "manual" ? "border-brand-primary bg-primary-primary-50 ring-[0.5px] ring-inset ring-brand-primary" : "border-border-default bg-white"}`}>
               <span className="flex items-start gap-[12px]">
                 <span className="flex size-[48px] items-center justify-center rounded-sm bg-warning-warning-50 text-warning-warning-700"><Pencil size={24} /></span>
                 <span className="flex-1" />
@@ -239,7 +238,7 @@ export function PostJobView() {
             </button>
           </div>
           <Button className="mt-[16px]" onClick={() => setPhase(method === "ai" ? "paste" : "details")}>Continue</Button>
-          <p className="mt-[16px] flex items-center gap-[8px] text-body-sm-regular text-text-secondary"><FileText size={16} /> You can save as draft anytime.</p>
+          <p className="mt-[16px] flex items-center gap-[8px] text-body-sm-regular text-text-secondary"><FileText size={20} /> You can save as draft anytime.</p>
         </div>
       ) : null}
 
@@ -281,12 +280,14 @@ export function PostJobView() {
       ) : null}
 
       {stepIndex >= 0 ? (
-        <div className="grid items-start gap-[24px] lg:grid-cols-[360px_minmax(0,768px)]">
-          <aside className="h-fit rounded-lg border border-border-default bg-white p-[24px]">
+        <div className="grid items-start gap-[24px] lg:grid-cols-[280px_minmax(0,824px)]">
+          <aside className="h-fit space-y-[8px] rounded-[16px] border border-border-default bg-white p-[16px]">
             <p className="text-body-semibold">Post a job</p>
-            <div className="mt-[12px]"><ProgressBar value={((stepIndex + 1) / 3) * 100} /></div>
-            <p className="mt-[4px] text-right text-label-regular text-text-secondary">Step {stepIndex + 1} of 3</p>
-            <ol className="mt-[16px]">
+            <div className="flex items-center justify-between gap-[8px]">
+              <div className="w-[147px]"><ProgressBar variant="stepper" value={((stepIndex + 1) / 3) * 100} /></div>
+              <p className="text-label-medium text-text-secondary">Step {stepIndex + 1} of 3</p>
+            </div>
+            <ol>
               {[
                 ["Job Details", "Basic job information and description"],
                 ["Pay & Requirements", "Compensation and additional candidate requirements"],
@@ -295,17 +296,17 @@ export function PostJobView() {
                 const current = index === stepIndex;
                 const complete = index < stepIndex;
                 return (
-                  <li key={title} className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-[12px]">
-                    <span className="flex flex-col items-center">
-                      <span className={`flex size-[28px] shrink-0 items-center justify-center rounded-full text-label-medium ${complete || current ? "bg-brand-primary text-white" : "bg-grey-grey-100 text-text-secondary"}`}>
-                        {complete ? <Check size={14} /> : index + 1}
+                  <li key={title} aria-current={current ? "step" : undefined}>
+                    <div className={`flex min-h-[84px] items-start gap-[12px] rounded-[12px] p-[12px] ${current ? "bg-primary-primary-50" : ""}`}>
+                      <span className={`grid size-[24px] shrink-0 place-items-center rounded-full text-label-medium ${complete ? "bg-success-default text-white" : current ? "bg-brand-primary text-white" : "border border-border-default text-text-tertiary"}`}>
+                        {complete ? <Check size={14} aria-label="Completed" /> : index + 1}
                       </span>
-                      {index < steps.length - 1 ? <span className="mt-[4px] mb-[4px] w-px flex-1 bg-border-default" /> : null}
-                    </span>
-                    <span className={`mb-[12px] min-h-[64px] min-w-[0px] rounded-md px-[8px] py-[4px] ${current ? "bg-primary-primary-50" : ""}`}>
-                      <span className={`block text-body-sm-semibold ${current ? "text-brand-primary" : "text-text-primary"}`}>{title}</span>
-                      <span className="block text-label-regular text-text-secondary">{body}</span>
-                    </span>
+                      <span>
+                        <span className={`block text-body-semibold ${current ? "text-brand-primary" : complete ? "text-text-primary" : "text-text-secondary"}`}>{title}</span>
+                        <span className="mt-[4px] block text-label-medium text-text-secondary">{body}</span>
+                      </span>
+                    </div>
+                    {index < steps.length - 1 && <span aria-hidden className={`ml-[23px] block h-[16px] w-[2px] ${complete ? "bg-success-default" : "bg-border-default"}`} />}
                   </li>
                 );
               })}
@@ -368,19 +369,19 @@ export function PostJobView() {
                     {errors.workArrangement ? <p className="mt-[4px] text-label-medium text-error-default">{errors.workArrangement}</p> : null}
                   </div>
                 </div>
-                <div className="grid items-start gap-[16px] md:grid-cols-2">
+                <div className="grid items-start gap-[24px] md:grid-cols-2">
                   <div>
-                    <p className="mb-[8px] text-label-medium text-text-secondary">Experience required <span className="text-error-default">*</span></p>
-                    <div className="grid grid-cols-2 gap-[8px]">
+                    <p className="mb-[8px] text-label-medium text-text-primary">Experience required <span className="text-error-default">*</span></p>
+                    <div className="grid grid-cols-2 gap-[12px]">
                       <label className="block">
-                        <span className="mb-[4px] block text-label-regular text-text-secondary">Minimum</span>
+                        <span className="mb-[4px] block text-label-medium text-text-secondary">Minimum</span>
                         <SelectInput aria-label="Minimum experience" value={draft.experience.split("–")[0]?.trim() ?? ""} onChange={(event) => patch("experience", `${event.target.value} – ${draft.experience.split("–")[1]?.trim() || ""}`.replace(/\s+–\s+$/, ""))}>
                           <option value="">Select</option>
                           {["Fresher", "1 year", "2 years", "3 years"].map((item) => <option key={item}>{item}</option>)}
                         </SelectInput>
                       </label>
                       <label className="block">
-                        <span className="mb-[4px] block text-label-regular text-text-secondary">Maximum</span>
+                        <span className="mb-[4px] block text-label-medium text-text-secondary">Maximum</span>
                         <SelectInput aria-label="Maximum experience" value={draft.experience.split("–")[1]?.trim() ?? ""} onChange={(event) => patch("experience", `${draft.experience.split("–")[0]?.trim() || ""} – ${event.target.value}`.replace(/^\s+–\s+/, ""))}>
                           <option value="">Select</option>
                           {["3 years", "5 years", "8 years"].map((item) => <option key={item}>{item}</option>)}
@@ -390,9 +391,8 @@ export function PostJobView() {
                     {errors.experience ? <p className="mt-[4px] text-label-medium text-error-default">{errors.experience}</p> : null}
                   </div>
                   <div>
-                    <p className="mb-[8px] text-label-medium text-text-secondary">Application deadline <span className="text-text-tertiary">(optional)</span></p>
-                    <span className="mb-[4px] block text-label-regular text-transparent select-none" aria-hidden>Date</span>
-                    <DateField value={draft.deadline} onChange={(value) => patch("deadline", value)} />
+                    <p className="mb-[8px] text-label-medium text-text-primary">Application deadline <span className="text-text-tertiary">(optional)</span></p>
+                    <DateField fieldLabel="Application deadline" value={draft.deadline} onChange={(value) => patch("deadline", value)} />
                   </div>
                 </div>
                 <div>
@@ -514,7 +514,7 @@ export function PostJobView() {
             ) : null}
             <div className="sticky bottom-[0px] mt-[24px] flex flex-wrap items-center justify-end gap-[8px] bg-white py-[12px]">
               <p className="mr-auto flex items-center gap-[8px] text-label-regular text-text-secondary">
-                <FileText size={16} /> You can save as draft anytime.
+                <FileText size={20} /> You can save as draft anytime.
                 {saveNote === "saving" ? <span>Saving…</span> : null}
                 {saveNote === "saved" ? <span className="text-success-success-700">Saved</span> : null}
               </p>
@@ -535,13 +535,9 @@ export function PostJobView() {
       {/* E08j Submit confirm */}
       <ConfirmDialog
         open={confirm}
-        title="Submit for review?"
-        body={
-          <div className="space-y-[8px]">
-            <p>{draft.title || "This job"} will move to pending review. Editing pauses until the review finishes.</p>
-            <p>Your job will be reviewed within {JOB_REVIEW_WINDOW}.</p>
-          </div>
-        }
+        title="Submit job for review?"
+        body="Our team checks every job before it goes live, usually within 24 hours. Job approval is separate from your company verification."
+        compact
         confirmLabel="Submit for review"
         onCancel={() => setConfirm(false)}
         onConfirm={() => {
@@ -567,7 +563,7 @@ function salaryText(digits: string) {
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-function DateField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+function DateField({ value, onChange, fieldLabel }: { value: string; onChange: (value: string) => void; fieldLabel?: string }) {
   const parsed = value ? new Date(`${value}T00:00:00`) : null;
   const [open, setOpen] = useState(false);
   const [cursor, setCursor] = useState(parsed ?? new Date(2026, 9, 1));
@@ -578,9 +574,9 @@ function DateField({ value, onChange }: { value: string; onChange: (value: strin
   const label = parsed ? `${parsed.getDate()} ${SHORT_MONTHS[parsed.getMonth()]} ${parsed.getFullYear()}` : "Select date";
   return (
     <div className="relative">
-      <button type="button" aria-expanded={open} onClick={() => setOpen((current) => !current)} className="flex h-[44px] w-full items-center gap-[8px] rounded-sm border border-border-default px-[12px] text-left text-body-sm-regular">
+      <button type="button" aria-label={fieldLabel ? `${fieldLabel}: ${label}` : undefined} aria-expanded={open} onClick={() => setOpen((current) => !current)} className="flex h-[44px] w-full items-center gap-[8px] rounded-sm border border-border-default px-[12px] text-left text-body-sm-regular">
         <span className={value ? "flex-1 text-text-primary" : "flex-1 text-text-tertiary"}>{label}</span>
-        <Calendar size={16} className="text-text-tertiary" />
+        <Calendar size={20} className="text-text-secondary" />
       </button>
       {open ? (
         <div className="absolute top-[48px] z-30 w-[280px] rounded-md border border-border-default bg-white p-[12px] shadow-lg">
