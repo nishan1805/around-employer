@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, ChevronDown, Menu } from "lucide-react";
+import { AlertCircle, Bell, Briefcase, Building2, ChevronDown, Clock, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -24,6 +24,13 @@ const TITLES: Record<string, string> = {
   "/settings": "Settings",
   "/help": "Help & Support",
   "/verification": "Verification",
+};
+
+const notificationIcons = {
+  applicant: Briefcase,
+  approved: Building2,
+  returned: AlertCircle,
+  expiring: Clock,
 };
 
 function titleFor(pathname: string) {
@@ -66,21 +73,27 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
           <Bell size={18} />
           {unread ? <span className="absolute top-[8px] right-[8px] size-[8px] rounded-full bg-error-default" /> : null}
         </button>
-        <AnchoredMenu open={notesOpen} anchor={notesAnchor} onClose={() => setNotesOpen(false)} className="w-[360px] rounded-md border border-border-default bg-white shadow-lg">
-          <div className="flex items-center justify-between px-[16px] py-[12px]">
+        <AnchoredMenu open={notesOpen} anchor={notesAnchor} onClose={() => setNotesOpen(false)} className="w-[380px] max-w-[calc(100vw-16px)] max-h-[calc(100dvh-80px)] overflow-y-auto rounded-[12px] border border-border-default bg-white py-[8px] shadow-[0_4px_6px_#00000008,0_12px_16px_#00000014]">
+          <div className="flex items-center justify-between px-[16px] py-[8px]">
             <p className="text-body-semibold">Notifications</p>
-            <button className="text-label-medium text-brand-primary" onClick={markAllRead}>
+            <button className="text-body-sm-semibold text-brand-primary" onClick={markAllRead}>
               Mark all as read
             </button>
           </div>
           <ul>
-            {notifications.map((item) => (
-              <li key={item.id} className={`border-t border-border-default px-[16px] py-[12px] ${item.unread ? "bg-primary-primary-50" : ""}`}>
-                <p className="text-body-sm-semibold">{item.title}</p>
-                {item.body ? <p className="text-body-sm-regular text-text-secondary">{item.body}</p> : null}
-                <p className="text-label-regular text-text-tertiary">{item.time}</p>
-              </li>
-            ))}
+            {notifications.map((item) => {
+              const Icon = notificationIcons[item.tone];
+              return (
+                <li key={item.id} className={`flex items-start gap-[12px] px-[16px] py-[12px] ${item.unread ? "bg-primary-primary-50" : ""}`}>
+                  <span className="grid size-[40px] shrink-0 place-items-center rounded-full bg-grey-grey-100 text-text-primary"><Icon size={20} /></span>
+                  <div className="min-w-0 flex-1 space-y-[2px]">
+                    <p className="text-body-sm-semibold text-text-primary">{item.title}{item.unread && <span className="sr-only"> (unread)</span>}</p>
+                    {item.body && <p className="text-body-sm-regular text-text-secondary">{item.body}</p>}
+                    <p className="text-label-regular text-text-secondary">{item.time}</p>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </AnchoredMenu>
       </div>

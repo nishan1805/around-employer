@@ -3,14 +3,16 @@ export function ProgressBar({
   steps = 1,
   current = 0,
   value,
+  variant,
 }: {
   steps?: number;
   current?: number;
   value?: number;
+  variant?: "stepper";
 }) {
   if (typeof value === "number") {
     return (
-      <div className="h-[4px] overflow-hidden rounded-full bg-grey-grey-200" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
+      <div className={`overflow-hidden rounded-full ${variant === "stepper" ? "h-[6px] bg-background-secondary" : "h-[4px] bg-grey-grey-200"}`} role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
         <div className="h-full rounded-full bg-brand-primary" style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
       </div>
     );

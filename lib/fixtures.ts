@@ -105,7 +105,7 @@ export const NOTIFICATIONS: AppNotification[] = [
     title: "Job approved",
     body: "Site Supervisor is now live on Around Jobs",
     time: "1 hr ago",
-    unread: false,
+    unread: true,
     tone: "approved",
   },
   {
@@ -126,8 +126,8 @@ export const NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: "n5",
-    title: "Amit Patel applied for Civil Engineer",
-    body: "",
+    title: "New applicant",
+    body: "Amit Patel applied for Civil Engineer",
     time: "2 days ago",
     unread: false,
     tone: "applicant",

@@ -2,6 +2,7 @@
 
 import { AlertCircle, ArrowRight, Briefcase, Calendar, ChevronDown, ChevronLeft, ChevronRight, Clock, Download, Expand, Globe, Maximize2, Minus, Phone, Plus } from "lucide-react";
 import type { ReactNode } from "react";
+import { downloadResume } from "@/lib/download";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -78,17 +79,6 @@ export function CandidateView({ id }: { id: string }) {
   const detail = candidate.detail;
   const resume = detail?.resume ?? null;
 
-  function download() {
-    const text = detail?.resume?.pages.map((item) => `${item.heading}\n${item.body}`).join("\n\n") ?? candidate.name;
-    const blob = new Blob([text], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = detail?.resume?.fileName ?? "resume.txt";
-    anchor.click();
-    URL.revokeObjectURL(url);
-  }
-
   return (
     <div>
       <Link href="/applicants" className="inline-flex items-center gap-[8px] text-body-sm-medium text-text-primary"><ChevronLeft size={16} /> Back to Applicants</Link>
@@ -105,7 +95,7 @@ export function CandidateView({ id }: { id: string }) {
           <Button aria-expanded={menu} onClick={() => setMenu((open) => !open)}>
             Change status <ChevronDown size={16} />
           </Button>
-          <Button variant="outline" onClick={download} disabled={state === "no-resume" || !detail?.resume}>
+          <Button variant="outline" onClick={() => { if (resume) downloadResume(resume); }} disabled={state === "no-resume" || !detail?.resume}>
             <Download size={16} /> Download resume
           </Button>
           {menu ? (
